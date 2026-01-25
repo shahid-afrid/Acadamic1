@@ -1,0 +1,302 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - TeamPro1</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,600,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/TeamPro1.styles.css" asp-append-version="true" />
+    <style>
+        :root {
+            --royal-blue: #274060;
+            --warm-gold: #FFC857;
+            --cream: #F9FAF2;
+            --slate: #CED3DC;
+            --card-shadow: rgba(39,64,96,0.13);
+            --glass-bg: rgba(249,250,242,0.92);
+        }
+
+        body {
+            font-family: 'Montserrat', Arial, sans-serif;
+            background: linear-gradient(rgba(249, 250, 242, 0.15), rgba(255, 200, 87, 0.10)), 
+                        url('@Url.Content("~/images/RGMCET-BACKGROUND.jpg")') center center/cover no-repeat fixed;
+            min-height: 100vh;
+            margin: 0;
+            position: relative;
+        }
+
+        /* Subtle background overlay to match home page */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
+            background: linear-gradient(135deg, var(--cream) 60%, var(--warm-gold) 100%);
+            opacity: 0.20;
+            pointer-events: none;
+        }
+
+        /* Glass-morphism navbar with new palette */
+        .navbar {
+            background: var(--glass-bg) !important;
+            backdrop-filter: blur(12px);
+            border: none !important;
+            box-shadow: 0 16px 48px var(--card-shadow);
+            border-radius: 0 0 20px 20px;
+            margin-bottom: 0 !important;
+            border: 2px solid var(--slate);
+            border-top: none;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--royal-blue) !important;
+            letter-spacing: 0.5px;
+        }
+
+        .navbar-nav .nav-link {
+            color: var(--royal-blue) !important;
+            font-weight: 600;
+            margin: 0 8px;
+            padding: 8px 16px !important;
+            border-radius: 22px;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-nav .nav-link:hover {
+            background: linear-gradient(90deg, var(--royal-blue) 74%, var(--warm-gold) 100%);
+            color: white !important;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px var(--card-shadow);
+            border: 2px solid var(--slate);
+        }
+
+        /* Glass container for main content */
+        .container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border-radius: 26px;
+            box-shadow: 0 16px 48px var(--card-shadow);
+            margin: 30px auto;
+            padding: 40px;
+            position: relative;
+            z-index: 1;
+            border: 2px solid var(--slate);
+        }
+
+        /* Main content styling */
+        main {
+            color: var(--royal-blue);
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            color: var(--royal-blue);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        /* Button styling to match home page theme */
+        .btn-primary {
+            background: linear-gradient(90deg, var(--royal-blue) 74%, var(--warm-gold) 100%);
+            border: 2px solid var(--slate);
+            border-radius: 27px;
+            padding: 14px 28px;
+            font-weight: 600;
+            color: white;
+            transition: all 0.22s ease;
+            box-shadow: 0 8px 24px var(--card-shadow);
+            text-decoration: none;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(90deg, var(--warm-gold) 62%, var(--royal-blue) 100%);
+            color: var(--royal-blue);
+            transform: translateY(-4px) scale(1.035);
+            box-shadow: 0 16px 32px var(--warm-gold);
+            border: 2px solid var(--royal-blue);
+        }
+
+        .btn-secondary {
+            background: var(--cream);
+            border: 2px solid var(--royal-blue);
+            border-radius: 27px;
+            padding: 14px 28px;
+            font-weight: 600;
+            color: var(--royal-blue);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px var(--card-shadow);
+        }
+
+        .btn-secondary:hover {
+            background: var(--royal-blue);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px var(--card-shadow);
+        }
+
+        /* Glass footer */
+        footer {
+            background: var(--glass-bg) !important;
+            backdrop-filter: blur(12px);
+            border: 2px solid var(--slate) !important;
+            border-bottom: none !important;
+            border-radius: 20px 20px 0 0;
+            box-shadow: 0 -16px 48px var(--card-shadow);
+            color: #464646 !important;
+            margin-top: 40px;
+            padding: 20px 0;
+        }
+
+        footer a {
+            color: var(--royal-blue);
+            text-decoration: underline;
+            font-weight: 600;
+        }
+
+        footer a:hover {
+            color: var(--warm-gold);
+        }
+
+        /* Card styling for consistent theme */
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 2px solid var(--slate);
+            border-radius: 26px;
+            box-shadow: 0 16px 48px var(--card-shadow);
+        }
+
+        .card-header {
+            background: linear-gradient(90deg, var(--royal-blue) 74%, var(--warm-gold) 100%);
+            color: white;
+            border-radius: 24px 24px 0 0 !important;
+            font-weight: 600;
+            border: none;
+        }
+
+        .card-body {
+            color: var(--royal-blue);
+        }
+
+        /* Form styling */
+        .form-control {
+            border-radius: 20px;
+            border: 2px solid var(--slate);
+            padding: 12px 16px;
+            transition: all 0.3s ease;
+            background: var(--cream);
+        }
+
+        .form-control:focus {
+            border-color: var(--royal-blue);
+            box-shadow: 0 0 0 0.2rem rgba(39,64,96,0.25);
+            background: white;
+        }
+
+        .form-label {
+            color: var(--royal-blue);
+            font-weight: 600;
+        }
+
+        /* Table styling */
+        .table {
+            background: var(--cream);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .table th {
+            background: var(--royal-blue);
+            color: white;
+            border: none;
+            font-weight: 600;
+        }
+
+        .table td {
+            border-color: var(--slate);
+            color: var(--royal-blue);
+        }
+
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: rgba(249,250,242,0.5);
+        }
+
+        /* Alert styling */
+        .alert-success {
+            background: linear-gradient(90deg, var(--cream) 60%, var(--warm-gold) 100%);
+            border: 2px solid var(--warm-gold);
+            color: var(--royal-blue);
+            border-radius: 16px;
+        }
+
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.1);
+            border: 2px solid #dc3545;
+            color: #721c24;
+            border-radius: 16px;
+        }
+
+        /* Responsive adjustments */
+        @@media (max-width: 768px) {
+            .container {
+                margin: 15px;
+                padding: 25px;
+                border-radius: 20px;
+            }
+
+            .navbar {
+                border-radius: 0 0 16px 16px;
+            }
+
+            footer {
+                border-radius: 16px 16px 0 0;
+            }
+
+            .btn-primary, .btn-secondary {
+                padding: 12px 24px;
+                border-radius: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">🎓 TeamPro1</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">🏠 Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">🔒 Privacy</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    @Html.Partial("_Footer")
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,245 @@
+﻿@{
+    ViewBag.Title = "Student Registration";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Registration - TeamPro1</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --royal-blue: #274060;
+            --warm-gold: #FFC857;
+            --cream: #F9FAF2;
+            --slate: #CED3DC;
+            --card-shadow: rgba(39,64,96,0.13);
+            --success-green: #28a745;
+            --error-red: #dc3545;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            font-family: 'Montserrat', Arial, sans-serif;
+            background: linear-gradient(rgba(249, 250, 242, 0.15), rgba(255, 200, 87, 0.10)), url('@Url.Content("~/images/RGMCET-BACKGROUND.jpg")') center center/cover no-repeat fixed;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 0;
+            display: block;
+            background: linear-gradient(135deg, var(--cream) 60%, var(--warm-gold) 100%);
+            opacity: 0.20;
+            pointer-events: none;
+        }
+
+        .glass-card {
+            background: rgba(249,250,242,0.92);
+            box-shadow: 0 16px 48px var(--card-shadow);
+            border-radius: 26px;
+            padding: 40px;
+            text-align: center;
+            backdrop-filter: blur(12px);
+            max-width: 500px;
+            width: 90vw;
+            margin: 80px auto 40px auto;
+            position: relative;
+            z-index: 1;
+            border: 2px solid var(--slate);
+        }
+
+        .logo {
+            width: 70px;
+            height: 70px;
+            margin-bottom: 15px;
+            filter: drop-shadow(2px 6px 18px var(--royal-blue));
+            object-fit: contain;
+            background: var(--cream);
+            border-radius: 12px;
+            padding: 6px;
+        }
+
+        h2 {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: var(--royal-blue);
+            margin-bottom: 25px;
+            letter-spacing: 1px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            color: var(--royal-blue);
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 0.95em;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--slate);
+            border-radius: 20px;
+            font-size: 1em;
+            font-family: 'Montserrat', Arial, sans-serif;
+            background: white;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--royal-blue);
+            box-shadow: 0 0 0 3px rgba(39, 64, 96, 0.1);
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: linear-gradient(90deg, var(--royal-blue) 74%, var(--warm-gold) 100%);
+            color: white;
+            border: 2px solid var(--slate);
+            border-radius: 25px;
+            padding: 14px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            font-family: 'Montserrat', Arial, sans-serif;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(90deg, var(--warm-gold) 62%, var(--royal-blue) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px var(--card-shadow);
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: var(--royal-blue);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: var(--warm-gold);
+        }
+
+        .text-danger {
+            color: var(--error-red);
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+
+        .login-link {
+            margin-top: 20px;
+            color: var(--royal-blue);
+        }
+
+        .login-link a {
+            color: var(--royal-blue);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .login-link a:hover {
+            color: var(--warm-gold);
+        }
+    </style>
+</head>
+<body>
+    <div class="glass-card">
+        <img src="~/images/RGMCET.jpg" alt="RGMCET Logo" class="logo" />
+        <h2>Student Registration</h2>
+
+        <form asp-action="Register" asp-controller="Student" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="form-group">
+                <label for="fullName">Full Name</label>
+                <input type="text" id="fullName" name="fullName" required placeholder="Enter your full name" />
+            </div>
+
+            <div class="form-group">
+                <label for="regdNumber">Registration Number</label>
+                <input type="text" id="regdNumber" name="regdNumber" required placeholder="Enter your registration number" />
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" required placeholder="Enter your email" />
+            </div>
+
+            <div class="form-group">
+                <label for="year">Year</label>
+                <select id="year" name="year" required>
+                    <option value="">Select Year</option>
+                    <option value="1">1st Year</option>
+                    <option value="2">2nd Year</option>
+                    <option value="3">3rd Year</option>
+                    <option value="4">4th Year</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="semester">Semester</label>
+                <select id="semester" name="semester" required>
+                    <option value="">Select Semester</option>
+                    <option value="1">1st Semester</option>
+                    <option value="2">2nd Semester</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required placeholder="Create a password" />
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="Confirm your password" />
+            </div>
+
+            <button type="submit" class="btn-primary">Register</button>
+        </form>
+
+        <div class="login-link">
+            Already have an account? <a href="@Url.Action("Login", "Student")">Login here</a>
+        </div>
+
+        <a href="@Url.Action("Index", "Student")" class="back-link">← Back to Student Home</a>
+    </div>
+</body>
+</html>

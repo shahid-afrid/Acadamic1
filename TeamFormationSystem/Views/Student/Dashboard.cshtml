@@ -1,0 +1,156 @@
+@{
+    ViewData["Title"] = "Student Profile";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Student Profile - TeamPro1</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --royal-blue: #274060;
+            --warm-gold: #FFC857;
+            --cream: #F9FAF2;
+            --slate: #CED3DC;
+            --card-shadow: rgba(39,64,96,0.13);
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px 0;
+            font-family: 'Montserrat', Arial, sans-serif;
+            background: linear-gradient(rgba(249, 250, 242, 0.15), rgba(255, 200, 87, 0.10)),
+            url('@Url.Content("~/images/RGMCET-BACKGROUND.jpg")') center center/cover no-repeat fixed;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 0;
+            display: block;
+            background: linear-gradient(135deg, var(--cream) 60%, var(--warm-gold) 100%);
+            opacity: 0.20;
+            pointer-events: none;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .profile-card {
+            background: rgba(249,250,242,0.95);
+            border-radius: 20px;
+            padding: 40px;
+            backdrop-filter: blur(12px);
+            border: 2px solid var(--slate);
+            box-shadow: 0 8px 32px var(--card-shadow);
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .profile-header h2 {
+            color: var(--royal-blue);
+            font-size: 2em;
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .profile-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .info-item {
+            padding: 15px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 10px;
+            border-left: 4px solid var(--royal-blue);
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--royal-blue);
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            color: #444;
+            font-size: 1.1em;
+        }
+
+        .nav-link {
+            display: inline-block;
+            margin: 20px 0;
+            background: var(--royal-blue);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background: var(--warm-gold);
+            color: var(--royal-blue);
+            text-decoration: none;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="@Url.Action("MainDashboard", "Student")" class="nav-link">? Back to Dashboard</a>
+        
+        <div class="profile-card">
+            <div class="profile-header">
+                <h2>Student Profile</h2>
+            </div>
+            
+            <div class="profile-info">
+                <div class="info-item">
+                    <div class="info-label">Full Name</div>
+                    <div class="info-value">@ViewBag.StudentName</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">Registration Number</div>
+                    <div class="info-value">@ViewBag.StudentRegdNumber</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">Email Address</div>
+                    <div class="info-value">@ViewBag.StudentEmail</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">Year</div>
+                    <div class="info-value">@ViewBag.StudentYear</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">Department</div>
+                    <div class="info-value">@ViewBag.StudentDepartment</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

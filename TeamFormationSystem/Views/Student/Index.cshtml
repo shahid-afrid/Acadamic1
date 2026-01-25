@@ -1,0 +1,287 @@
+﻿@{
+    ViewBag.Title = "Student Home";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Student Section - TeamPro1</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --royal-blue: #274060;
+            --warm-gold: #FFC857;
+            --cream: #F9FAF2;
+            --slate: #CED3DC;
+            --card-shadow: rgba(39,64,96,0.13);
+            --success-green: #28a745;
+            --error-red: #dc3545;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            font-family: 'Montserrat', Arial, sans-serif;
+            background: linear-gradient(rgba(249, 250, 242, 0.15), rgba(255, 200, 87, 0.10)),
+            url('@Url.Content("~/images/RGMCET-BACKGROUND.jpg")') center center/cover no-repeat fixed;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 0;
+            display: block;
+            background: linear-gradient(135deg, var(--cream) 60%, var(--warm-gold) 100%);
+            opacity: 0.20;
+            pointer-events: none;
+        }
+
+        .glass-card {
+            background: rgba(249,250,242,0.92);
+            box-shadow: 0 16px 48px var(--card-shadow);
+            border-radius: 26px;
+            padding: 62px 44px 44px 44px;
+            text-align: center;
+            backdrop-filter: blur(12px);
+            max-width: 480px;
+            width: 96vw;
+            margin: 90px auto 0 auto;
+            position: relative;
+            z-index: 1;
+            border: 2px solid var(--slate);
+        }
+
+        .logo {
+            width: 86px;
+            height: 86px;
+            margin-bottom: 14px;
+            filter: drop-shadow(2px 6px 18px var(--royal-blue));
+            object-fit: contain;
+            background: var(--cream);
+            border-radius: 12px;
+            padding: 6px;
+        }
+
+        h2 {
+            font-size: 2.18em;
+            font-weight: 700;
+            color: var(--royal-blue);
+            margin-top: 12px;
+            margin-bottom: 33px;
+            letter-spacing: 1.1px;
+        }
+
+        .button-group {
+            margin: 36px 0 18px 0;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .glass-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(90deg, var(--royal-blue) 74%, var(--warm-gold) 100%);
+            color: #fff;
+            border: none;
+            border-radius: 27px;
+            padding: 14px 36px;
+            font-size: 1.13em;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 8px 24px var(--card-shadow);
+            outline: none;
+            text-decoration: none;
+            border: 2px solid var(--slate);
+            transition: box-shadow 0.2s, background 0.22s, transform 0.16s, color 0.18s;
+        }
+
+        .glass-btn:hover {
+            box-shadow: 0 16px 32px var(--warm-gold);
+            background: linear-gradient(90deg, var(--warm-gold) 62%, var(--royal-blue) 100%);
+            color: var(--royal-blue);
+            transform: translateY(-4px) scale(1.035);
+            border: 2px solid var(--royal-blue);
+        }
+
+        .register-btn {
+            background: linear-gradient(90deg, var(--success-green) 74%, var(--warm-gold) 100%);
+        }
+
+        .register-btn:hover {
+            background: linear-gradient(90deg, var(--warm-gold) 62%, var(--success-green) 100%);
+            color: var(--royal-blue);
+            border: 2px solid var(--success-green);
+        }
+
+        .footer {
+            margin-top: 31px;
+            color: #464646;
+            font-size: 1em;
+        }
+
+        .footer a {
+            color: var(--royal-blue);
+            text-decoration: underline;
+        }
+
+        .nav-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(249,250,242,0.9);
+            color: var(--royal-blue);
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid var(--slate);
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background: var(--warm-gold);
+            color: var(--royal-blue);
+            transform: translateY(-2px);
+        }
+
+        @@media (max-width: 768px) {
+            .button-group {
+                flex-direction: column;
+                gap: 18px;
+                align-items: center;
+            }
+
+            .glass-card {
+                margin: 40px auto 0 auto;
+                padding: 40px 22px 32px 22px;
+            }
+
+            h2 {
+                font-size: 1.45em;
+            }
+
+            .nav-link {
+                position: static;
+                margin-bottom: 20px;
+                display: inline-block;
+            }
+        }
+    
+        /* App Footer Styling */
+        .app-footer {
+            background: rgba(249,250,242,0.95);
+            backdrop-filter: blur(12px);
+            border-top: 3px solid var(--slate, #CED3DC);
+            box-shadow: 0 -8px 32px rgba(39,64,96,0.13);
+            padding: 30px 20px;
+            margin-top: 50px;
+            text-align: center;
+            font-family: 'Montserrat', Arial, sans-serif;
+            color: #274060;
+            position: relative;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-line {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+
+        .footer-line.guidance { font-size: 1em; font-weight: 600; color: #444;
+            margin-bottom: 12px;
+        }
+
+        .footer-line.team {
+            font-size: 0.95em;
+            font-weight: 500;
+            color: #444;
+        }
+
+        .footer-line.copyright {
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #274060;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid rgba(39,64,96,0.1);
+        }
+
+        .footer-highlight { color: #274060;
+            font-weight: 700;
+        }
+
+        .footer-name { color: #274060;
+            font-weight: 600;
+        }
+
+        @@media (max-width: 768px) {
+            .app-footer {
+                padding: 20px 15px;
+                margin-top: 30px;
+            }
+
+            .footer-line.guidance {
+                font-size: 0.9em;
+            }
+
+            .footer-line.team {
+                font-size: 0.85em;
+            }
+
+            .footer-line.copyright {
+                font-size: 0.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="@Url.Action("Index", "Home")" class="nav-link">Home</a>
+    
+    <div class="glass-card">
+        <img src="~/images/RGMCET.jpg" alt="RGMCET Logo" class="logo" />
+        <h2>Welcome to the<br>Student Section</h2>
+        <div class="button-group">
+            
+            <a class="glass-btn" href="@Url.Action("Login", "Student")">
+                <span>🔐 Login</span>
+            </a>
+            <a class="glass-btn" href="@Url.Action("Register", "Student")">
+                <span>📝 Register</span>
+            </a>
+        </div>
+        <div class="footer">
+            &copy; 2025 - TeamPro1 - RGMCET | <a href="#">Privacy</a>
+        </div>
+    </div>
+
+    <footer class="app-footer">
+        <div class="footer-content">
+            <div class="footer-line guidance">
+                Developed under the guidance of <span class="footer-highlight">Dr. P. Penchala Prasad</span>, Associate Professor, CSE(DS), RGMCET
+            </div>
+            <div class="footer-line team">
+                With team <span class="footer-name">Mr. S. Md. Shahid Afrid</span> (23091A32D4) & <span class="footer-name">Ms. G. Veena</span> (23091A32H9)
+            </div>
+            <div class="footer-line copyright">
+                &copy; All Rights Reserved @@2025
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
