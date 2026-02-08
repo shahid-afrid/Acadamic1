@@ -1,0 +1,1133 @@
+@{
+    ViewData["Title"] = "Team Details";
+    Layout = null;
+    var team = ViewBag.Team as TeamPro1.Models.Team;
+    var projectProgress = ViewBag.ProjectProgress as TeamPro1.Models.ProjectProgress;
+    var teamMeetings = ViewBag.TeamMeetings as List<TeamPro1.Models.TeamMeeting>;
+    var faculties = ViewBag.Faculties as List<TeamPro1.Models.Faculty>;
+    var currentFacultyId = (int)ViewBag.CurrentFacultyId;
+    var isCurrentFacultyAssigned = projectProgress?.AssignedFacultyId == currentFacultyId;
+    var availableFaculties = faculties?.Where(f => f.Id != (projectProgress?.AssignedFacultyId ?? 0)).ToList();
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Team #@team?.TeamNumber Details - TeamPro1</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        :root {
+            --royal-blue: #274060;
+            --warm-gold: #FFC857;
+            --cream: #F9FAF2;
+            --slate: #CED3DC;
+            --card-shadow: rgba(39,64,96,0.13);
+            --success-green: #28a745;
+            --error-red: #dc3545;
+            --faculty-purple: #6f42c1;
+            --info-blue: #17a2b8;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px 0;
+            font-family: 'Montserrat', Arial, sans-serif;
+            background: linear-gradient(rgba(249, 250, 242, 0.15), rgba(255, 200, 87, 0.10)),
+            url('@Url.Content("~/images/RGMCET-BACKGROUND.jpg")') center center/cover no-repeat fixed;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 0;
+            display: block;
+            background: linear-gradient(135deg, var(--cream) 60%, var(--warm-gold) 100%);
+            opacity: 0.20;
+            pointer-events: none;
+        }
+
+        .main-container {
+            position: relative;
+            z-index: 1;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .nav-link {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(249,250,242,0.9);
+            color: var(--royal-blue);
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 2px solid var(--slate);
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .nav-link:hover {
+            background: var(--warm-gold);
+            color: var(--royal-blue);
+            transform: translateY(-2px);
+            text-decoration: none;
+        }
+
+        .page-header {
+            background: rgba(249,250,242,0.92);
+            box-shadow: 0 8px 32px var(--card-shadow);
+            border-radius: 20px;
+            padding: 30px 40px;
+            text-align: center;
+            backdrop-filter: blur(12px);
+            margin-bottom: 30px;
+            border: 2px solid var(--slate);
+            margin-top: 60px;
+        }
+
+        .page-header h2 {
+            font-size: 2em;
+            font-weight: 700;
+            color: var(--royal-blue);
+            margin: 0;
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .alert-success {
+            background: rgba(40, 167, 69, 0.15);
+            color: var(--success-green);
+            border: 1px solid var(--success-green);
+        }
+
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.15);
+            color: var(--error-red);
+            border: 1px solid var(--error-red);
+        }
+
+        .detail-section {
+            background: rgba(249,250,242,0.95);
+            border-radius: 20px;
+            padding: 25px;
+            border: 2px solid var(--slate);
+            box-shadow: 0 8px 32px var(--card-shadow);
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: var(--royal-blue);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--slate);
+        }
+
+        .section-title i {
+            margin-right: 10px;
+            color: var(--faculty-purple);
+        }
+
+        .student-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+
+        .student-avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--faculty-purple), var(--info-blue));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2em;
+        }
+
+        .student-details h4 {
+            margin: 0 0 5px 0;
+            color: var(--royal-blue);
+        }
+
+        .student-details p {
+            margin: 0;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: var(--royal-blue);
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--slate);
+            border-radius: 12px;
+            font-size: 1em;
+            font-family: 'Montserrat', sans-serif;
+            background: rgba(249,250,242,0.8);
+            transition: border-color 0.3s, box-shadow 0.3s;
+            box-sizing: border-box;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--faculty-purple);
+            box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.2);
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .glass-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(90deg, var(--faculty-purple) 74%, var(--warm-gold) 100%);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 20px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .glass-btn:hover {
+            background: linear-gradient(90deg, var(--warm-gold) 0%, var(--faculty-purple) 100%);
+            color: white;
+            transform: translateY(-2px);
+            text-decoration: none;
+        }
+
+        .glass-btn.success {
+            background: linear-gradient(90deg, var(--success-green) 74%, var(--info-blue) 100%);
+        }
+
+        .glass-btn.success:hover {
+            background: linear-gradient(90deg, var(--info-blue) 0%, var(--success-green) 100%);
+        }
+
+        .glass-btn.warning {
+            background: linear-gradient(90deg, #f39c12 74%, #e67e22 100%);
+        }
+
+        .glass-btn.warning:hover {
+            background: linear-gradient(90deg, #e67e22 0%, #f39c12 100%);
+        }
+
+        .progress-display {
+            margin: 20px 0;
+        }
+
+        .progress-bar-container {
+            background: var(--slate);
+            border-radius: 15px;
+            height: 20px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--faculty-purple), var(--success-green));
+            border-radius: 15px;
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .meetings-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 15px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .meetings-table th,
+        .meetings-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--slate);
+        }
+
+        .meetings-table th {
+            background: linear-gradient(135deg, var(--faculty-purple), var(--info-blue));
+            color: white;
+            font-weight: 600;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .meetings-table tr:hover td {
+            background: rgba(255, 200, 87, 0.1);
+        }
+
+        .meeting-status {
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .status-completed {
+            background: rgba(40, 167, 69, 0.15);
+            color: var(--success-green);
+        }
+
+        .status-pending {
+            background: rgba(255, 193, 7, 0.15);
+            color: #856404;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+        }
+
+        .no-data i {
+            font-size: 2em;
+            color: var(--slate);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .current-value {
+            padding: 12px 16px;
+            background: rgba(111, 66, 193, 0.1);
+            border-radius: 10px;
+            border-left: 4px solid var(--faculty-purple);
+            margin-bottom: 15px;
+        }
+
+        .current-label {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .current-text {
+            color: var(--royal-blue);
+            font-weight: 600;
+        }
+
+        .proof-link {
+            color: var(--info-blue);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9em;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .proof-link:hover {
+            color: var(--royal-blue);
+            text-decoration: underline;
+        }
+
+        .review-box-sm {
+            background: #f8f9fa;
+            border-left: 3px solid var(--info-blue);
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            line-height: 1.5;
+            color: #555;
+        }
+
+        .review-box-sm.empty {
+            color: #999;
+            font-style: italic;
+            border-left-color: var(--slate);
+        }
+
+        .no-data-text {
+            color: #999;
+            font-style: italic;
+            font-size: 0.85em;
+        }
+
+        .btn-edit-table {
+            background: linear-gradient(135deg, var(--warm-gold), #ffb84d);
+            color: var(--royal-blue);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9em;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 8px rgba(255, 200, 87, 0.3);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+        }
+
+        .btn-edit-table:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 12px rgba(255, 200, 87, 0.5);
+            background: linear-gradient(135deg, #ffb84d, var(--warm-gold));
+        }
+
+        .meeting-number-badge {
+            background: linear-gradient(135deg, var(--warm-gold), #ffb84d);
+            color: var(--royal-blue);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.85em;
+            display: inline-block;
+            box-shadow: 0 3px 8px rgba(255, 200, 87, 0.3);
+        }
+
+        .progress-container-sm {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .progress-bar-bg-sm {
+            flex: 1;
+            height: 18px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill-sm {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success-green), #66bb6a);
+            border-radius: 10px;
+            transition: width 0.6s ease;
+        }
+
+        .progress-text-sm {
+            font-size: 0.85em;
+            color: var(--royal-blue);
+            font-weight: 700;
+            min-width: 35px;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: var(--cream);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @@keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header-review {
+            background: linear-gradient(135deg, var(--faculty-purple), var(--info-blue));
+            color: white;
+            padding: 25px 30px;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header-review h3 {
+            margin: 0;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 1.3em;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .modal-body-review {
+            padding: 30px;
+        }
+
+        .modal-footer-review {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            padding: 20px 30px;
+            border-top: 2px solid var(--slate);
+        }
+
+        .btn-secondary {
+            background: var(--slate);
+            color: #333;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .btn-secondary:hover {
+            background: #b0b7c0;
+        }
+
+        .app-footer {
+            background: rgba(249, 250, 242, 0.95);
+            backdrop-filter: blur(12px);
+            border-top: 3px solid var(--slate, #CED3DC);
+            box-shadow: 0 -8px 32px rgba(39,64,96,0.13);
+            padding: 30px 20px;
+            margin-top: 50px;
+            text-align: center;
+            font-family: 'Montserrat', Arial, sans-serif;
+            color: #274060;
+            position: relative;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-line {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+
+        .footer-line.guidance { 
+            font-size: 1em; 
+            font-weight: 600; 
+            color: #444;
+            margin-bottom: 12px;
+        }
+
+        .footer-line.team {
+            font-size: 0.95em;
+            font-weight: 500;
+            color: #444;
+        }
+
+        .footer-line.copyright {
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #274060;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid rgba(39,64,96,0.1);
+        }
+
+        .footer-highlight { 
+            color: #274060;
+            font-weight: 700;
+        }
+
+        .footer-name { 
+            color: #274060;
+            font-weight: 600;
+        }
+
+        @@media (max-width: 768px) {
+            .nav-link {
+                position: static;
+                display: inline-block;
+                margin: 10px auto;
+            }
+
+            .page-header {
+                margin-top: 20px;
+            }
+
+            .btn-row {
+                flex-direction: column;
+            }
+
+            .meetings-table {
+                display: block;
+                overflow-x: auto;
+            }
+
+            .app-footer {
+                padding: 20px 15px;
+                margin-top: 30px;
+            }
+
+            .footer-line.guidance {
+                font-size: 0.9em;
+            }
+
+            .footer-line.team {
+                font-size: 0.85em;
+            }
+
+            .footer-line.copyright {
+                font-size: 0.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="@Url.Action("AllTeams", "Faculty")" class="nav-link"><i class="fas fa-arrow-left"></i> Back to All Teams</a>
+
+    <div class="main-container">
+        <div class="page-header">
+            <h2><i class="fas fa-users-cog"></i> Team #@team?.TeamNumber Details</h2>
+        </div>
+
+        <div id="alertContainer"></div>
+
+        <!-- Team Members Section -->
+        <div class="detail-section">
+            <div class="section-title" style="display: flex; justify-content: space-between; align-items: center;">
+                <span><i class="fas fa-users"></i> Team Members</span>
+                <button type="button" onclick="showLogsModal(@team.Id)" style="background: linear-gradient(135deg, var(--info-blue), #20c1da); color: white; border: none; border-radius: 20px; padding: 10px 22px; font-weight: 700; font-size: 0.85em; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(23,162,184,0.3); transition: all 0.3s ease; font-family: 'Montserrat', sans-serif;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+                    <i class="fas fa-history"></i> Activity Logs
+                </button>
+            </div>
+            
+            @if (team?.Student1 != null)
+            {
+                <div class="student-row">
+                    <div class="student-avatar"><i class="fas fa-user"></i></div>
+                    <div class="student-details">
+                        <h4>@team.Student1.FullName</h4>
+                        <p>@team.Student1.RegdNumber | @team.Student1.Email</p>
+                        <p>Year @team.Student1.Year, Semester @team.Student1.Semester | @team.Student1.Department</p>
+                    </div>
+                </div>
+            }
+
+            @if (team?.Student2 != null)
+            {
+                <div class="student-row">
+                    <div class="student-avatar"><i class="fas fa-user"></i></div>
+                    <div class="student-details">
+                        <h4>@team.Student2.FullName</h4>
+                        <p>@team.Student2.RegdNumber | @team.Student2.Email</p>
+                        <p>Year @team.Student2.Year, Semester @team.Student2.Semester | @team.Student2.Department</p>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Problem Statement Section -->
+        <div class="detail-section">
+            <div class="section-title"><i class="fas fa-lightbulb"></i> Problem Statement</div>
+            
+            @if (!string.IsNullOrEmpty(projectProgress?.ProblemStatement))
+            {
+                <div class="current-value">
+                    <div class="current-label">Current Problem Statement</div>
+                    <div class="current-text">@projectProgress.ProblemStatement</div>
+                </div>
+            }
+
+            <form id="problemStatementForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="teamId" value="@team?.Id" />
+                <div class="form-group">
+                    <label>@(string.IsNullOrEmpty(projectProgress?.ProblemStatement) ? "Assign" : "Update") Problem Statement</label>
+                    <textarea name="problemStatement" class="form-control" placeholder="Enter the problem statement for this team...">@projectProgress?.ProblemStatement</textarea>
+                </div>
+                <button type="submit" class="glass-btn">
+                    <i class="fas fa-save"></i> Save Problem Statement
+                </button>
+            </form>
+        </div>
+
+        <!-- Mentor Assignment Section -->
+        <div class="detail-section">
+            <div class="section-title"><i class="fas fa-user-tie"></i> Mentor Assignment</div>
+            
+            @if (projectProgress?.AssignedFaculty != null)
+            {
+                <div class="current-value">
+                    <div class="current-label">Current Mentor</div>
+                    <div class="current-text">@projectProgress.AssignedFaculty.FullName (@projectProgress.AssignedFaculty.Department)</div>
+                </div>
+            }
+
+            @if (isCurrentFacultyAssigned)
+            {
+                <div style="padding: 12px 16px; background: rgba(40, 167, 69, 0.1); border-radius: 10px; border-left: 4px solid var(--success-green); margin-bottom: 15px;">
+                    <p style="margin: 0; color: var(--success-green); font-weight: 600;">
+                        <i class="fas fa-check-circle"></i> You are assigned as the mentor for this team.
+                    </p>
+                </div>
+            }
+            else
+            {
+                <form id="mentorForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="teamId" value="@team?.Id" />
+                    <div class="form-group">
+                        <label>@(projectProgress?.AssignedFaculty == null ? "Assign" : "Change") Mentor</label>
+                        <select name="mentorId" class="form-control">
+                            <option value="">-- Select Mentor --</option>
+                            @if (availableFaculties != null)
+                            {
+                                @foreach (var faculty in availableFaculties)
+                                {
+                                    <option value="@faculty.Id">@faculty.FullName (@faculty.Department)</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <button type="submit" class="glass-btn">
+                        <i class="fas fa-user-check"></i> Assign Mentor
+                    </button>
+                </form>
+            }
+        </div>
+
+        <!-- Progress Section -->
+        <div class="detail-section">
+            <div class="section-title"><i class="fas fa-chart-line"></i> Project Progress</div>
+            
+            <div class="progress-display">
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progressBar" style="width: @(projectProgress?.CompletionPercentage ?? 0)%">
+                        @(projectProgress?.CompletionPercentage ?? 0)%
+                    </div>
+                </div>
+                <p>Current Status: <strong>@(projectProgress?.Status ?? "Not Started")</strong></p>
+            </div>
+
+            <form id="progressForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="teamId" value="@team?.Id" />
+                <div class="form-group">
+                    <label>Completion Percentage</label>
+                    <input type="range" name="completionPercentage" class="form-control" min="0" max="100" 
+                           value="@(projectProgress?.CompletionPercentage ?? 0)" 
+                           oninput="document.getElementById('percentageValue').textContent = this.value + '%'" 
+                           style="padding: 0;" />
+                    <span id="percentageValue">@(projectProgress?.CompletionPercentage ?? 0)%</span>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select name="status" class="form-control">
+                        @{
+                            var currentStatus = projectProgress?.Status ?? "Not Started";
+                            var statusOptions = new[] { "Not Started", "Problem Statement Assigned", "Mentor Assigned", "In Progress", "Under Review", "Completed" };
+                        }
+                        @foreach (var opt in statusOptions)
+                        {
+                            if (currentStatus == opt)
+                            {
+                                <option value="@opt" selected="selected">@opt</option>
+                            }
+                            else
+                            {
+                                <option value="@opt">@opt</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <button type="submit" class="glass-btn success">
+                    <i class="fas fa-sync-alt"></i> Update Progress
+                </button>
+            </form>
+        </div>
+
+        <!-- Meetings Section -->
+        <div class="detail-section">
+            <div class="section-title"><i class="fas fa-calendar-check"></i> Team Meetings</div>
+            
+            @if (teamMeetings == null || teamMeetings.Count == 0)
+            {
+                <div class="no-data">
+                    <i class="fas fa-calendar-times"></i>
+                    <p>No meetings recorded yet for this team.</p>
+                </div>
+            }
+            else
+            {
+                <div style="overflow-x: auto;">
+                    <table class="meetings-table">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-hashtag"></i> Meeting</th>
+                                <th><i class="fas fa-calendar"></i> Date</th>
+                                <th><i class="fas fa-percentage"></i> Completion</th>
+                                <th><i class="fas fa-file-alt"></i> Notes</th>
+                                <th><i class="fas fa-upload"></i> Proof</th>
+                                <th><i class="fas fa-comments"></i> Faculty Review</th>
+                                <th style="text-align: center;"><i class="fas fa-edit"></i> Review</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var meeting in teamMeetings)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="meeting-number-badge">
+                                            Meeting @meeting.MeetingNumber
+                                        </div>
+                                    </td>
+                                    <td>@meeting.MeetingDate.ToString("MMM dd, yyyy")</td>
+                                    <td>
+                                        <div class="progress-container-sm">
+                                            <div class="progress-bar-bg-sm">
+                                                <div class="progress-bar-fill-sm" style="width: @meeting.CompletionPercentage%"></div>
+                                            </div>
+                                            <div class="progress-text-sm">@meeting.CompletionPercentage%</div>
+                                        </div>
+                                    </td>
+                                    <td>@(string.IsNullOrEmpty(meeting.Notes) ? "-" : meeting.Notes)</td>
+                                    <td style="text-align: center;">
+                                        @if (meeting.ProofImageData != null && meeting.ProofImageData.Length > 0 || !string.IsNullOrEmpty(meeting.ProofUploads))
+                                        {
+                                            <a href="@Url.Action("GetProofImage", "Student", new { id = meeting.Id })" target="_blank" class="proof-link">
+                                                <i class="fas fa-file-image"></i> View
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="no-data-text">No proof</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(meeting.FacultyReview))
+                                        {
+                                            <div class="review-box-sm">@meeting.FacultyReview</div>
+                                        }
+                                        else
+                                        {
+                                            <div class="review-box-sm empty">
+                                                <i class="fas fa-comment-slash"></i> No review
+                                            </div>
+                                        }
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <button type="button" class="btn-edit-table" onclick="showReviewModal(@meeting.Id, @meeting.MeetingNumber, '@(meeting.FacultyReview?.Replace("'", "\\'").Replace("\n", "\\n").Replace("\r", "") ?? "")')">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Faculty Review Modal -->
+    <div id="reviewModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header-review">
+                <h3><i class="fas fa-comments"></i> Add/Edit Faculty Review</h3>
+                <button type="button" class="modal-close" onclick="hideReviewModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body-review">
+                <p style="color: #666; margin-bottom: 15px;">Meeting #<strong id="reviewMeetingNumber"></strong></p>
+                <form id="reviewForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="reviewMeetingId" name="meetingId" />
+                    <div class="form-group">
+                        <label><i class="fas fa-pen"></i> Faculty Review / Feedback</label>
+                        <textarea id="reviewText" name="facultyReview" class="form-control" rows="4" placeholder="Enter your review or feedback for this meeting..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer-review">
+                <button type="button" class="btn-secondary" onclick="hideReviewModal()">Cancel</button>
+                <button type="button" class="glass-btn success" onclick="submitReview()">
+                    <i class="fas fa-save"></i> Save Review
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity Logs Modal -->
+    <div id="logsModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header-review" style="background: linear-gradient(135deg, var(--info-blue), #20c1da);">
+                <h3><i class="fas fa-history"></i> Activity Logs</h3>
+                <button type="button" class="modal-close" onclick="hideLogsModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="logsModalBody" style="padding: 0;">
+            </div>
+        </div>
+    </div>
+
+    <footer class="app-footer">
+        <div class="footer-content">
+            <div class="footer-line guidance">
+                Developed under the guidance of <span class="footer-highlight">Dr. P. Penchala Prasad</span>, Associate Professor, CSE(DS), RGMCET
+            </div>
+            <div class="footer-line team">
+                With team <span class="footer-name">Mr. S. Md. Shahid Afrid</span> (23091A32D4) & <span class="footer-name">Ms. G. Veena</span> (23091A32H9)
+            </div>
+            <div class="footer-line copyright">
+                &copy; All Rights Reserved @@2025
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function showAlert(message, isSuccess) {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertClass = isSuccess ? 'alert-success' : 'alert-danger';
+            const icon = isSuccess ? 'fa-check-circle' : 'fa-exclamation-circle';
+            alertContainer.innerHTML = `<div class="alert ${alertClass}"><i class="fas ${icon}"></i> ${message}</div>`;
+            setTimeout(() => alertContainer.innerHTML = '', 5000);
+        }
+
+        // Problem Statement Form
+        document.getElementById('problemStatementForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            try {
+                const response = await fetch('@Url.Action("AssignProblemStatement", "Faculty")', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                showAlert(result.message, result.success);
+                if (result.success) {
+                    setTimeout(() => location.reload(), 1500);
+                }
+            } catch (error) {
+                showAlert('An error occurred. Please try again.', false);
+            }
+        });
+
+        // Mentor Form (only exists if current faculty is not the assigned mentor)
+        var mentorForm = document.getElementById('mentorForm');
+        if (mentorForm) {
+            mentorForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+                if (!formData.get('mentorId')) {
+                    showAlert('Please select a mentor.', false);
+                    return;
+                }
+                try {
+                    const response = await fetch('@Url.Action("AssignMentor", "Faculty")', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const result = await response.json();
+                    showAlert(result.message, result.success);
+                    if (result.success) {
+                        setTimeout(() => location.reload(), 1500);
+                    }
+                } catch (error) {
+                    showAlert('An error occurred. Please try again.', false);
+                }
+            });
+        }
+
+        // Progress Form
+        document.getElementById('progressForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            try {
+                const response = await fetch('@Url.Action("UpdateTeamProgress", "Faculty")', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                showAlert(result.message, result.success);
+                if (result.success) {
+                    const percentage = formData.get('completionPercentage');
+                    document.getElementById('progressBar').style.width = percentage + '%';
+                    document.getElementById('progressBar').textContent = percentage + '%';
+                }
+            } catch (error) {
+                showAlert('An error occurred. Please try again.', false);
+            }
+        });
+
+        // Faculty Review Modal
+        function showReviewModal(meetingId, meetingNumber, currentReview) {
+            document.getElementById('reviewMeetingId').value = meetingId;
+            document.getElementById('reviewMeetingNumber').textContent = meetingNumber;
+            document.getElementById('reviewText').value = currentReview || '';
+            document.getElementById('reviewModal').style.display = 'flex';
+        }
+
+        function hideReviewModal() {
+            document.getElementById('reviewModal').style.display = 'none';
+        }
+
+        async function submitReview() {
+            var formData = new FormData(document.getElementById('reviewForm'));
+            try {
+                const response = await fetch('@Url.Action("AddFacultyReview", "Faculty")', {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                showAlert(result.message, result.success);
+                if (result.success) {
+                    hideReviewModal();
+                    setTimeout(() => location.reload(), 1500);
+                }
+            } catch (error) {
+                showAlert('An error occurred. Please try again.', false);
+            }
+        }
+
+        // Logs Modal
+        async function showLogsModal(teamId) {
+            var modal = document.getElementById('logsModal');
+            var body = document.getElementById('logsModalBody');
+            body.innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-spin" style="font-size:2em;color:var(--info-blue);"></i><p style="margin-top:15px;color:#666;">Loading logs...</p></div>';
+            modal.style.display = 'flex';
+
+            try {
+                var response = await fetch('@Url.Action("GetTeamLogs", "Faculty")' + '?teamId=' + teamId);
+                var result = await response.json();
+                if (result.success && result.logs.length > 0) {
+                    var html = '<div style="max-height:60vh;overflow-y:auto;">';
+                    result.logs.forEach(function(log) {
+                        var roleColor = log.performedByRole === 'Student' ? '#274060' : log.performedByRole === 'Faculty' ? '#6f42c1' : '#e67e22';
+                        var roleIcon = log.performedByRole === 'Student' ? 'fa-user-graduate' : log.performedByRole === 'Faculty' ? 'fa-chalkboard-teacher' : 'fa-user-shield';
+                        html += '<div style="padding:15px 20px;border-bottom:1px solid #eee;transition:background 0.2s;" onmouseover="this.style.background=\'rgba(23,162,184,0.05)\'" onmouseout="this.style.background=\'transparent\'">';
+                        html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">';
+                        html += '<div style="flex:1;">';
+                        html += '<div style="font-weight:700;color:#274060;font-size:1em;margin-bottom:4px;"><i class="fas fa-circle" style="font-size:0.5em;color:' + roleColor + ';vertical-align:middle;margin-right:6px;"></i>' + log.action + '</div>';
+                        if (log.details) {
+                            html += '<div style="font-size:0.9em;color:#555;line-height:1.5;margin-bottom:6px;">' + log.details + '</div>';
+                        }
+                        html += '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">';
+                        html += '<span style="background:' + roleColor + ';color:white;padding:3px 10px;border-radius:12px;font-size:0.75em;font-weight:600;"><i class="fas ' + roleIcon + '" style="margin-right:4px;"></i>' + log.performedByRole + '</span>';
+                        html += '<span style="font-size:0.85em;color:#888;font-weight:500;">' + log.performedByName + '</span>';
+                        html += '</div>';
+                        html += '</div>';
+                        html += '<div style="font-size:0.8em;color:#999;white-space:nowrap;min-width:130px;text-align:right;">';
+                        html += '<i class="fas fa-clock" style="margin-right:4px;"></i>' + log.timestamp;
+                        html += '</div>';
+                        html += '</div>';
+                        html += '</div>';
+                    });
+                    html += '</div>';
+                    body.innerHTML = html;
+                } else if (result.success && result.logs.length === 0) {
+                    body.innerHTML = '<div style="text-align:center;padding:50px 20px;"><i class="fas fa-inbox" style="font-size:3em;color:var(--slate);margin-bottom:15px;display:block;"></i><h4 style="color:#274060;margin-bottom:8px;">No Activity Yet</h4><p style="color:#666;">Activity logs will appear here when changes are made.</p></div>';
+                } else {
+                    body.innerHTML = '<div style="text-align:center;padding:40px;color:#dc3545;"><i class="fas fa-exclamation-circle" style="font-size:2em;margin-bottom:10px;display:block;"></i>' + (result.message || 'Failed to load logs.') + '</div>';
+                }
+            } catch (err) {
+                body.innerHTML = '<div style="text-align:center;padding:40px;color:#dc3545;"><i class="fas fa-exclamation-circle" style="font-size:2em;margin-bottom:10px;display:block;"></i>Error loading logs.</div>';
+            }
+        }
+
+        function hideLogsModal() {
+            document.getElementById('logsModal').style.display = 'none';
+        }
+
+        // Close modal on outside click
+        document.getElementById('reviewModal')?.addEventListener('click', function(e) {
+            if (e.target.id === 'reviewModal') hideReviewModal();
+        });
+        document.getElementById('logsModal')?.addEventListener('click', function(e) {
+            if (e.target.id === 'logsModal') hideLogsModal();
+        });
+    </script>
+</body>
+</html>

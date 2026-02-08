@@ -1,0 +1,476 @@
+@model List<TeamPro1.Models.TeamFormationSchedule>
+
+@{
+    ViewData["Title"] = "Schedule Team Formation";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Schedule Team Formation - TeamPro1</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        :root {
+            --royal-blue: #274060;
+            --warm-gold: #FFC857;
+            --cream: #F9FAF2;
+            --slate: #CED3DC;
+            --card-shadow: rgba(39,64,96,0.13);
+            --success-green: #28a745;
+            --error-red: #dc3545;
+            --cseds-purple: #6f42c1;
+            --cseds-teal: #20c997;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px 0;
+            font-family: 'Montserrat', Arial, sans-serif;
+            background: linear-gradient(rgba(249, 250, 242, 0.15), rgba(255, 200, 87, 0.10)),
+            url('@Url.Content("~/images/RGMCET-BACKGROUND.jpg")') center center/cover no-repeat fixed;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 0;
+            display: block;
+            background: linear-gradient(135deg, var(--cream) 60%, var(--warm-gold) 100%);
+            opacity: 0.20;
+            pointer-events: none;
+        }
+
+        .main-container {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .page-header {
+            background: rgba(249,250,242,0.92);
+            box-shadow: 0 8px 32px var(--card-shadow);
+            border-radius: 20px;
+            padding: 30px 40px;
+            text-align: center;
+            backdrop-filter: blur(12px);
+            margin-bottom: 30px;
+            border: 2px solid var(--slate);
+        }
+
+        .page-header h1 {
+            font-size: 2em;
+            font-weight: 700;
+            color: var(--royal-blue);
+            margin: 0 0 10px 0;
+            letter-spacing: 1.2px;
+        }
+
+        .page-header p {
+            color: #666;
+            font-size: 1em;
+            margin: 0;
+        }
+
+        .dept-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--cseds-purple), var(--cseds-teal));
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+
+        .schedule-card {
+            background: rgba(249,250,242,0.95);
+            border-radius: 15px;
+            padding: 25px 30px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(12px);
+            border: 2px solid var(--slate);
+            box-shadow: 0 8px 32px var(--card-shadow);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .schedule-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 5px;
+        }
+
+        .schedule-card.open::before {
+            background: var(--success-green);
+        }
+
+        .schedule-card.closed::before {
+            background: var(--error-red);
+        }
+
+        .schedule-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(111, 66, 193, 0.2);
+        }
+
+        .schedule-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex: 1;
+        }
+
+        .year-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .schedule-card.open .year-icon {
+            background: linear-gradient(135deg, var(--success-green), #20c997);
+        }
+
+        .schedule-card.closed .year-icon {
+            background: linear-gradient(135deg, var(--error-red), #c82333);
+        }
+
+        .schedule-details h3 {
+            margin: 0 0 5px 0;
+            color: var(--royal-blue);
+            font-size: 1.2em;
+        }
+
+        .schedule-details .status-text {
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .schedule-details .status-text.open {
+            color: var(--success-green);
+        }
+
+        .schedule-details .status-text.closed {
+            color: var(--error-red);
+        }
+
+        .schedule-details .timestamp {
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 3px;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 32px;
+            flex-shrink: 0;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 32px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 24px;
+            width: 24px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        input:checked + .toggle-slider {
+            background: linear-gradient(135deg, var(--success-green), var(--cseds-teal));
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(28px);
+        }
+
+        .toggle-slider:hover {
+            box-shadow: 0 0 8px rgba(40, 167, 69, 0.3);
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(249,250,242,0.9);
+            color: var(--royal-blue);
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 2px solid var(--slate);
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .back-btn:hover {
+            background: var(--warm-gold);
+            transform: translateY(-2px);
+            text-decoration: none;
+            color: var(--royal-blue);
+        }
+
+        .alert {
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .alert-success {
+            background: rgba(40,167,69,0.15);
+            color: var(--success-green);
+            border: 1px solid var(--success-green);
+        }
+
+        .alert-danger {
+            background: rgba(220,53,69,0.15);
+            color: var(--error-red);
+            border: 1px solid var(--error-red);
+        }
+
+        /* Toast notification */
+        .toast-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 12px;
+            font-weight: 600;
+            z-index: 9999;
+            animation: slideInRight 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            display: none;
+        }
+
+        .toast-notification.success {
+            background: rgba(40,167,69,0.95);
+            color: white;
+        }
+
+        .toast-notification.error {
+            background: rgba(220,53,69,0.95);
+            color: white;
+        }
+
+        @@keyframes slideInRight {
+            from { opacity: 0; transform: translateX(50px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .app-footer {
+            background: rgba(249,250,242,0.95);
+            backdrop-filter: blur(12px);
+            border-top: 3px solid var(--slate);
+            box-shadow: 0 -8px 32px rgba(39,64,96,0.13);
+            padding: 30px 20px;
+            margin-top: 50px;
+            text-align: center;
+            color: #274060;
+            border-radius: 20px 20px 0 0;
+        }
+        .footer-content { max-width: 1200px; margin: 0 auto; }
+        .footer-line { margin: 8px 0; line-height: 1.6; }
+        .footer-line.guidance { font-size: 1em; font-weight: 600; color: #444; margin-bottom: 12px; }
+        .footer-line.team { font-size: 0.95em; font-weight: 500; color: #444; }
+        .footer-line.copyright { font-size: 0.9em; font-weight: 600; color: #274060; margin-top: 15px; padding-top: 15px; border-top: 2px solid rgba(39,64,96,0.1); }
+        .footer-highlight { color: #274060; font-weight: 700; }
+        .footer-name { color: #274060; font-weight: 600; }
+
+        @@media (max-width: 768px) {
+            .main-container { padding: 0 15px; }
+            .page-header { padding: 25px 20px; }
+            .page-header h1 { font-size: 1.5em; }
+            .schedule-card { flex-direction: column; gap: 15px; text-align: center; }
+            .schedule-info { flex-direction: column; gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="toastNotification" class="toast-notification"></div>
+
+    <div class="main-container">
+        <a href="@Url.Action("Dashboard", "Admin")" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+
+        @* Hidden form just to render the anti-forgery token into the DOM *@
+        <form id="antiForgeryForm" style="display:none;">
+            @Html.AntiForgeryToken()
+        </form>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success"><i class="fas fa-check-circle"></i> @TempData["SuccessMessage"]</div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> @TempData["ErrorMessage"]</div>
+        }
+
+        <div class="page-header">
+            <h1><i class="fas fa-calendar-check"></i> Schedule Team Members Selection</h1>
+            <p>Control when students can form teams for each year</p>
+            <div class="dept-badge"><i class="fas fa-building"></i> @ViewBag.AdminDepartment</div>
+        </div>
+
+        @foreach (var schedule in Model.OrderBy(s => s.Year))
+        {
+            var isOpen = schedule.IsOpen;
+            var statusClass = isOpen ? "open" : "closed";
+            <div class="schedule-card @statusClass" id="card-year-@schedule.Year">
+                <div class="schedule-info">
+                    <div class="year-icon">
+                        Y@(schedule.Year)
+                    </div>
+                    <div class="schedule-details">
+                        <h3>Year @schedule.Year Students</h3>
+                        <div class="status-text @statusClass" id="status-text-@schedule.Year">
+                            <i class="fas @(isOpen ? "fa-check-circle" : "fa-times-circle")"></i>
+                            @(isOpen ? "Team Formation is OPEN" : "Team Formation is CLOSED")
+                        </div>
+                        <div class="timestamp" id="timestamp-@schedule.Year">
+                            @if (isOpen && schedule.OpenedAt.HasValue)
+                            {
+                                <text>Opened: @schedule.OpenedAt.Value.ToString("MMM dd, yyyy hh:mm tt")</text>
+                            }
+                            else if (!isOpen && schedule.ClosedAt.HasValue)
+                            {
+                                <text>Closed: @schedule.ClosedAt.Value.ToString("MMM dd, yyyy hh:mm tt")</text>
+                            }
+                            else
+                            {
+                                <text>Not yet configured</text>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <label class="toggle-switch">
+                    <input type="checkbox"
+                           id="toggle-@schedule.Year"
+                           @(isOpen ? "checked" : "")
+                           onchange="toggleTeamFormation(@schedule.Year, this.checked)" />
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        }
+    </div>
+
+    <footer class="app-footer">
+        <div class="footer-content">
+            <div class="footer-line guidance">Developed under the guidance of <span class="footer-highlight">Dr. P. Penchala Prasad</span>, Associate Professor, CSE(DS), RGMCET</div>
+            <div class="footer-line team">With team <span class="footer-name">Mr. S. Md. Shahid Afrid</span> (23091A32D4) & <span class="footer-name">Ms. G. Veena</span> (23091A32H9)</div>
+            <div class="footer-line copyright">&copy; All Rights Reserved @@2025</div>
+        </div>
+    </footer>
+
+    <script>
+        function toggleTeamFormation(year, isOpen) {
+            var tokenValue = document.querySelector('#antiForgeryForm input[name="__RequestVerificationToken"]').value;
+
+            fetch('@Url.Action("ToggleTeamFormation", "Admin")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': tokenValue
+                },
+                body: 'year=' + year + '&isOpen=' + isOpen + '&__RequestVerificationToken=' + encodeURIComponent(tokenValue)
+            })
+            .then(function(response) {
+                if (!response.ok) {
+                    throw new Error('Server returned ' + response.status);
+                }
+                return response.json();
+            })
+            .then(function(data) {
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    updateCardUI(year, isOpen);
+                } else {
+                    showToast(data.message, 'error');
+                    document.getElementById('toggle-' + year).checked = !isOpen;
+                }
+            })
+            .catch(function(error) {
+                showToast('An error occurred. Please try again.', 'error');
+                document.getElementById('toggle-' + year).checked = !isOpen;
+            });
+        }
+
+        function updateCardUI(year, isOpen) {
+            var card = document.getElementById('card-year-' + year);
+            var statusText = document.getElementById('status-text-' + year);
+            var timestamp = document.getElementById('timestamp-' + year);
+            var yearIcon = card.querySelector('.year-icon');
+
+            card.className = 'schedule-card ' + (isOpen ? 'open' : 'closed');
+
+            if (isOpen) {
+                statusText.className = 'status-text open';
+                statusText.innerHTML = '<i class="fas fa-check-circle"></i> Team Formation is OPEN';
+                timestamp.textContent = 'Opened: ' + new Date().toLocaleString();
+            } else {
+                statusText.className = 'status-text closed';
+                statusText.innerHTML = '<i class="fas fa-times-circle"></i> Team Formation is CLOSED';
+                timestamp.textContent = 'Closed: ' + new Date().toLocaleString();
+            }
+        }
+
+        function showToast(message, type) {
+            var toast = document.getElementById('toastNotification');
+            toast.className = 'toast-notification ' + type;
+            toast.innerHTML = '<i class="fas ' + (type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle') + '"></i> ' + message;
+            toast.style.display = 'block';
+
+            setTimeout(function() {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

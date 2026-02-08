@@ -21,8 +21,15 @@ namespace TeamPro1.Models
         [Range(0, 100)]
         public int CompletionPercentage { get; set; } = 0;
 
-        // Proof/Documentation uploads (file path or URL to uploaded proof image)
+        // Legacy: file path (kept for backward compatibility with existing data)
         public string? ProofUploads { get; set; }
+
+        // Proof image stored directly in the database
+        public byte[]? ProofImageData { get; set; }
+
+        // MIME type of the proof image (e.g., "image/jpeg")
+        [StringLength(100)]
+        public string? ProofContentType { get; set; }
 
         // Faculty Review/Feedback for this meeting
         public string? FacultyReview { get; set; }

@@ -792,7 +792,7 @@
 
         .meeting-date {
             font-weight: 600;
-            color: var(--royal-blue);
+            color: var,--royal-blue;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -1131,7 +1131,16 @@
                         </div>
                         <div class="info-value team-members-list">
                             <div class="member-item">@student1.RegdNumber - @student1.FullName</div>
-                            <div class="member-item">@student2.RegdNumber - @student2.FullName</div>
+                            @if (student2 != null)
+                            {
+                                <div class="member-item">@student2.RegdNumber - @student2.FullName</div>
+                            }
+                            else
+                            {
+                                <div class="member-item" style="color: #6f42c1; font-style: italic;">
+                                    <i class="fas fa-user"></i> Individual Team
+                                </div>
+                            }
                         </div>
                     </div>
 
@@ -1188,6 +1197,17 @@
                             }
                         </div>
                     </div>
+
+                    <div class="info-item" style="cursor: pointer; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;" onclick="showLogsModal(@team.Id)">
+                        <div class="info-label">
+                            <i class="fas fa-history"></i> Activity Logs
+                        </div>
+                        <div class="info-value">
+                            <button type="button" style="background: linear-gradient(135deg, var(--info-blue), #20c1da); color: white; border: none; border-radius: 20px; padding: 10px 25px; font-weight: 700; font-size: 0.95em; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(23,162,184,0.3); transition: all 0.3s ease; font-family: 'Montserrat', sans-serif;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='none'">
+                                <i class="fas fa-clipboard-list"></i> View Logs
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -1200,6 +1220,9 @@
 
                 @{
                     var canAddMeeting = !string.IsNullOrEmpty(progress?.ProblemStatement) && mentor != null;
+                    var nextMeetingNumber = meetings.Count > 0 ? meetings.Max(m => m.MeetingNumber) + 1 : 1;
+                    var lastCompletionPercentage = meetings.Count > 0 ? meetings.OrderBy(m => m.MeetingNumber).Last().CompletionPercentage : 0;
+                    var latestMeetingNumber = meetings.Count > 0 ? meetings.Max(m => m.MeetingNumber) : 0;
                 }
 
                 <div class="status-table-container">
@@ -1220,7 +1243,8 @@
                             {
                                 @foreach (var meeting in meetings)
                                 {
-                                    var canEdit = meeting.MeetingNumber == 1 && canAddMeeting;
+                                    var canEdit = canAddMeeting;
+                                    var isLatest = meeting.MeetingNumber == latestMeetingNumber;
                                     <tr>
                                         <!-- Meeting Number -->
                                         <td>
@@ -1256,9 +1280,9 @@
 
                                         <!-- Proof -->
                                         <td style="text-align: center;">
-                                            @if (!string.IsNullOrEmpty(meeting.ProofUploads))
+                                            @if (meeting.ProofImageData != null && meeting.ProofImageData.Length > 0 || !string.IsNullOrEmpty(meeting.ProofUploads))
                                             {
-                                                <a href="@meeting.ProofUploads" target="_blank" class="proof-link">
+                                                <a href="@Url.Action("GetProofImage", "Student", new { id = meeting.Id })" target="_blank" class="proof-link">
                                                     <i class="fas fa-file-image"></i> View
                                                 </a>
                                             }
@@ -1286,7 +1310,7 @@
                                         <td style="text-align: center;">
                                             @if (canEdit)
                                             {
-                                                <button type="button" class="btn-edit-table" onclick="showEditMeetingModal(@meeting.Id, @meeting.MeetingNumber, '@meeting.MeetingDate.ToString("yyyy-MM-dd")', '@(meeting.Notes?.Replace("'", "\\'").Replace("\n", "\\n").Replace("\r", ""))', @meeting.CompletionPercentage)">
+                                                <button type="button" class="btn-edit-table" onclick="showEditMeetingModal(@meeting.Id, @meeting.MeetingNumber, '@meeting.MeetingDate.ToString("yyyy-MM-dd")', '@(meeting.Notes?.Replace("'", "\\'").Replace("\n", "\\n").Replace("\r", ""))', @meeting.CompletionPercentage, @(isLatest ? "true" : "false"))">
                                                     <i class="fas fa-edit"></i>
                                                 </button>
                                             }
@@ -1308,7 +1332,7 @@
                                             <div class="no-meetings-placeholder">
                                                 <i class="fas fa-lock" style="font-size: 40px; color: var(--slate); margin-bottom: 15px;"></i>
                                                 <h4 style="color: var(--royal-blue); margin-bottom: 10px;">Waiting for Assignment</h4>
-                                                <p style="color: #666;">Problem statement and mentor must be assigned by faculty before you can add meetings.</p>
+                                                <p style="color: #666;">Problem statement and mentor must be assigned by HoD before you can add meetings.</p>
                                             </div>
                                         }
                                         else
@@ -1340,7 +1364,7 @@
                             <i class="fas fa-lock"></i> Add Meeting (Locked)
                         </button>
                         <p style="text-align: center; color: #666; margin-top: 10px; font-size: 0.9em;">
-                            <i class="fas fa-info-circle"></i> Waiting for faculty to assign problem statement and mentor
+                            <i class="fas fa-info-circle"></i> Waiting for HoD to assign problem statement and mentor
                         </p>
                     }
                 </div>
@@ -1361,7 +1385,7 @@
                         
                         <div class="form-group">
                             <label><i class="fas fa-hashtag"></i> Meeting Number</label>
-                            <input type="number" name="MeetingNumber" class="form-control" min="1" required />
+                            <input type="number" name="MeetingNumber" class="form-control" value="@nextMeetingNumber" readonly style="background: #e9ecef; cursor: not-allowed;" />
                         </div>
 
                         <div class="form-group">
@@ -1376,7 +1400,11 @@
 
                         <div class="form-group">
                             <label><i class="fas fa-percentage"></i> Project Completion (%)</label>
-                            <input type="number" name="CompletionPercentage" class="form-control" min="0" max="100" value="0" required />
+                            <input type="number" id="addCompletionPercentage" name="CompletionPercentage" class="form-control" min="@lastCompletionPercentage" max="100" value="@lastCompletionPercentage" required />
+                            @if (lastCompletionPercentage > 0)
+                            {
+                                <small class="form-text"><i class="fas fa-info-circle"></i> Minimum value is @lastCompletionPercentage% (from previous meeting)</small>
+                            }
                         </div>
 
                         <div class="form-group">
@@ -1411,7 +1439,7 @@
                         
                         <div class="form-group">
                             <label><i class="fas fa-hashtag"></i> Meeting Number</label>
-                            <input type="number" id="editMeetingNumber" name="MeetingNumber" class="form-control" readonly />
+                            <input type="number" id="editMeetingNumber" name="MeetingNumber" class="form-control" readonly style="background: #e9ecef; cursor: not-allowed;" />
                         </div>
 
                         <div class="form-group">
@@ -1424,9 +1452,12 @@
                             <textarea id="editMeetingNotes" name="Notes" class="form-control" rows="3" placeholder="Enter meeting agenda or problem statement"></textarea>
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group" id="editCompletionGroup">
                             <label><i class="fas fa-percentage"></i> Project Completion (%)</label>
                             <input type="number" id="editCompletionPercentage" name="CompletionPercentage" class="form-control" min="0" max="100" required />
+                            <small id="editCompletionHint" class="form-text" style="display: none;">
+                                <i class="fas fa-lock"></i> Completion percentage can only be changed on the latest meeting
+                            </small>
                         </div>
 
                         <div class="form-group">
@@ -1445,22 +1476,55 @@
                 </div>
             </div>
 
+            <!-- Activity Logs Modal -->
+            <div id="logsModal" class="modal-overlay" style="display: none;">
+                <div class="modal-content" style="max-width: 700px;">
+                    <div class="modal-header" style="background: linear-gradient(135deg, var(--info-blue), #20c1da);">
+                        <h3><i class="fas fa-history"></i> Activity Logs</h3>
+                        <button type="button" class="modal-close" onclick="hideLogsModal()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div id="logsModalBody" style="padding: 0;">
+                    </div>
+                </div>
+            </div>
+
             <script>
+                var nextMeetingNumber = @nextMeetingNumber;
+                var lastCompletionPercentage = @lastCompletionPercentage;
+
                 function showAddMeetingModal() {
                     // Check if button is disabled
                     var btn = event.target.closest('button');
                     if (btn && btn.disabled) {
-                        alert('?? Cannot add meeting.\n\nProblem statement and mentor must be assigned by faculty first.');
+                        alert('Cannot add meeting.\n\nProblem statement and mentor must be assigned by faculty first.');
                         return false;
                     }
 
-                    // Reset form
+                    // Reset form but preserve computed values
                     document.getElementById('addMeetingForm').reset();
-                    // Remove readonly from meeting number if it was set
+
+                    // Set auto-calculated meeting number (readonly)
                     var meetingNumberInput = document.querySelector('#addMeetingForm input[name="MeetingNumber"]');
                     if (meetingNumberInput) {
-                        meetingNumberInput.readOnly = false;
+                        meetingNumberInput.value = nextMeetingNumber;
+                        meetingNumberInput.readOnly = true;
                     }
+
+                    // Set completion percentage with minimum from last meeting
+                    var completionInput = document.getElementById('addCompletionPercentage');
+                    if (completionInput) {
+                        completionInput.value = lastCompletionPercentage;
+                        completionInput.min = lastCompletionPercentage;
+                    }
+
+                    // Set today's date
+                    var dateInput = document.querySelector('#addMeetingForm input[name="MeetingDate"]');
+                    if (dateInput) {
+                        dateInput.value = new Date().toISOString().split('T')[0];
+                    }
+
                     document.getElementById('addMeetingModal').style.display = 'flex';
                 }
 
@@ -1469,23 +1533,31 @@
                 }
 
                 function showAddFirstMeetingModal() {
-                    // Reset form first
-                    document.getElementById('addMeetingForm').reset();
-                    // Pre-fill meeting number as 1
-                    var meetingNumberInput = document.querySelector('#addMeetingForm input[name="MeetingNumber"]');
-                    if (meetingNumberInput) {
-                        meetingNumberInput.value = 1;
-                        meetingNumberInput.readOnly = true;
-                    }
-                    document.getElementById('addMeetingModal').style.display = 'flex';
+                    showAddMeetingModal();
                 }
 
-                function showEditMeetingModal(meetingId, meetingNumber, meetingDate, notes, completionPercentage) {
+                function showEditMeetingModal(meetingId, meetingNumber, meetingDate, notes, completionPercentage, isLatest) {
                     document.getElementById('editMeetingId').value = meetingId;
                     document.getElementById('editMeetingNumber').value = meetingNumber;
                     document.getElementById('editMeetingDate').value = meetingDate;
                     document.getElementById('editMeetingNotes').value = notes || '';
                     document.getElementById('editCompletionPercentage').value = completionPercentage;
+
+                    var completionInput = document.getElementById('editCompletionPercentage');
+                    var completionHint = document.getElementById('editCompletionHint');
+
+                    if (isLatest) {
+                        completionInput.readOnly = false;
+                        completionInput.style.background = '';
+                        completionInput.style.cursor = '';
+                        completionHint.style.display = 'none';
+                    } else {
+                        completionInput.readOnly = true;
+                        completionInput.style.background = '#e9ecef';
+                        completionInput.style.cursor = 'not-allowed';
+                        completionHint.style.display = 'block';
+                    }
+
                     document.getElementById('editMeetingModal').style.display = 'flex';
                 }
 
@@ -1493,91 +1565,57 @@
                     document.getElementById('editMeetingModal').style.display = 'none';
                 }
 
-                // Form validation
-                document.getElementById('addMeetingForm')?.addEventListener('submit', function(e) {
-                    var meetingNumber = this.querySelector('input[name="MeetingNumber"]').value;
-                    var meetingDate = this.querySelector('input[name="MeetingDate"]').value;
-                    var completion = this.querySelector('input[name="CompletionPercentage"]').value;
+                // Logs Modal
+                async function showLogsModal(teamId) {
+                    var modal = document.getElementById('logsModal');
+                    var body = document.getElementById('logsModalBody');
+                    body.innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-spin" style="font-size:2em;color:var(--info-blue);"></i><p style="margin-top:15px;color:#666;">Loading logs...</p></div>';
+                    modal.style.display = 'flex';
 
-                    if (!meetingNumber || meetingNumber < 1) {
-                        alert('? Please enter a valid meeting number (1 or greater).');
-                        e.preventDefault();
-                        return false;
-                    }
-
-                    if (!meetingDate) {
-                        alert('?? Please select a meeting date.');
-                        e.preventDefault();
-                        return false;
-                    }
-
-                    if (completion === '' || completion < 0 || completion > 100) {
-                        alert('? Completion percentage must be between 0 and 100.');
-                        e.preventDefault();
-                        return false;
-                    }
-
-                    // Check file if selected
-                    var fileInput = this.querySelector('input[name="ProofFile"]');
-                    if (fileInput && fileInput.files.length > 0) {
-                        var file = fileInput.files[0];
-                        var fileSize = file.size / 1024 / 1024; // in MB
-                        var fileExt = file.name.split('.').pop().toLowerCase();
-
-                        if (fileSize > 5) {
-                            alert('? Proof file size must be less than 5MB.');
-                            e.preventDefault();
-                            return false;
+                    try {
+                        var response = await fetch('@Url.Action("GetTeamLogs", "Student")' + '?teamId=' + teamId);
+                        var result = await response.json();
+                        if (result.success && result.logs.length > 0) {
+                            var html = '<div style="max-height:60vh;overflow-y:auto;">';
+                            result.logs.forEach(function(log) {
+                                var roleColor = log.performedByRole === 'Student' ? '#274060' : log.performedByRole === 'Faculty' ? '#6f42c1' : '#e67e22';
+                                var roleIcon = log.performedByRole === 'Student' ? 'fa-user-graduate' : log.performedByRole === 'Faculty' ? 'fa-chalkboard-teacher' : 'fa-user-shield';
+                                html += '<div style="padding:15px 20px;border-bottom:1px solid #eee;transition:background 0.2s;" onmouseover="this.style.background=\'rgba(23,162,184,0.05)\'" onmouseout="this.style.background=\'transparent\'">';
+                                html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">';
+                                html += '<div style="flex:1;">';
+                                html += '<div style="font-weight:700;color:#274060;font-size:1em;margin-bottom:4px;"><i class="fas fa-circle" style="font-size:0.5em;color:' + roleColor + ';vertical-align:middle;margin-right:6px;"></i>' + log.action + '</div>';
+                                if (log.details) {
+                                    html += '<div style="font-size:0.9em;color:#555;line-height:1.5;margin-bottom:6px;">' + log.details + '</div>';
+                                }
+                                html += '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">';
+                                html += '<span style="background:' + roleColor + ';color:white;padding:3px 10px;border-radius:12px;font-size:0.75em;font-weight:600;"><i class="fas ' + roleIcon + '" style="margin-right:4px;"></i>' + log.performedByRole + '</span>';
+                                html += '<span style="font-size:0.85em;color:#888;font-weight:500;">' + log.performedByName + '</span>';
+                                html += '</div>';
+                                html += '</div>';
+                                html += '<div style="font-size:0.8em;color:#999;white-space:nowrap;min-width:130px;text-align:right;">';
+                                html += '<i class="fas fa-clock" style="margin-right:4px;"></i>' + log.timestamp;
+                                html += '</div>';
+                                html += '</div>';
+                                html += '</div>';
+                            });
+                            html += '</div>';
+                            body.innerHTML = html;
+                        } else if (result.success && result.logs.length === 0) {
+                            body.innerHTML = '<div style="text-align:center;padding:50px 20px;"><i class="fas fa-inbox" style="font-size:3em;color:var(--slate);margin-bottom:15px;display:block;"></i><h4 style="color:#274060;margin-bottom:8px;">No Activity Yet</h4><p style="color:#666;">Activity logs will appear here when changes are made.</p></div>';
+                        } else {
+                            body.innerHTML = '<div style="text-align:center;padding:40px;color:#dc3545;"><i class="fas fa-exclamation-circle" style="font-size:2em;margin-bottom:10px;display:block;"></i>' + (result.message || 'Failed to load logs.') + '</div>';
                         }
-
-                        if (fileExt !== 'jpg' && fileExt !== 'jpeg') {
-                            alert('? Only JPG/JPEG files are allowed for proof upload.');
-                            e.preventDefault();
-                            return false;
-                        }
+                    } catch (err) {
+                        body.innerHTML = '<div style="text-align:center;padding:40px;color:#dc3545;"><i class="fas fa-exclamation-circle" style="font-size:2em;margin-bottom:10px;display:block;"></i>Error loading logs.</div>';
                     }
+                }
 
-                    return true;
-                });
+                function hideLogsModal() {
+                    document.getElementById('logsModal').style.display = 'none';
+                }
 
-                // Edit form validation
-                document.getElementById('editMeetingForm')?.addEventListener('submit', function(e) {
-                    var meetingDate = this.querySelector('input[name="MeetingDate"]').value;
-                    var completion = this.querySelector('input[name="CompletionPercentage"]').value;
-
-                    if (!meetingDate) {
-                        alert('?? Please select a meeting date.');
-                        e.preventDefault();
-                        return false;
-                    }
-
-                    if (completion === '' || completion < 0 || completion > 100) {
-                        alert('? Completion percentage must be between 0 and 100.');
-                        e.preventDefault();
-                        return false;
-                    }
-
-                    // Check file if selected
-                    var fileInput = this.querySelector('input[name="ProofFile"]');
-                    if (fileInput && fileInput.files.length > 0) {
-                        var file = fileInput.files[0];
-                        var fileSize = file.size / 1024 / 1024; // in MB
-                        var fileExt = file.name.split('.').pop().toLowerCase();
-
-                        if (fileSize > 5) {
-                            alert('? Proof file size must be less than 5MB.');
-                            e.preventDefault();
-                            return false;
-                        }
-
-                        if (fileExt !== 'jpg' && fileExt !== 'jpeg') {
-                            alert('? Only JPG/JPEG files are allowed for proof upload.');
-                            e.preventDefault();
-                            return false;
-                        }
-                    }
-
-                    return true;
+                document.getElementById('logsModal')?.addEventListener('click', function(e) {
+                    if (e.target.id === 'logsModal') hideLogsModal();
                 });
 
                 // Close modal when clicking outside

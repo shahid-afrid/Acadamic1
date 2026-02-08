@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using TeamPro1.Models;
 using TeamPro1.Hubs;  // ? SignalR Hub
+using TeamPro1.Data;  // For DbSeeder
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +30,10 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.Migrate();
+    
+    // Seed test data (only runs if database is empty)
+    // Comment out this line after first run if you don't want to seed data
+    await DbSeeder.SeedTestFacultyAsync(db);
 }
 
 // Configure the HTTP request pipeline.
@@ -56,5 +61,4 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
-
 

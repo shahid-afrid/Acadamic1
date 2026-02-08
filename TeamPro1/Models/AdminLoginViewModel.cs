@@ -11,6 +11,9 @@ namespace TeamPro1.Models
         [Required(ErrorMessage = "Password is required")]
         [DataType(DataType.Password)]
         public string Password { get; set; }
+
+        [Required(ErrorMessage = "Please select your department")]
+        public string Department { get; set; }
     }
 
     public class AdminDashboardViewModel
@@ -20,5 +23,6 @@ namespace TeamPro1.Models
         public int TotalSubjects { get; set; }
         public int TotalEnrollments { get; set; }
         public int TotalAdmins { get; set; }
+        public string Department { get; set; } = string.Empty;
     }
 }

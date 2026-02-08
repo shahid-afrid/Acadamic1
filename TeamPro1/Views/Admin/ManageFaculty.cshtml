@@ -1,0 +1,612 @@
+@model List<TeamPro1.Models.Faculty>
+
+@{
+    ViewData["Title"] = "Manage Faculty";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manage Faculty - Admin - TeamPro1</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        :root {
+            --royal-blue: #274060;
+            --warm-gold: #FFC857;
+            --cream: #F9FAF2;
+            --slate: #CED3DC;
+            --card-shadow: rgba(39,64,96,0.13);
+            --success-green: #28a745;
+            --error-red: #dc3545;
+            --cseds-purple: #6f42c1;
+            --cseds-teal: #20c997;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px 0;
+            font-family: 'Montserrat', Arial, sans-serif;
+            background: linear-gradient(rgba(249, 250, 242, 0.15), rgba(255, 200, 87, 0.10)),
+            url('@Url.Content("~/images/RGMCET-BACKGROUND.jpg")') center center/cover no-repeat fixed;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 0;
+            display: block;
+            background: linear-gradient(135deg, var(--cream) 60%, var(--warm-gold) 100%);
+            opacity: 0.20;
+            pointer-events: none;
+        }
+
+        .main-container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .page-header {
+            background: rgba(249,250,242,0.95);
+            backdrop-filter: blur(12px);
+            border: 2px solid var(--slate);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px var(--card-shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .page-header h1 {
+            color: var(--royal-blue);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 0;
+            font-size: 2em;
+        }
+
+        .page-header p { color: #666; margin: 5px 0 0 0; }
+
+        .faculty-section {
+            background: rgba(249,250,242,0.95);
+            border: 2px solid var(--slate);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px var(--card-shadow);
+        }
+
+        .faculty-section h3 {
+            color: var(--royal-blue);
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .glass-btn {
+            background: linear-gradient(135deg, var(--cseds-purple), var(--cseds-teal));
+            color: white !important;
+            border: none;
+            border-radius: 25px;
+            padding: 12px 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1em;
+        }
+
+        .glass-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(111, 66, 193, 0.4);
+            text-decoration: none;
+            color: white !important;
+        }
+
+        .btn-sm {
+            padding: 8px 16px !important;
+            font-size: 0.875rem;
+            margin: 2px;
+        }
+
+        .btn-success { background: linear-gradient(135deg, #28a745, #20c997); }
+        .btn-danger { background: linear-gradient(135deg, #dc3545, #e74c3c); }
+        .btn-warning { background: linear-gradient(135deg, #f39c12, #e67e22); }
+        .btn-back { background: linear-gradient(135deg, var(--slate) 0%, #95a5a6 100%); }
+        .btn-back:hover { background: linear-gradient(135deg, #95a5a6 0%, var(--slate) 100%); }
+
+        .faculty-table {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .faculty-table thead {
+            background: linear-gradient(135deg, var(--cseds-purple), var(--cseds-teal));
+            color: white;
+        }
+
+        .faculty-table thead th {
+            padding: 15px;
+            font-weight: 600;
+            border: none;
+            text-align: left;
+        }
+
+        .faculty-table tbody td {
+            padding: 15px;
+            vertical-align: middle;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .faculty-table tbody tr:hover {
+            background-color: rgba(111, 66, 193, 0.05);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .filters-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            padding: 10px 16px;
+            border: 2px solid var(--slate);
+            border-radius: 10px;
+            font-size: 1em;
+            min-width: 300px;
+            font-family: 'Montserrat', sans-serif;
+            transition: border-color 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--cseds-purple);
+            box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.1);
+        }
+
+        .record-count {
+            color: #666;
+            font-weight: 600;
+            padding: 8px 16px;
+            background: rgba(111, 66, 193, 0.1);
+            border-radius: 8px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state i {
+            font-size: 4em;
+            color: var(--cseds-purple);
+            margin-bottom: 20px;
+        }
+
+        /* Alert Messages */
+        .alert-card {
+            background: rgba(249,250,242,0.95);
+            border-radius: 20px;
+            padding: 20px 30px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .alert-card.success {
+            background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(32, 201, 151, 0.1));
+            border: 2px solid #28a745;
+        }
+
+        .alert-card.error {
+            background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(231, 76, 60, 0.1));
+            border: 2px solid #dc3545;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(39, 64, 96, 0.75);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .modal-overlay.show { display: flex; }
+
+        @@keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+            overflow: hidden;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @@keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--cseds-purple), var(--cseds-teal));
+            color: white;
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h5 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modal-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .modal-body p { color: #666; margin-bottom: 0; font-size: 1.05em; }
+
+        .modal-footer {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .app-footer {
+            background: rgba(249,250,242,0.95);
+            backdrop-filter: blur(12px);
+            border-top: 3px solid var(--slate);
+            box-shadow: 0 -8px 32px rgba(39,64,96,0.13);
+            padding: 30px 20px;
+            margin-top: 50px;
+            text-align: center;
+            color: #274060;
+            border-radius: 20px 20px 0 0;
+        }
+        .footer-content { max-width: 1200px; margin: 0 auto; }
+        .footer-line { margin: 8px 0; line-height: 1.6; }
+        .footer-line.guidance { font-size: 1em; font-weight: 600; color: #444; margin-bottom: 12px; }
+        .footer-line.team { font-size: 0.95em; font-weight: 500; color: #444; }
+        .footer-line.copyright { font-size: 0.9em; font-weight: 600; color: #274060; margin-top: 15px; padding-top: 15px; border-top: 2px solid rgba(39,64,96,0.1); }
+        .footer-highlight { color: #274060; font-weight: 700; }
+        .footer-name { color: #274060; font-weight: 600; }
+
+        @@media (max-width: 768px) {
+            .main-container { padding: 0 15px; }
+            .page-header { flex-direction: column; text-align: center; }
+            .page-header h1 { font-size: 1.5em; }
+            .filters-row { flex-direction: column; }
+            .search-input { min-width: 100%; }
+            .section-header { flex-direction: column; }
+            .faculty-table thead { display: none; }
+            .faculty-table tbody tr {
+                display: block; border: 1px solid #ddd;
+                border-radius: 10px; margin-bottom: 15px; padding: 15px;
+            }
+            .faculty-table tbody td {
+                display: block; text-align: right; border: none; padding: 8px 0;
+            }
+            .faculty-table tbody td::before {
+                content: attr(data-label) ": ";
+                float: left; font-weight: bold; color: var(--royal-blue);
+            }
+            .modal-content { width: 95%; }
+            .app-footer { padding: 20px 15px; margin-top: 30px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Header -->
+        <div class="page-header">
+            <div>
+                <h1><i class="fas fa-chalkboard-teacher"></i> Manage Faculty</h1>
+                <p>Manage faculty members for <strong>@ViewBag.AdminDepartment</strong> department</p>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <a href="@Url.Action("AddFaculty", "Admin")" class="glass-btn btn-success">
+                    <i class="fas fa-user-plus"></i> Add Faculty
+                </a>
+                <button type="button" class="glass-btn" style="background: linear-gradient(135deg, #28a745, #20c997);" onclick="exportFacultyExcel()" id="exportExcelBtn">
+                    <i class="fas fa-file-excel"></i> Export Excel
+                </button>
+                <a href="@Url.Action("Dashboard", "Admin")" class="glass-btn btn-back">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- Success/Error Messages -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert-card success">
+                <i class="fas fa-check-circle" style="font-size: 2em; color: #28a745;"></i>
+                <div>
+                    <h4 style="margin: 0; color: #28a745;">Success!</h4>
+                    <p style="margin: 5px 0 0 0; color: #155724;">@TempData["SuccessMessage"]</p>
+                </div>
+            </div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert-card error">
+                <i class="fas fa-exclamation-circle" style="font-size: 2em; color: #dc3545;"></i>
+                <div>
+                    <h4 style="margin: 0; color: #dc3545;">Error!</h4>
+                    <p style="margin: 5px 0 0 0; color: #721c24;">@TempData["ErrorMessage"]</p>
+                </div>
+            </div>
+        }
+
+        <!-- Faculty Section -->
+        <div class="faculty-section">
+            <div class="section-header">
+                <h3><i class="fas fa-users" style="color: var(--cseds-purple);"></i> Faculty Members (@Model.Count)</h3>
+                <span class="record-count" id="facultyCount">Showing: @Model.Count</span>
+            </div>
+
+            <div class="filters-row">
+                <input type="text" id="searchInput" class="search-input"
+                       placeholder="Search by name or email..."
+                       onkeyup="filterFaculty()">
+            </div>
+
+            @if (Model.Count == 0)
+            {
+                <div class="empty-state">
+                    <i class="fas fa-user-slash"></i>
+                    <h3>No Faculty Found</h3>
+                    <p>No faculty members registered yet in your department.</p>
+                    <a href="@Url.Action("AddFaculty", "Admin")" class="glass-btn btn-success" style="margin-top: 15px;">
+                        <i class="fas fa-user-plus"></i> Add First Faculty
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div style="overflow-x: auto;">
+                    <table class="faculty-table" id="facultyTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Full Name</th>
+                                <th>Email</th>
+                                <th>Department</th>
+                                <th>Joined</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{ int idx = 1; }
+                            @foreach (var faculty in Model)
+                            {
+                                <tr data-faculty-id="@faculty.Id">
+                                    <td data-label="#">@idx</td>
+                                    <td data-label="Full Name"><strong>@faculty.FullName</strong></td>
+                                    <td data-label="Email">@faculty.Email</td>
+                                    <td data-label="Department">@faculty.Department</td>
+                                    <td data-label="Joined">@faculty.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                    <td data-label="Actions">
+                                        <div class="action-buttons">
+                                            <a href="@Url.Action("EditFaculty", "Admin", new { id = faculty.Id })"
+                                               class="glass-btn btn-sm btn-warning"
+                                               title="Edit Faculty">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
+                                            <button type="button" class="glass-btn btn-sm btn-danger"
+                                                    onclick="confirmDelete('@faculty.Id', '@faculty.FullName.Replace("'", "\\'")') "
+                                                    title="Delete Faculty">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                idx++;
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5><i class="fas fa-exclamation-triangle"></i> Confirm Delete</h5>
+                <button class="modal-close" onclick="closeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <strong id="deleteFacultyName"></strong>? This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="glass-btn btn-back" onclick="closeModal()">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button type="button" class="glass-btn btn-danger" id="confirmDeleteBtn">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="app-footer">
+        <div class="footer-content">
+            <div class="footer-line guidance">Developed under the guidance of <span class="footer-highlight">Dr. P. Penchala Prasad</span>, Associate Professor, CSE(DS), RGMCET</div>
+            <div class="footer-line team">With team <span class="footer-name">Mr. S. Md. Shahid Afrid</span> (23091A32D4) & <span class="footer-name">Ms. G. Veena</span> (23091A32H9)</div>
+            <div class="footer-line copyright">&copy; All Rights Reserved @@2025</div>
+        </div>
+    </footer>
+
+    @Html.AntiForgeryToken()
+
+    <script>
+        function filterFaculty() {
+            var input = document.getElementById('searchInput').value.toLowerCase();
+            var rows = document.querySelectorAll('#facultyTable tbody tr');
+            var visibleCount = 0;
+
+            rows.forEach(function(row) {
+                var text = row.textContent.toLowerCase();
+                if (text.includes(input)) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            document.getElementById('facultyCount').textContent = 'Showing: ' + visibleCount;
+        }
+
+        var deleteFacultyId = 0;
+        function confirmDelete(id, name) {
+            deleteFacultyId = id;
+            document.getElementById('deleteFacultyName').textContent = name;
+            document.getElementById('deleteModal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('deleteModal').classList.remove('show');
+        }
+
+        document.getElementById('deleteModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        document.getElementById('confirmDeleteBtn').addEventListener('click', async function() {
+            closeModal();
+            try {
+                var formData = new FormData();
+                formData.append('id', deleteFacultyId);
+                var tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (tokenInput) formData.append('__RequestVerificationToken', tokenInput.value);
+
+                var response = await fetch('@Url.Action("DeleteFaculty", "Admin")', {
+                    method: 'POST',
+                    body: formData
+                });
+                var result = await response.json();
+                if (result.success) {
+                    var row = document.querySelector('tr[data-faculty-id="' + deleteFacultyId + '"]');
+                    if (row) row.remove();
+                    var currentCount = parseInt(document.getElementById('facultyCount').textContent.match(/\d+/)[0]);
+                    document.getElementById('facultyCount').textContent = 'Showing: ' + (currentCount - 1);
+                    alert('Faculty deleted successfully!');
+                } else {
+                    alert(result.message);
+                }
+            } catch (e) {
+                alert('Error deleting faculty.');
+            }
+        });
+
+        async function exportFacultyExcel() {
+            var btn = document.getElementById('exportExcelBtn');
+            var originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exporting...';
+            btn.disabled = true;
+
+            try {
+                window.location.href = '@Url.Action("ExportFacultyExcel", "Admin")';
+            } catch (error) {
+                alert('Error exporting Excel file.');
+            }
+
+            setTimeout(function() {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TeamPro1.Models;
 
@@ -11,9 +12,11 @@ using TeamPro1.Models;
 namespace TeamPro1.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260207015911_AddAdminsTable")]
+    partial class AddAdminsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -95,35 +98,6 @@ namespace TeamPro1.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Faculties");
-                });
-
-            modelBuilder.Entity("TeamPro1.Models.ProblemStatementBank", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Department")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Statement")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<int>("Year")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("ProblemStatementBanks");
                 });
 
             modelBuilder.Entity("TeamPro1.Models.ProjectProgress", b =>
@@ -230,13 +204,10 @@ namespace TeamPro1.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsIndividual")
-                        .HasColumnType("bit");
-
                     b.Property<int>("Student1Id")
                         .HasColumnType("int");
 
-                    b.Property<int?>("Student2Id")
+                    b.Property<int>("Student2Id")
                         .HasColumnType("int");
 
                     b.Property<int>("TeamNumber")
@@ -249,84 +220,6 @@ namespace TeamPro1.Migrations
                     b.HasIndex("Student2Id");
 
                     b.ToTable("Teams");
-                });
-
-            modelBuilder.Entity("TeamPro1.Models.TeamFormationSchedule", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime?>("ClosedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Department")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<bool>("IsOpen")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("LastUpdated")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("OpenedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Year")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Department", "Year")
-                        .IsUnique();
-
-                    b.ToTable("TeamFormationSchedules");
-                });
-
-            modelBuilder.Entity("TeamPro1.Models.TeamActivityLog", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Action")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("Details")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PerformedByName")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<string>("PerformedByRole")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int>("TeamId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("TeamId");
-
-                    b.ToTable("TeamActivityLogs");
                 });
 
             modelBuilder.Entity("TeamPro1.Models.TeamMeeting", b =>
@@ -357,13 +250,6 @@ namespace TeamPro1.Migrations
 
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ProofContentType")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<byte[]>("ProofImageData")
-                        .HasColumnType("varbinary(max)");
 
                     b.Property<string>("ProofUploads")
                         .HasColumnType("nvarchar(max)");
@@ -446,33 +332,12 @@ namespace TeamPro1.Migrations
                     b.HasOne("TeamPro1.Models.Student", "Student2")
                         .WithMany()
                         .HasForeignKey("Student2Id")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Student1");
 
                     b.Navigation("Student2");
-                });
-
-            modelBuilder.Entity("TeamPro1.Models.TeamFormationSchedule", b =>
-                {
-                    b.HasOne("TeamPro1.Models.Department", "Department")
-                        .WithMany()
-                        .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Department");
-                });
-
-            modelBuilder.Entity("TeamPro1.Models.TeamActivityLog", b =>
-                {
-                    b.HasOne("TeamPro1.Models.Team", "Team")
-                        .WithMany()
-                        .HasForeignKey("TeamId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Team");
                 });
 
             modelBuilder.Entity("TeamPro1.Models.TeamMeeting", b =>

@@ -773,6 +773,38 @@
             color: #274060;
             font-weight: 600;
         }
+
+        /* Be Individual Button */
+        .btn-individual {
+            background: linear-gradient(135deg, #6f42c1, #9b59b6);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 0.95em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(111, 66, 193, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Montserrat', Arial, sans-serif;
+        }
+
+        .btn-individual:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(111, 66, 193, 0.5);
+            background: linear-gradient(135deg, #5a32a3, #8e44ad);
+        }
+
+        .btn-individual:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+            transform: none;
+            box-shadow: none;
+        }
     </style>
 </head>
 <body>
@@ -830,7 +862,21 @@
                 <li>You can <strong>cancel your request</strong> if the other student hasn't responded yet.</li>
                 <li>Students already in a team are marked as <strong>"In Team"</strong> and cannot receive requests.</li>
                 <li>After your request is accepted, a team will be formed automatically.</li>
+                <li>If you prefer to work alone, click <strong>"Be Individual"</strong> to register as a solo team.</li>
             </ul>
+
+            @if (!ViewBag.CurrentStudentInTeam)
+            {
+                <div style="margin-top: 20px; padding-top: 18px; border-top: 2px solid var(--slate); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+                    <div style="display: flex; align-items: center; gap: 10px; color: #555; font-size: 0.95em;">
+                        <i class="fas fa-user" style="color: var(--royal-blue); font-size: 1.2em;"></i>
+                        <span>Prefer to work alone? Register as an <strong>individual team</strong>.</span>
+                    </div>
+                    <button type="button" class="btn-individual" onclick="beIndividual()">
+                        <i class="fas fa-user"></i> Be Individual
+                    </button>
+                </div>
+            }
         </div>
 
         @if (ViewBag.StudentPool != null && ViewBag.StudentPool.Count > 0)
@@ -1124,6 +1170,32 @@
 
         function getAntiForgeryToken() {
             return document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+        }
+
+        function beIndividual() {
+            if (!confirm('Are you sure you want to register as an individual team?\n\nThis means you will work alone without a teammate.\nAny pending requests will be cancelled.\n\nThis action cannot be undone.')) {
+                return;
+            }
+
+            fetch('@Url.Action("BeIndividual", "Student")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                },
+                body: `__RequestVerificationToken=${getAntiForgeryToken()}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                if (data.success) {
+                    location.reload();
+                }
+            })
+            .catch(error => {
+                alert('An error occurred. Please try again.');
+                console.error('Error:', error);
+            });
         }
     </script>
 

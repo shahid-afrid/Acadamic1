@@ -163,7 +163,7 @@ namespace TeamPro1.Controllers
         }
 
         // GET: Student/MainDashboard
-        public IActionResult MainDashboard()
+        public async Task<IActionResult> MainDashboard()
         {
             // Check if student is logged in
             var studentId = HttpContext.Session.GetString("StudentId");
@@ -179,9 +179,24 @@ namespace TeamPro1.Controllers
             ViewBag.StudentYear = HttpContext.Session.GetString("StudentYear");
             ViewBag.StudentDepartment = HttpContext.Session.GetString("StudentDepartment");
 
-            // Set schedule availability (you can implement actual logic later)
-            ViewBag.IsSelectionAvailable = true; // Default to true for now
-            ViewBag.ScheduleStatus = "Faculty selection is currently available for all students.";
+            // Check team formation schedule for this student's department and year
+            var dept = HttpContext.Session.GetString("StudentDepartment");
+            var yearStr = HttpContext.Session.GetString("StudentYear");
+            int.TryParse(yearStr, out int year);
+
+            var schedule = await _context.TeamFormationSchedules
+                .FirstOrDefaultAsync(s => s.Department == dept && s.Year == year);
+
+            if (schedule != null && schedule.IsOpen)
+            {
+                ViewBag.IsTeamFormationOpen = true;
+                ViewBag.TeamFormationStatus = "Team member selection is currently available for your year.";
+            }
+            else
+            {
+                ViewBag.IsTeamFormationOpen = false;
+                ViewBag.TeamFormationStatus = "Team member selection is currently closed for your year. Please wait for your admin to open it.";
+            }
 
             return View();
         }
@@ -392,6 +407,16 @@ namespace TeamPro1.Controllers
                 {
                     TempData["ErrorMessage"] = "Student not found. Please login again.";
                     return RedirectToAction("Login");
+                }
+
+                // Check if team formation is open for this student's department and year
+                var schedule = await _context.TeamFormationSchedules
+                    .FirstOrDefaultAsync(s => s.Department == currentStudent.Department && s.Year == currentStudent.Year);
+
+                if (schedule == null || !schedule.IsOpen)
+                {
+                    TempData["ErrorMessage"] = "Team member selection is currently closed for your year. Please wait for your admin to open it.";
+                    return RedirectToAction("MainDashboard");
                 }
 
                 // Get all students from same year and semester (excluding current student)
@@ -715,7 +740,7 @@ namespace TeamPro1.Controllers
                 {
                     filteredTeams = teams.Where(t => 
                         t.Student1 != null && 
-                        t.Student2 != null &&
+                        (t.IsIndividual || t.Student2 != null) &&
                         t.Student1.Year == currentStudent.Year && 
                         t.Student1.Semester == currentStudent.Semester
                     ).ToList();
@@ -863,9 +888,9 @@ namespace TeamPro1.Controllers
                     if (dbEx.Message.Contains("Invalid object name 'TeamMeetings'") || 
                         dbEx.InnerException?.Message.Contains("Invalid object name 'TeamMeetings'") == true)
                     {
-                        TempData["ErrorMessage"] = @"?? TeamMeetings table not found in database. 
+                        TempData["ErrorMessage"] = @"TeamMeetings table not found in database. 
                             Please run the SQL script: Scripts\AddTeamMeetingTable.sql to create the table first. 
-                            Instructions: Open SQL Server Management Studio ? Connect to your database ? Run the script.";
+                            Instructions: Open SQL Server Management Studio, connect to your database, and run the script.";
                         teamMeetings = new List<TeamMeeting>();
                     }
                     else
@@ -900,7 +925,7 @@ namespace TeamPro1.Controllers
             var studentIdString = HttpContext.Session.GetString("StudentId");
             if (string.IsNullOrEmpty(studentIdString))
             {
-                TempData["ErrorMessage"] = "?? Session expired. Please login again.";
+                TempData["ErrorMessage"] = "Session expired. Please login again.";
                 return RedirectToAction("Login");
             }
 
@@ -909,25 +934,25 @@ namespace TeamPro1.Controllers
                 // Detailed validation with specific error messages
                 if (TeamId <= 0)
                 {
-                    TempData["ErrorMessage"] = "? Invalid Team ID. Please try again.";
+                    TempData["ErrorMessage"] = "Invalid Team ID. Please try again.";
                     return RedirectToAction("StatusUpdate");
                 }
 
                 if (MeetingNumber <= 0)
                 {
-                    TempData["ErrorMessage"] = "? Meeting number must be greater than 0.";
+                    TempData["ErrorMessage"] = "Meeting number must be greater than 0.";
                     return RedirectToAction("StatusUpdate");
                 }
 
                 if (!MeetingDate.HasValue)
                 {
-                    TempData["ErrorMessage"] = "?? Meeting date is required. Please select a date.";
+                    TempData["ErrorMessage"] = "Meeting date is required. Please select a date.";
                     return RedirectToAction("StatusUpdate");
                 }
 
                 if (MeetingDate.Value > DateTime.Now.AddDays(1))
                 {
-                    TempData["WarningMessage"] = "?? Meeting date is in the future. Are you sure this is correct?";
+                    TempData["WarningMessage"] = "Meeting date is in the future. Are you sure this is correct?";
                     // Don't return - allow it but warn
                 }
 
@@ -938,14 +963,14 @@ namespace TeamPro1.Controllers
 
                 if (CompletionPercentage < 0 || CompletionPercentage > 100)
                 {
-                    TempData["ErrorMessage"] = "? Completion percentage must be between 0 and 100.";
+                    TempData["ErrorMessage"] = "Completion percentage must be between 0 and 100.";
                     return RedirectToAction("StatusUpdate");
                 }
 
                 // Verify student is part of this team
                 if (!int.TryParse(studentIdString, out int currentStudentId))
                 {
-                    TempData["ErrorMessage"] = "? Invalid session data. Please login again.";
+                    TempData["ErrorMessage"] = "Invalid session data. Please login again.";
                     return RedirectToAction("Login");
                 }
 
@@ -955,7 +980,7 @@ namespace TeamPro1.Controllers
 
                 if (team == null)
                 {
-                    TempData["ErrorMessage"] = "?? You are not authorized to add meetings for this team.";
+                    TempData["ErrorMessage"] = "You are not authorized to add meetings for this team.";
                     return RedirectToAction("StatusUpdate");
                 }
 
@@ -966,19 +991,19 @@ namespace TeamPro1.Controllers
 
                 if (projectProgress == null)
                 {
-                    TempData["ErrorMessage"] = "?? Cannot add meeting. Project progress record not found.";
+                    TempData["ErrorMessage"] = "Cannot add meeting. Project progress record not found.";
                     return RedirectToAction("StatusUpdate");
                 }
 
                 if (string.IsNullOrEmpty(projectProgress.ProblemStatement))
                 {
-                    TempData["ErrorMessage"] = "?? Cannot add meeting. Problem statement must be assigned by faculty first.";
+                    TempData["ErrorMessage"] = "Cannot add meeting. Problem statement must be assigned by faculty first.";
                     return RedirectToAction("StatusUpdate");
                 }
 
                 if (projectProgress.AssignedFacultyId == null)
                 {
-                    TempData["ErrorMessage"] = "?? Cannot add meeting. Mentor must be assigned by faculty first.";
+                    TempData["ErrorMessage"] = "Cannot add meeting. Mentor must be assigned by faculty first.";
                     return RedirectToAction("StatusUpdate");
                 }
 
@@ -988,18 +1013,45 @@ namespace TeamPro1.Controllers
 
                 if (existingMeeting != null)
                 {
-                    TempData["ErrorMessage"] = $"? Meeting #{MeetingNumber} already exists for your team. Please use a different meeting number.";
+                    TempData["ErrorMessage"] = $"Meeting #{MeetingNumber} already exists for your team. Please use a different meeting number.";
                     return RedirectToAction("StatusUpdate");
                 }
 
-                // Handle proof file upload
-                string? proofFilePath = null;
+                // Enforce auto-incremented meeting number
+                var existingMeetings = await _context.TeamMeetings
+                    .Where(tm => tm.TeamId == TeamId)
+                    .OrderBy(tm => tm.MeetingNumber)
+                    .ToListAsync();
+
+                var expectedMeetingNumber = existingMeetings.Count > 0
+                    ? existingMeetings.Max(m => m.MeetingNumber) + 1
+                    : 1;
+
+                if (MeetingNumber != expectedMeetingNumber)
+                {
+                    MeetingNumber = expectedMeetingNumber;
+                }
+
+                // Enforce that completion percentage cannot go backward
+                if (existingMeetings.Count > 0)
+                {
+                    var lastCompletion = existingMeetings.Last().CompletionPercentage;
+                    if (CompletionPercentage < lastCompletion)
+                    {
+                        TempData["ErrorMessage"] = $"Completion percentage cannot be less than {lastCompletion}% (previous meeting progress).";
+                        return RedirectToAction("StatusUpdate");
+                    }
+                }
+
+                // Handle proof file upload - store in database
+                byte[]? proofImageData = null;
+                string? proofContentType = null;
                 if (ProofFile != null && ProofFile.Length > 0)
                 {
                     // Validate file size (max 5MB)
                     if (ProofFile.Length > 5 * 1024 * 1024)
                     {
-                        TempData["ErrorMessage"] = "? Proof file size must be less than 5MB.";
+                        TempData["ErrorMessage"] = "Proof file size must be less than 5MB.";
                         return RedirectToAction("StatusUpdate");
                     }
 
@@ -1007,34 +1059,22 @@ namespace TeamPro1.Controllers
                     var extension = Path.GetExtension(ProofFile.FileName).ToLower();
                     if (extension != ".jpg" && extension != ".jpeg")
                     {
-                        TempData["ErrorMessage"] = "? Only JPG/JPEG files are allowed for proof upload. Please select a valid image file.";
+                        TempData["ErrorMessage"] = "Only JPG/JPEG files are allowed for proof upload. Please select a valid image file.";
                         return RedirectToAction("StatusUpdate");
                     }
 
                     try
                     {
-                        // Create uploads directory if it doesn't exist
-                        var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "proofs");
-                        if (!Directory.Exists(uploadsFolder))
+                        using (var memoryStream = new MemoryStream())
                         {
-                            Directory.CreateDirectory(uploadsFolder);
+                            await ProofFile.CopyToAsync(memoryStream);
+                            proofImageData = memoryStream.ToArray();
                         }
-
-                        // Generate unique filename
-                        var uniqueFileName = $"proof_{TeamId}_meeting{MeetingNumber}_{DateTime.Now:yyyyMMddHHmmss}{extension}";
-                        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                        // Save file
-                        using (var fileStream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await ProofFile.CopyToAsync(fileStream);
-                        }
-
-                        proofFilePath = $"/uploads/proofs/{uniqueFileName}";
+                        proofContentType = ProofFile.ContentType;
                     }
                     catch (Exception fileEx)
                     {
-                        TempData["ErrorMessage"] = $"? Failed to upload proof file: {fileEx.Message}";
+                        TempData["ErrorMessage"] = $"Failed to process proof file: {fileEx.Message}";
                         return RedirectToAction("StatusUpdate");
                     }
                 }
@@ -1047,7 +1087,8 @@ namespace TeamPro1.Controllers
                     MeetingDate = MeetingDate.Value,
                     Notes = Notes,
                     CompletionPercentage = CompletionPercentage.Value,
-                    ProofUploads = proofFilePath,
+                    ProofImageData = proofImageData,
+                    ProofContentType = proofContentType,
                     Status = "Completed",
                     CreatedAt = DateTime.Now
                 };
@@ -1055,17 +1096,29 @@ namespace TeamPro1.Controllers
                 _context.TeamMeetings.Add(meeting);
                 await _context.SaveChangesAsync();
 
-                TempData["SuccessMessage"] = $"? Meeting #{MeetingNumber} added successfully! Completion: {CompletionPercentage}%";
+                // Log activity
+                _context.TeamActivityLogs.Add(new TeamActivityLog
+                {
+                    TeamId = TeamId,
+                    Action = $"Added Meeting #{MeetingNumber}",
+                    Details = $"Date: {MeetingDate.Value:MMM dd, yyyy}, Completion: {CompletionPercentage}%{(ProofFile != null ? ", Proof uploaded" : "")}",
+                    PerformedByRole = "Student",
+                    PerformedByName = HttpContext.Session.GetString("StudentName") ?? "Unknown",
+                    Timestamp = DateTime.Now
+                });
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = $"Meeting #{MeetingNumber} added successfully! Completion: {CompletionPercentage}%";
                 return RedirectToAction("StatusUpdate");
             }
             catch (DbUpdateException dbEx)
             {
-                TempData["ErrorMessage"] = $"? Database error while adding meeting: {dbEx.InnerException?.Message ?? dbEx.Message}";
+                TempData["ErrorMessage"] = $"Database error while adding meeting: {dbEx.InnerException?.Message ?? dbEx.Message}";
                 return RedirectToAction("StatusUpdate");
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"? An unexpected error occurred: {ex.Message}. Please try again or contact support.";
+                TempData["ErrorMessage"] = $"An unexpected error occurred: {ex.Message}. Please try again or contact support.";
                 return RedirectToAction("StatusUpdate");
             }
         }
@@ -1078,7 +1131,7 @@ namespace TeamPro1.Controllers
             var studentIdString = HttpContext.Session.GetString("StudentId");
             if (string.IsNullOrEmpty(studentIdString))
             {
-                TempData["ErrorMessage"] = "?? Session expired. Please login again.";
+                TempData["ErrorMessage"] = "Session expired. Please login again.";
                 return RedirectToAction("Login");
             }
 
@@ -1087,32 +1140,32 @@ namespace TeamPro1.Controllers
                 // Detailed validation
                 if (MeetingId <= 0)
                 {
-                    TempData["ErrorMessage"] = "? Invalid Meeting ID.";
+                    TempData["ErrorMessage"] = "Invalid Meeting ID.";
                     return RedirectToAction("StatusUpdate");
                 }
 
                 if (!MeetingDate.HasValue)
                 {
-                    TempData["ErrorMessage"] = "?? Meeting date is required.";
+                    TempData["ErrorMessage"] = "Meeting date is required.";
                     return RedirectToAction("StatusUpdate");
                 }
 
                 if (!CompletionPercentage.HasValue)
                 {
-                    TempData["ErrorMessage"] = "? Completion percentage is required.";
+                    TempData["ErrorMessage"] = "Completion percentage is required.";
                     return RedirectToAction("StatusUpdate");
                 }
 
                 if (CompletionPercentage < 0 || CompletionPercentage > 100)
                 {
-                    TempData["ErrorMessage"] = "? Completion percentage must be between 0 and 100.";
+                    TempData["ErrorMessage"] = "Completion percentage must be between 0 and 100.";
                     return RedirectToAction("StatusUpdate");
                 }
 
                 // Verify student is part of this team
                 if (!int.TryParse(studentIdString, out int currentStudentId))
                 {
-                    TempData["ErrorMessage"] = "? Invalid session data. Please login again.";
+                    TempData["ErrorMessage"] = "Invalid session data. Please login again.";
                     return RedirectToAction("Login");
                 }
 
@@ -1122,7 +1175,7 @@ namespace TeamPro1.Controllers
 
                 if (team == null)
                 {
-                    TempData["ErrorMessage"] = "?? You are not authorized to update meetings for this team.";
+                    TempData["ErrorMessage"] = "You are not authorized to update meetings for this team.";
                     return RedirectToAction("StatusUpdate");
                 }
 
@@ -1132,15 +1185,21 @@ namespace TeamPro1.Controllers
 
                 if (meeting == null)
                 {
-                    TempData["ErrorMessage"] = "? Meeting not found.";
+                    TempData["ErrorMessage"] = "Meeting not found.";
                     return RedirectToAction("StatusUpdate");
                 }
 
-                // Only allow editing of meeting 1 and only if problem statement and mentor are assigned
-                if (meeting.MeetingNumber != 1)
+                // Check if this is the latest meeting
+                var latestMeetingNumber = await _context.TeamMeetings
+                    .Where(tm => tm.TeamId == TeamId)
+                    .MaxAsync(tm => tm.MeetingNumber);
+
+                var isLatestMeeting = meeting.MeetingNumber == latestMeetingNumber;
+
+                // If not the latest meeting, ignore any completion percentage change
+                if (!isLatestMeeting)
                 {
-                    TempData["ErrorMessage"] = "?? Only the first meeting can be edited.";
-                    return RedirectToAction("StatusUpdate");
+                    CompletionPercentage = meeting.CompletionPercentage;
                 }
 
                 // Verify problem statement and mentor are assigned
@@ -1150,18 +1209,19 @@ namespace TeamPro1.Controllers
 
                 if (projectProgress == null || string.IsNullOrEmpty(projectProgress.ProblemStatement) || projectProgress.AssignedFacultyId == null)
                 {
-                    TempData["ErrorMessage"] = "?? Cannot edit meeting until problem statement and mentor are assigned by faculty.";
+                    TempData["ErrorMessage"] = "Cannot edit meeting until problem statement and mentor are assigned by faculty.";
                     return RedirectToAction("StatusUpdate");
                 }
 
-                // Handle proof file upload
-                string? proofFilePath = meeting.ProofUploads; // Keep existing proof by default
+                // Handle proof file upload - store in database
+                byte[]? proofImageData = meeting.ProofImageData; // Keep existing proof by default
+                string? proofContentType = meeting.ProofContentType;
                 if (ProofFile != null && ProofFile.Length > 0)
                 {
                     // Validate file size
                     if (ProofFile.Length > 5 * 1024 * 1024)
                     {
-                        TempData["ErrorMessage"] = "? Proof file size must be less than 5MB.";
+                        TempData["ErrorMessage"] = "Proof file size must be less than 5MB.";
                         return RedirectToAction("StatusUpdate");
                     }
 
@@ -1169,51 +1229,22 @@ namespace TeamPro1.Controllers
                     var extension = Path.GetExtension(ProofFile.FileName).ToLower();
                     if (extension != ".jpg" && extension != ".jpeg")
                     {
-                        TempData["ErrorMessage"] = "? Only JPG/JPEG files are allowed for proof upload.";
+                        TempData["ErrorMessage"] = "Only JPG/JPEG files are allowed for proof upload.";
                         return RedirectToAction("StatusUpdate");
                     }
 
                     try
                     {
-                        // Create uploads directory if it doesn't exist
-                        var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "proofs");
-                        if (!Directory.Exists(uploadsFolder))
+                        using (var memoryStream = new MemoryStream())
                         {
-                            Directory.CreateDirectory(uploadsFolder);
+                            await ProofFile.CopyToAsync(memoryStream);
+                            proofImageData = memoryStream.ToArray();
                         }
-
-                        // Delete old proof file if it exists
-                        if (!string.IsNullOrEmpty(meeting.ProofUploads))
-                        {
-                            var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", meeting.ProofUploads.TrimStart('/'));
-                            if (System.IO.File.Exists(oldFilePath))
-                            {
-                                try
-                                {
-                                    System.IO.File.Delete(oldFilePath);
-                                }
-                                catch
-                                {
-                                    // Ignore if file can't be deleted
-                                }
-                            }
-                        }
-
-                        // Generate unique filename
-                        var uniqueFileName = $"proof_{TeamId}_meeting{MeetingNumber}_{DateTime.Now:yyyyMMddHHmmss}{extension}";
-                        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                        // Save file
-                        using (var fileStream = new FileStream(filePath, FileMode.Create))
-                        {
-                            await ProofFile.CopyToAsync(fileStream);
-                        }
-
-                        proofFilePath = $"/uploads/proofs/{uniqueFileName}";
+                        proofContentType = ProofFile.ContentType;
                     }
                     catch (Exception fileEx)
                     {
-                        TempData["ErrorMessage"] = $"? Failed to upload proof file: {fileEx.Message}";
+                        TempData["ErrorMessage"] = $"Failed to process proof file: {fileEx.Message}";
                         return RedirectToAction("StatusUpdate");
                     }
                 }
@@ -1222,23 +1253,182 @@ namespace TeamPro1.Controllers
                 meeting.MeetingDate = MeetingDate.Value;
                 meeting.Notes = Notes;
                 meeting.CompletionPercentage = CompletionPercentage.Value;
-                meeting.ProofUploads = proofFilePath;
+                meeting.ProofImageData = proofImageData;
+                meeting.ProofContentType = proofContentType;
                 meeting.LastUpdated = DateTime.Now;
 
                 await _context.SaveChangesAsync();
 
-                TempData["SuccessMessage"] = $"? Meeting #{MeetingNumber} updated successfully! Completion: {CompletionPercentage}%";
+                // Log activity
+                _context.TeamActivityLogs.Add(new TeamActivityLog
+                {
+                    TeamId = TeamId,
+                    Action = $"Updated Meeting #{MeetingNumber}",
+                    Details = $"Date: {MeetingDate.Value:MMM dd, yyyy}, Completion: {CompletionPercentage}%{(ProofFile != null ? ", New proof uploaded" : "")}",
+                    PerformedByRole = "Student",
+                    PerformedByName = HttpContext.Session.GetString("StudentName") ?? "Unknown",
+                    Timestamp = DateTime.Now
+                });
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = $"Meeting #{MeetingNumber} updated successfully! Completion: {CompletionPercentage}%";
                 return RedirectToAction("StatusUpdate");
             }
             catch (DbUpdateException dbEx)
             {
-                TempData["ErrorMessage"] = $"? Database error while updating meeting: {dbEx.InnerException?.Message ?? dbEx.Message}";
+                TempData["ErrorMessage"] = $"Database error while updating meeting: {dbEx.InnerException?.Message ?? dbEx.Message}";
                 return RedirectToAction("StatusUpdate");
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = $"? An unexpected error occurred: {ex.Message}. Please try again or contact support.";
+                TempData["ErrorMessage"] = $"An unexpected error occurred: {ex.Message}. Please try again or contact support.";
                 return RedirectToAction("StatusUpdate");
+            }
+        }
+
+        // GET: Student/GetProofImage/{id}
+        public async Task<IActionResult> GetProofImage(int id)
+        {
+            var meeting = await _context.TeamMeetings
+                .FirstOrDefaultAsync(tm => tm.Id == id);
+
+            if (meeting == null)
+            {
+                return NotFound();
+            }
+
+            // Serve from database if available
+            if (meeting.ProofImageData != null && meeting.ProofImageData.Length > 0)
+            {
+                return File(meeting.ProofImageData, meeting.ProofContentType ?? "image/jpeg");
+            }
+
+            // Fallback to legacy file path if ProofUploads has a value
+            if (!string.IsNullOrEmpty(meeting.ProofUploads))
+            {
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", meeting.ProofUploads.TrimStart('/'));
+                if (System.IO.File.Exists(filePath))
+                {
+                    var fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
+                    return File(fileBytes, "image/jpeg");
+                }
+            }
+
+            return NotFound();
+        }
+
+        // GET: Student/GetTeamLogs/{teamId}
+        public async Task<IActionResult> GetTeamLogs(int teamId)
+        {
+            var studentIdString = HttpContext.Session.GetString("StudentId");
+            if (string.IsNullOrEmpty(studentIdString))
+            {
+                return Json(new { success = false, message = "Please login first." });
+            }
+
+            if (!int.TryParse(studentIdString, out int currentStudentId))
+            {
+                return Json(new { success = false, message = "Invalid session." });
+            }
+
+            // Verify student is part of this team
+            var team = await _context.Teams
+                .FirstOrDefaultAsync(t => t.Id == teamId &&
+                    (t.Student1Id == currentStudentId || t.Student2Id == currentStudentId));
+
+            if (team == null)
+            {
+                return Json(new { success = false, message = "Unauthorized." });
+            }
+
+            var logs = await _context.TeamActivityLogs
+                .Where(l => l.TeamId == teamId)
+                .OrderByDescending(l => l.Timestamp)
+                .Select(l => new
+                {
+                    l.Action,
+                    l.Details,
+                    l.PerformedByRole,
+                    l.PerformedByName,
+                    Timestamp = l.Timestamp.ToString("MMM dd, yyyy hh:mm tt")
+                })
+                .ToListAsync();
+
+            return Json(new { success = true, logs });
+        }
+
+        // POST: Student/BeIndividual
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> BeIndividual()
+        {
+            var studentIdString = HttpContext.Session.GetString("StudentId");
+            if (string.IsNullOrEmpty(studentIdString))
+            {
+                return Json(new { success = false, message = "Please login first." });
+            }
+
+            try
+            {
+                if (!int.TryParse(studentIdString, out int currentStudentId))
+                {
+                    return Json(new { success = false, message = "Invalid session." });
+                }
+
+                // Check if student is already in a team
+                var alreadyInTeam = await _context.Teams
+                    .AnyAsync(t => t.Student1Id == currentStudentId || t.Student2Id == currentStudentId);
+
+                if (alreadyInTeam)
+                {
+                    return Json(new { success = false, message = "You are already in a team." });
+                }
+
+                // Cancel any pending sent requests
+                var pendingSentRequests = await _context.TeamRequests
+                    .Where(tr => tr.SenderId == currentStudentId && tr.Status == "Pending")
+                    .ToListAsync();
+
+                if (pendingSentRequests.Any())
+                {
+                    _context.TeamRequests.RemoveRange(pendingSentRequests);
+                }
+
+                // Reject any pending received requests
+                var pendingReceivedRequests = await _context.TeamRequests
+                    .Where(tr => tr.ReceiverId == currentStudentId && tr.Status == "Pending")
+                    .ToListAsync();
+
+                foreach (var req in pendingReceivedRequests)
+                {
+                    req.Status = "Rejected";
+                    req.UpdatedAt = DateTime.Now;
+                }
+
+                // Get the next team number
+                var maxTeamNumber = await _context.Teams.AnyAsync()
+                    ? await _context.Teams.MaxAsync(t => t.TeamNumber)
+                    : 0;
+                var newTeamNumber = maxTeamNumber + 1;
+
+                // Create an individual team
+                var team = new Team
+                {
+                    TeamNumber = newTeamNumber,
+                    Student1Id = currentStudentId,
+                    Student2Id = null,
+                    IsIndividual = true,
+                    CreatedAt = DateTime.Now
+                };
+
+                _context.Teams.Add(team);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, message = $"You are now registered as an individual team (Team {newTeamNumber})!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "An error occurred. Please try again." });
             }
         }
     }

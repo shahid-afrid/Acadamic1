@@ -1,0 +1,495 @@
+@model List<TeamPro1.Models.ProjectProgress>
+
+@{
+    ViewData["Title"] = "Assigned Teams";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Assigned Teams - TeamPro1</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        :root {
+            --royal-blue: #274060;
+            --warm-gold: #FFC857;
+            --cream: #F9FAF2;
+            --slate: #CED3DC;
+            --card-shadow: rgba(39,64,96,0.13);
+            --success-green: #28a745;
+            --error-red: #dc3545;
+            --faculty-purple: #6f42c1;
+            --info-blue: #17a2b8;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px 0;
+            font-family: 'Montserrat', Arial, sans-serif;
+            background: linear-gradient(rgba(249, 250, 242, 0.15), rgba(255, 200, 87, 0.10)),
+            url('@Url.Content("~/images/RGMCET-BACKGROUND.jpg")') center center/cover no-repeat fixed;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 0;
+            display: block;
+            background: linear-gradient(135deg, var(--cream) 60%, var(--warm-gold) 100%);
+            opacity: 0.20;
+            pointer-events: none;
+        }
+
+        .main-container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .nav-link {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(249,250,242,0.9);
+            color: var(--royal-blue);
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 2px solid var(--slate);
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .nav-link:hover {
+            background: var(--warm-gold);
+            color: var(--royal-blue);
+            transform: translateY(-2px);
+            text-decoration: none;
+        }
+
+        .page-header {
+            background: rgba(249,250,242,0.92);
+            box-shadow: 0 8px 32px var(--card-shadow);
+            border-radius: 20px;
+            padding: 30px 40px;
+            text-align: center;
+            backdrop-filter: blur(12px);
+            margin-bottom: 30px;
+            border: 2px solid var(--slate);
+            margin-top: 60px;
+        }
+
+        .page-header h2 {
+            font-size: 2em;
+            font-weight: 700;
+            color: var(--royal-blue);
+            margin: 0;
+        }
+
+        .page-header p {
+            color: #666;
+            margin: 10px 0 0 0;
+        }
+
+        .teams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 25px;
+        }
+
+        .team-card {
+            background: rgba(249,250,242,0.95);
+            border-radius: 20px;
+            padding: 25px;
+            border: 2px solid var(--slate);
+            box-shadow: 0 8px 32px var(--card-shadow);
+            transition: all 0.3s ease;
+        }
+
+        .team-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(39,64,96,0.2);
+            border-color: var(--faculty-purple);
+        }
+
+        .team-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--slate);
+        }
+
+        .team-number {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--royal-blue);
+        }
+
+        .team-status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .status-not-started {
+            background: rgba(108, 117, 125, 0.15);
+            color: #6c757d;
+        }
+
+        .status-in-progress {
+            background: rgba(23, 162, 184, 0.15);
+            color: var(--info-blue);
+        }
+
+        .status-completed {
+            background: rgba(40, 167, 69, 0.15);
+            color: var(--success-green);
+        }
+
+        .student-info {
+            margin-bottom: 15px;
+        }
+
+        .student-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+
+        .student-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--faculty-purple), var(--info-blue));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .student-details {
+            flex-grow: 1;
+        }
+
+        .student-name {
+            font-weight: 600;
+            color: var(--royal-blue);
+        }
+
+        .student-regd {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .problem-statement {
+            margin: 15px 0;
+            padding: 12px;
+            background: rgba(111, 66, 193, 0.1);
+            border-radius: 10px;
+            border-left: 4px solid var(--faculty-purple);
+        }
+
+        .problem-label {
+            font-size: 0.8em;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+
+        .problem-text {
+            color: var(--royal-blue);
+            font-weight: 500;
+        }
+
+        .progress-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--slate);
+        }
+
+        .progress-bar-container {
+            background: var(--slate);
+            border-radius: 10px;
+            height: 12px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--faculty-purple), var(--success-green));
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .view-btn {
+            display: block;
+            width: 100%;
+            margin-top: 15px;
+            background: linear-gradient(90deg, var(--faculty-purple) 74%, var(--warm-gold) 100%);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .view-btn:hover {
+            background: linear-gradient(90deg, var(--warm-gold) 0%, var(--faculty-purple) 100%);
+            color: white;
+            text-decoration: none;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: rgba(249,250,242,0.95);
+            border-radius: 20px;
+            border: 2px solid var(--slate);
+        }
+
+        .empty-state i {
+            font-size: 4em;
+            color: var(--slate);
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            color: var(--royal-blue);
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            color: #666;
+        }
+
+        .app-footer {
+            background: rgba(249, 250, 242, 0.95);
+            backdrop-filter: blur(12px);
+            border-top: 3px solid var(--slate, #CED3DC);
+            box-shadow: 0 -8px 32px rgba(39,64,96,0.13);
+            padding: 30px 20px;
+            margin-top: 50px;
+            text-align: center;
+            font-family: 'Montserrat', Arial, sans-serif;
+            color: #274060;
+            position: relative;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-line {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+
+        .footer-line.guidance { 
+            font-size: 1em; 
+            font-weight: 600; 
+            color: #444;
+            margin-bottom: 12px;
+        }
+
+        .footer-line.team {
+            font-size: 0.95em;
+            font-weight: 500;
+            color: #444;
+        }
+
+        .footer-line.copyright {
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #274060;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid rgba(39,64,96,0.1);
+        }
+
+        .footer-highlight { 
+            color: #274060;
+            font-weight: 700;
+        }
+
+        .footer-name { 
+            color: #274060;
+            font-weight: 600;
+        }
+
+        @@media (max-width: 768px) {
+            .teams-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-link {
+                position: static;
+                display: inline-block;
+                margin: 10px auto;
+            }
+
+            .page-header {
+                margin-top: 20px;
+            }
+
+            .app-footer {
+                padding: 20px 15px;
+                margin-top: 30px;
+            }
+
+            .footer-line.guidance {
+                font-size: 0.9em;
+            }
+
+            .footer-line.team {
+                font-size: 0.85em;
+            }
+
+            .footer-line.copyright {
+                font-size: 0.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="@Url.Action("MainDashboard", "Faculty")" class="nav-link"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+
+    <div class="main-container">
+        <div class="page-header">
+            <h2><i class="fas fa-tasks"></i> Teams Assigned to You</h2>
+            <p>Manage and monitor teams assigned to you as mentor</p>
+        </div>
+
+        @if (Model.Count == 0)
+        {
+            <div class="empty-state">
+                <i class="fas fa-clipboard-list"></i>
+                <h3>No Teams Assigned</h3>
+                <p>You don't have any teams assigned to you as mentor yet.</p>
+                <a href="@Url.Action("AllTeams", "Faculty")" class="view-btn" style="max-width: 300px; margin: 20px auto 0;">
+                    <i class="fas fa-users"></i> View All Teams
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="teams-grid">
+                @foreach (var progress in Model)
+                {
+                    var team = progress.Team;
+                    var statusClass = progress.Status switch
+                    {
+                        "Completed" => "status-completed",
+                        "Not Started" => "status-not-started",
+                        _ => "status-in-progress"
+                    };
+
+                    <div class="team-card">
+                        <div class="team-header">
+                            <span class="team-number">Team #@team?.TeamNumber</span>
+                            <span class="team-status @statusClass">@progress.Status</span>
+                        </div>
+
+                        <div class="student-info">
+                            @if (team?.Student1 != null)
+                            {
+                                <div class="student-row">
+                                    <div class="student-icon"><i class="fas fa-user"></i></div>
+                                    <div class="student-details">
+                                        <div class="student-name">@team.Student1.FullName</div>
+                                        <div class="student-regd">@team.Student1.RegdNumber</div>
+                                    </div>
+                                </div>
+                            }
+
+                            @if (team?.Student2 != null)
+                            {
+                                <div class="student-row">
+                                    <div class="student-icon"><i class="fas fa-user"></i></div>
+                                    <div class="student-details">
+                                        <div class="student-name">@team.Student2.FullName</div>
+                                        <div class="student-regd">@team.Student2.RegdNumber</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(progress.ProblemStatement))
+                        {
+                            <div class="problem-statement">
+                                <div class="problem-label">Problem Statement</div>
+                                <div class="problem-text">@progress.ProblemStatement</div>
+                            </div>
+                        }
+
+                        <div class="progress-section">
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" style="width: @progress.CompletionPercentage%"></div>
+                            </div>
+                            <div class="progress-info">
+                                <span>Progress</span>
+                                <span>@progress.CompletionPercentage%</span>
+                            </div>
+                        </div>
+
+                        <a href="@Url.Action("TeamDetails", "Faculty", new { id = team?.Id })" class="view-btn">
+                            <i class="fas fa-eye"></i> View Details & Manage
+                        </a>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <footer class="app-footer">
+        <div class="footer-content">
+            <div class="footer-line guidance">
+                Developed under the guidance of <span class="footer-highlight">Dr. P. Penchala Prasad</span>, Associate Professor, CSE(DS), RGMCET
+            </div>
+            <div class="footer-line team">
+                With team <span class="footer-name">Mr. S. Md. Shahid Afrid</span> (23091A32D4) & <span class="footer-name">Ms. G. Veena</span> (23091A32H9)
+            </div>
+            <div class="footer-line copyright">
+                &copy; All Rights Reserved @@2025
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

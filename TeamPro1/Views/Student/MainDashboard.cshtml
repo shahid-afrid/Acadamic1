@@ -461,16 +461,16 @@
             </p>
         </div>
 
-        @* Faculty Selection Schedule Status *@
-        @if (ViewBag.IsSelectionAvailable != null)
+        @* Team Formation Schedule Status *@
+        @if (ViewBag.IsTeamFormationOpen != null)
         {
-            @if ((bool)ViewBag.IsSelectionAvailable)
+            @if ((bool)ViewBag.IsTeamFormationOpen)
             {
                 <div class="schedule-status-alert available">
                     <i class="fas fa-check-circle status-icon"></i>
                     <div class="status-content">
-                        <div class="status-title">Faculty Selection Available</div>
-                        <p class="status-description">@ViewBag.ScheduleStatus</p>
+                        <div class="status-title">Team Formation Available</div>
+                        <p class="status-description">@ViewBag.TeamFormationStatus</p>
                     </div>
                 </div>
             }
@@ -479,8 +479,8 @@
                 <div class="schedule-status-alert unavailable">
                     <i class="fas fa-times-circle status-icon"></i>
                     <div class="status-content">
-                        <div class="status-title"> Faculty Selection Closed</div>
-                        <p class="status-description">@ViewBag.ScheduleMessage</p>
+                        <div class="status-title">Team Formation Closed</div>
+                        <p class="status-description">@ViewBag.TeamFormationStatus</p>
                     </div>
                 </div>
             }
@@ -496,13 +496,35 @@
                 <a asp-controller="Student" asp-action="Dashboard" class="glass-btn">View Profile</a>
             </div>
 
-            <div class="dashboard-card">
+            @{
+                var isTeamOpen = ViewBag.IsTeamFormationOpen != null && (bool)ViewBag.IsTeamFormationOpen;
+            }
+
+            <div class="dashboard-card @(!isTeamOpen ? "disabled" : "")">
                 <div class="card-icon">
                     <i class="fas fa-users" style="color: #17a2b8;"></i>
                 </div>
                 <h5 class="card-title">Pool of Students</h5>
-                <p class="card-text">View available students and send team requests.</p>
-                <a asp-controller="Student" asp-action="PoolOfStudents" class="glass-btn">View Pool</a>
+                <p class="card-text">
+                    @if (isTeamOpen)
+                    {
+                        <text>View available students and send team requests.</text>
+                    }
+                    else
+                    {
+                        <text>Team formation is currently closed by admin.</text>
+                    }
+                </p>
+                @if (isTeamOpen)
+                {
+                    <a asp-controller="Student" asp-action="PoolOfStudents" class="glass-btn">View Pool</a>
+                }
+                else
+                {
+                    <span class="glass-btn" style="background: #ccc; cursor: not-allowed;">
+                        <i class="fas fa-lock"></i> Closed
+                    </span>
+                }
             </div>
 
             <div class="dashboard-card">

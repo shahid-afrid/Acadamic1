@@ -411,6 +411,19 @@
             gap: 5px;
         }
 
+        .individual-badge {
+            background: linear-gradient(135deg, rgba(111, 66, 193, 0.15), rgba(111, 66, 193, 0.25));
+            color: #6f42c1;
+            border: 2px solid #6f42c1;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
         @@media (max-width: 768px) {
             .dashboard-header h2 {
                 font-size: 1.8em;
@@ -484,6 +497,7 @@
             <h4><i class="fas fa-info-circle"></i> About Grouped Student Pool</h4>
             <ul>
                 <li><strong>Team Formation:</strong> Teams are formed when students accept team requests</li>
+                <li><strong>Individual Teams:</strong> Students who chose to work alone are shown as individual teams</li>
                 <li><strong>Team Numbers:</strong> Assigned automatically based on the order of team formation</li>
                 <li><strong>Team Name:</strong> Generated from both students' registration numbers</li>
                 <li><strong>Your Team:</strong> If you're in a team, it will be highlighted in green</li>
@@ -524,12 +538,12 @@
                     <tbody>
                         @foreach (var team in ViewBag.Teams)
                         {
-                            var isMyTeam = team.Student1Id == ViewBag.CurrentStudentId || team.Student2Id == ViewBag.CurrentStudentId;
+                            var isMyTeam = team.Student1Id == ViewBag.CurrentStudentId || (team.Student2Id != null && team.Student2Id == ViewBag.CurrentStudentId);
                             var student1Name = team.Student1?.FullName ?? "Unknown";
                             var student1RegNo = team.Student1?.RegdNumber ?? "N/A";
-                            var student2Name = team.Student2?.FullName ?? "Unknown";
-                            var student2RegNo = team.Student2?.RegdNumber ?? "N/A";
-                            var teamName = $"{student1RegNo}-{student2RegNo}";
+                            var isIndividual = team.IsIndividual || team.Student2 == null;
+                            var student2Name = isIndividual ? "" : (team.Student2?.FullName ?? "Unknown");
+                            var student2RegNo = isIndividual ? "" : (team.Student2?.RegdNumber ?? "N/A");
                             
                             <tr class="@(isMyTeam ? "my-team" : "")">
                                 <td class="text-center">
@@ -550,10 +564,19 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <div class="student-info">
-                                        <span class="student-name">@student2Name</span>
-                                        <span class="student-regno">Regd: @student2RegNo</span>
-                                    </div>
+                                    @if (isIndividual)
+                                    {
+                                        <div class="individual-badge">
+                                            <i class="fas fa-user"></i> Individual
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="student-info">
+                                            <span class="student-name">@student2Name</span>
+                                            <span class="student-regno">Regd: @student2RegNo</span>
+                                        </div>
+                                    }
                                 </td>
                             </tr>
                         }

@@ -13,8 +13,9 @@ namespace TeamPro1.Models
         [Required]
         public int Student1Id { get; set; }
 
-        [Required]
-        public int Student2Id { get; set; }
+        public int? Student2Id { get; set; }
+
+        public bool IsIndividual { get; set; } = false;
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 

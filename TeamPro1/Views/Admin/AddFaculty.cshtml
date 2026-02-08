@@ -1,0 +1,118 @@
+@model TeamPro1.Models.Faculty
+
+@{
+    ViewData["Title"] = "Add Faculty";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Add Faculty - Admin - TeamPro1</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        :root {
+            --royal-blue: #274060; --warm-gold: #FFC857; --cream: #F9FAF2;
+            --slate: #CED3DC; --card-shadow: rgba(39,64,96,0.13);
+            --success-green: #28a745; --error-red: #dc3545; --admin-orange: #fd7e14;
+        }
+        body {
+            min-height: 100vh; margin: 0; padding: 20px 0;
+            font-family: 'Montserrat', Arial, sans-serif;
+            background: linear-gradient(rgba(249, 250, 242, 0.15), rgba(255, 200, 87, 0.10)),
+            url('@Url.Content("~/images/RGMCET-BACKGROUND.jpg")') center center/cover no-repeat fixed;
+            position: relative;
+        }
+        body::before { content: ""; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 0; background: linear-gradient(135deg, var(--cream) 60%, var(--warm-gold) 100%); opacity: 0.20; pointer-events: none; }
+
+        .main-container { position: relative; z-index: 1; max-width: 700px; margin: 0 auto; padding: 0 20px; }
+
+        .nav-link { position: fixed; top: 20px; left: 20px; background: rgba(249,250,242,0.9); color: var(--royal-blue); padding: 10px 20px; border-radius: 25px; text-decoration: none; font-weight: 600; border: 2px solid var(--slate); backdrop-filter: blur(8px); transition: all 0.3s ease; z-index: 100; }
+        .nav-link:hover { background: var(--warm-gold); transform: translateY(-2px); text-decoration: none; }
+
+        .page-header { background: rgba(249,250,242,0.92); box-shadow: 0 8px 32px var(--card-shadow); border-radius: 20px; padding: 30px 40px; text-align: center; backdrop-filter: blur(12px); margin-bottom: 30px; border: 2px solid var(--slate); margin-top: 60px; }
+        .page-header h2 { font-size: 2em; font-weight: 700; color: var(--royal-blue); margin: 0; }
+
+        .form-section { background: rgba(249,250,242,0.95); border-radius: 20px; padding: 30px; border: 2px solid var(--slate); box-shadow: 0 8px 32px var(--card-shadow); }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-weight: 600; color: var(--royal-blue); margin-bottom: 8px; font-size: 0.95em; }
+        .form-control { width: 100%; padding: 12px 16px; border: 2px solid var(--slate); border-radius: 12px; font-size: 1em; font-family: 'Montserrat', sans-serif; background: rgba(249,250,242,0.8); transition: border-color 0.3s, box-shadow 0.3s; box-sizing: border-box; }
+        .form-control:focus { outline: none; border-color: var(--admin-orange); box-shadow: 0 0 0 3px rgba(253,126,20,0.2); }
+
+        .validation-summary { background: rgba(220,53,69,0.1); border: 1px solid var(--error-red); border-radius: 8px; padding: 12px; margin-bottom: 20px; color: var(--error-red); }
+        .field-validation-error { color: var(--error-red); font-size: 0.85em; margin-top: 5px; display: block; }
+
+        .glass-btn { width: 100%; background: linear-gradient(90deg, var(--admin-orange) 74%, var(--warm-gold) 100%); color: #fff; border: none; border-radius: 15px; padding: 16px 24px; font-size: 1.1em; font-weight: 600; cursor: pointer; box-shadow: 0 8px 24px var(--card-shadow); border: 2px solid var(--slate); transition: all 0.3s ease; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .glass-btn:hover { box-shadow: 0 16px 32px rgba(253,126,20,0.4); background: linear-gradient(90deg, var(--warm-gold) 62%, var(--admin-orange) 100%); color: var(--royal-blue); transform: translateY(-3px); border: 2px solid var(--admin-orange); }
+
+        .app-footer { background: rgba(249,250,242,0.95); backdrop-filter: blur(12px); border-top: 3px solid var(--slate); box-shadow: 0 -8px 32px rgba(39,64,96,0.13); padding: 30px 20px; margin-top: 50px; text-align: center; color: #274060; border-radius: 20px 20px 0 0; }
+        .footer-content { max-width: 1200px; margin: 0 auto; }
+        .footer-line { margin: 8px 0; line-height: 1.6; }
+        .footer-line.guidance { font-size: 1em; font-weight: 600; color: #444; margin-bottom: 12px; }
+        .footer-line.team { font-size: 0.95em; font-weight: 500; color: #444; }
+        .footer-line.copyright { font-size: 0.9em; font-weight: 600; color: #274060; margin-top: 15px; padding-top: 15px; border-top: 2px solid rgba(39,64,96,0.1); }
+        .footer-highlight { color: #274060; font-weight: 700; }
+        .footer-name { color: #274060; font-weight: 600; }
+
+        @@media (max-width: 768px) { .nav-link { position: static; display: inline-block; margin: 10px auto; } .page-header { margin-top: 20px; } }
+    </style>
+</head>
+<body>
+    <a href="@Url.Action("ManageFaculty", "Admin")" class="nav-link"><i class="fas fa-arrow-left"></i> Back to Faculty</a>
+
+    <div class="main-container">
+        <div class="page-header">
+            <h2><i class="fas fa-user-plus"></i> Add New Faculty</h2>
+        </div>
+
+        <div class="form-section">
+            <form asp-action="AddFaculty" asp-controller="Admin" method="post">
+                @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ErrorCount > 0)
+                {
+                    <div asp-validation-summary="All" class="validation-summary"></div>
+                }
+
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Full Name</label>
+                    <input asp-for="FullName" class="form-control" placeholder="Enter faculty full name" required />
+                    <span asp-validation-for="FullName" class="field-validation-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-envelope"></i> Email</label>
+                    <input asp-for="Email" type="email" class="form-control" placeholder="Enter email address" required />
+                    <span asp-validation-for="Email" class="field-validation-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> Password</label>
+                    <input asp-for="Password" type="password" class="form-control" placeholder="Enter password" required />
+                    <span asp-validation-for="Password" class="field-validation-error"></span>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-building"></i> Department</label>
+                    <input type="text" class="form-control" value="@ViewBag.AdminDepartment" readonly
+                           style="background: rgba(253,126,20,0.1); font-weight: 600; color: var(--royal-blue);" />
+                    <input type="hidden" asp-for="Department" value="@ViewBag.AdminDepartment" />
+                </div>
+
+                <button type="submit" class="glass-btn">
+                    <i class="fas fa-plus-circle"></i> Add Faculty
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <footer class="app-footer">
+        <div class="footer-content">
+            <div class="footer-line guidance">Developed under the guidance of <span class="footer-highlight">Dr. P. Penchala Prasad</span>, Associate Professor, CSE(DS), RGMCET</div>
+            <div class="footer-line team">With team <span class="footer-name">Mr. S. Md. Shahid Afrid</span> (23091A32D4) & <span class="footer-name">Ms. G. Veena</span> (23091A32H9)</div>
+            <div class="footer-line copyright">&copy; All Rights Reserved @@2025</div>
+        </div>
+    </footer>
+</body>
+</html>

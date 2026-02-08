@@ -1,0 +1,326 @@
+@model TeamPro1.Models.Faculty
+
+@{
+    ViewData["Title"] = "Faculty Dashboard";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Faculty Dashboard - TeamPro1</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        :root {
+            --royal-blue: #274060;
+            --warm-gold: #FFC857;
+            --cream: #F9FAF2;
+            --slate: #CED3DC;
+            --card-shadow: rgba(39,64,96,0.13);
+            --success-green: #28a745;
+            --error-red: #dc3545;
+            --faculty-purple: #6f42c1;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px 0;
+            font-family: 'Montserrat', Arial, sans-serif;
+            background: linear-gradient(rgba(249, 250, 242, 0.15), rgba(255, 200, 87, 0.10)),
+            url('@Url.Content("~/images/RGMCET-BACKGROUND.jpg")') center center/cover no-repeat fixed;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 0;
+            display: block;
+            background: linear-gradient(135deg, var(--cream) 60%, var(--warm-gold) 100%);
+            opacity: 0.20;
+            pointer-events: none;
+        }
+
+        .main-container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .dashboard-header {
+            background: rgba(249,250,242,0.92);
+            box-shadow: 0 8px 32px var(--card-shadow);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            backdrop-filter: blur(12px);
+            margin-bottom: 40px;
+            border: 2px solid var(--slate);
+        }
+
+        .dashboard-header h2 {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: var(--royal-blue);
+            margin: 0;
+            letter-spacing: 1.2px;
+        }
+
+        .welcome-text {
+            font-size: 1.2em;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            padding: 20px 0;
+        }
+
+        .dashboard-card {
+            background: rgba(249,250,242,0.95);
+            border-radius: 20px;
+            padding: 35px 25px;
+            text-align: center;
+            backdrop-filter: blur(12px);
+            border: 2px solid var(--slate);
+            box-shadow: 0 8px 32px var(--card-shadow);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-decoration: none;
+            display: block;
+            color: inherit;
+        }
+
+        .dashboard-card:hover {
+            transform: scale(0.95) translateY(-8px);
+            box-shadow: 0 20px 60px rgba(39,64,96,0.25);
+            border-color: var(--warm-gold);
+            text-decoration: none;
+        }
+
+        .dashboard-card:hover .card-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .dashboard-card:hover .glass-btn {
+            background: linear-gradient(90deg, var(--warm-gold) 0%, var(--royal-blue) 100%);
+            color: white;
+        }
+
+        .card-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            color: var(--faculty-purple);
+        }
+
+        .card-title {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: var(--royal-blue);
+            margin-bottom: 10px;
+        }
+
+        .card-detail {
+            font-size: 1.1em;
+            color: var(--faculty-purple);
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .card-text {
+            font-size: 0.95em;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .glass-btn {
+            display: inline-block;
+            background: linear-gradient(90deg, var(--faculty-purple) 74%, var(--warm-gold) 100%);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .nav-link {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(249,250,242,0.9);
+            color: var(--royal-blue);
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 2px solid var(--slate);
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .nav-link:hover {
+            background: var(--warm-gold);
+            color: var(--royal-blue);
+            transform: translateY(-2px);
+            text-decoration: none;
+        }
+
+        .app-footer {
+            background: rgba(249, 250, 242, 0.95);
+            backdrop-filter: blur(12px);
+            border-top: 3px solid var(--slate, #CED3DC);
+            box-shadow: 0 -8px 32px rgba(39,64,96,0.13);
+            padding: 30px 20px;
+            margin-top: 50px;
+            text-align: center;
+            font-family: 'Montserrat', Arial, sans-serif;
+            color: #274060;
+            position: relative;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-line {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+
+        .footer-line.guidance { 
+            font-size: 1em; 
+            font-weight: 600; 
+            color: #444;
+            margin-bottom: 12px;
+        }
+
+        .footer-line.team {
+            font-size: 0.95em;
+            font-weight: 500;
+            color: #444;
+        }
+
+        .footer-line.copyright {
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #274060;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid rgba(39,64,96,0.1);
+        }
+
+        .footer-highlight { 
+            color: #274060;
+            font-weight: 700;
+        }
+
+        .footer-name { 
+            color: #274060;
+            font-weight: 600;
+        }
+
+        @@media (max-width: 768px) {
+            .dashboard-header h2 {
+                font-size: 1.8em;
+            }
+
+            .cards-container {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-link {
+                position: static;
+                display: inline-block;
+                margin: 10px 5px;
+            }
+
+            .app-footer {
+                padding: 20px 15px;
+                margin-top: 30px;
+            }
+
+            .footer-line.guidance {
+                font-size: 0.9em;
+            }
+
+            .footer-line.team {
+                font-size: 0.85em;
+            }
+
+            .footer-line.copyright {
+                font-size: 0.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="@Url.Action("Index", "Home")" class="nav-link"><i class="fas fa-home"></i> Home</a>
+
+    <div class="main-container">
+        <div class="dashboard-header">
+            <h2>Welcome Dr. @Model.FullName!</h2>
+            <div class="welcome-text">Faculty Dashboard</div>
+        </div>
+
+        <div class="cards-container">
+            <a href="@Url.Action("Profile", "Faculty")" class="dashboard-card">
+                <div class="card-icon"><i class="fas fa-user-tie"></i></div>
+                <h5 class="card-title">Profile</h5>
+                <div class="card-detail">@Model.FullName</div>
+                <p class="card-text">@Model.Email</p>
+                <span class="glass-btn">View Profile</span>
+            </a>
+
+            <a href="@Url.Action("AllTeams", "Faculty")" class="dashboard-card">
+                <div class="card-icon"><i class="fas fa-users"></i></div>
+                <h5 class="card-title">All Teams</h5>
+                <p class="card-text">View all student teams and their project progress</p>
+                <span class="glass-btn">View Teams</span>
+            </a>
+
+            <a href="@Url.Action("AssignedTeams", "Faculty")" class="dashboard-card">
+                <div class="card-icon"><i class="fas fa-book-open"></i></div>
+                <h5 class="card-title">Assigned Teams</h5>
+                <p class="card-text">Manage and monitor teams assigned to you as mentor</p>
+                <span class="glass-btn">View Assigned</span>
+            </a>
+        </div>
+    </div>
+
+    <footer class="app-footer">
+        <div class="footer-content">
+            <div class="footer-line guidance">
+                Developed under the guidance of <span class="footer-highlight">Dr. P. Penchala Prasad</span>, Associate Professor, CSE(DS), RGMCET
+            </div>
+            <div class="footer-line team">
+                With team <span class="footer-name">Mr. S. Md. Shahid Afrid</span> (23091A32D4) & <span class="footer-name">Ms. G. Veena</span> (23091A32H9)
+            </div>
+            <div class="footer-line copyright">
+                &copy; All Rights Reserved @@2025
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
