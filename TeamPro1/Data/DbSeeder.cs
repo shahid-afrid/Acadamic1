@@ -26,7 +26,7 @@ namespace TeamPro1.Data
                     {
                         FullName = "Dr. Test Faculty",
                         Email = "faculty@test.com",
-                        Password = "test123", // Note: In production, use proper password hashing
+                        Password = BCrypt.Net.BCrypt.HashPassword("test123"), // Using BCrypt for password hashing
                         Department = "Computer Science",
                         CreatedAt = DateTime.Now
                     },
@@ -34,7 +34,7 @@ namespace TeamPro1.Data
                     {
                         FullName = "Dr. John Doe",
                         Email = "john.doe@rgmcet.edu",
-                        Password = "password123",
+                        Password = BCrypt.Net.BCrypt.HashPassword("password123"),
                         Department = "CSE(DS)",
                         CreatedAt = DateTime.Now
                     },
@@ -42,7 +42,7 @@ namespace TeamPro1.Data
                     {
                         FullName = "Dr. Jane Smith",
                         Email = "jane.smith@rgmcet.edu",
-                        Password = "password123",
+                        Password = BCrypt.Net.BCrypt.HashPassword("password123"),
                         Department = "CSE(AI&ML)",
                         CreatedAt = DateTime.Now
                     },
@@ -50,7 +50,7 @@ namespace TeamPro1.Data
                     {
                         FullName = "Prof. Robert Brown",
                         Email = "robert.brown@rgmcet.edu",
-                        Password = "password123",
+                        Password = BCrypt.Net.BCrypt.HashPassword("password123"),
                         Department = "Computer Science",
                         CreatedAt = DateTime.Now
                     },
@@ -58,7 +58,7 @@ namespace TeamPro1.Data
                     {
                         FullName = "Dr. P. Penchala Prasad",
                         Email = "prasad@rgmcet.edu",
-                        Password = "password123",
+                        Password = BCrypt.Net.BCrypt.HashPassword("password123"),
                         Department = "CSE(DS)",
                         CreatedAt = DateTime.Now
                     }
@@ -95,13 +95,13 @@ namespace TeamPro1.Data
 
             var admins = new List<Admin>
             {
-                new Admin { Name = "CSE(DS) Admin",    Email = "admin.cseds@rgmcet.edu",   Password = "admin123", Department = "CSE(DS)",          CreatedAt = DateTime.Now },
-                new Admin { Name = "CSE(AI&ML) Admin", Email = "admin.cseaiml@rgmcet.edu", Password = "admin123", Department = "CSE(AI&ML)",       CreatedAt = DateTime.Now },
-                new Admin { Name = "CSE Admin",        Email = "admin.cse@rgmcet.edu",     Password = "admin123", Department = "Computer Science", CreatedAt = DateTime.Now },
-                new Admin { Name = "ECE Admin",        Email = "admin.ece@rgmcet.edu",     Password = "admin123", Department = "ECE",              CreatedAt = DateTime.Now },
-                new Admin { Name = "EEE Admin",        Email = "admin.eee@rgmcet.edu",     Password = "admin123", Department = "EEE",              CreatedAt = DateTime.Now },
-                new Admin { Name = "Mechanical Admin", Email = "admin.mech@rgmcet.edu",    Password = "admin123", Department = "Mechanical",       CreatedAt = DateTime.Now },
-                new Admin { Name = "Civil Admin",      Email = "admin.civil@rgmcet.edu",   Password = "admin123", Department = "Civil",            CreatedAt = DateTime.Now },
+                new Admin { Name = "CSE(DS) Admin",    Email = "admin.cseds@rgmcet.edu",   Password = BCrypt.Net.BCrypt.HashPassword("admin123"), Department = "CSE(DS)",          CreatedAt = DateTime.Now },
+                new Admin { Name = "CSE(AI&ML) Admin", Email = "admin.cseaiml@rgmcet.edu", Password = BCrypt.Net.BCrypt.HashPassword("admin123"), Department = "CSE(AI&ML)",       CreatedAt = DateTime.Now },
+                new Admin { Name = "CSE Admin",        Email = "admin.cse@rgmcet.edu",     Password = BCrypt.Net.BCrypt.HashPassword("admin123"), Department = "Computer Science", CreatedAt = DateTime.Now },
+                new Admin { Name = "ECE Admin",        Email = "admin.ece@rgmcet.edu",     Password = BCrypt.Net.BCrypt.HashPassword("admin123"), Department = "ECE",              CreatedAt = DateTime.Now },
+                new Admin { Name = "EEE Admin",        Email = "admin.eee@rgmcet.edu",     Password = BCrypt.Net.BCrypt.HashPassword("admin123"), Department = "EEE",              CreatedAt = DateTime.Now },
+                new Admin { Name = "Mechanical Admin", Email = "admin.mech@rgmcet.edu",    Password = BCrypt.Net.BCrypt.HashPassword("admin123"), Department = "Mechanical",       CreatedAt = DateTime.Now },
+                new Admin { Name = "Civil Admin",      Email = "admin.civil@rgmcet.edu",   Password = BCrypt.Net.BCrypt.HashPassword("admin123"), Department = "Civil",            CreatedAt = DateTime.Now },
             };
 
             await context.Admins.AddRangeAsync(admins);

@@ -24,6 +24,8 @@
   <ItemGroup>
     <Folder Include="Views\Admin\Admin\" />
     <Folder Include="Views\Faculty\Faculty\" />
+    <Folder Include="Views\PasswordMigration\" />
+    <Folder Include="Views\Seed\" />
   </ItemGroup>
 
 </Project>

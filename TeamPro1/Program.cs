@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.HttpOverrides;
 using TeamPro1.Models;
-using TeamPro1.Hubs;  // ? SignalR Hub
+using TeamPro1.Hubs;  // SignalR Hub
 using TeamPro1.Data;  // For DbSeeder
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,8 +21,17 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-// ? Add SignalR for real-time notifications
+// SignalR for real-time notifications
 builder.Services.AddSignalR();
+
+// Configure forwarded headers so the app works correctly behind ngrok/reverse proxies
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor
+                             | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 
 var app = builder.Build();
 
@@ -30,10 +40,13 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.Migrate();
-    
-    // Seed test data (only runs if database is empty)
-    // Comment out this line after first run if you don't want to seed data
-    await DbSeeder.SeedTestFacultyAsync(db);
+
+    // SECURITY: Only seed test data in development environment
+    // Remove this line or comment out for production deployment
+    if (app.Environment.IsDevelopment())
+    {
+        await DbSeeder.SeedTestFacultyAsync(db);
+    }
 }
 
 // Configure the HTTP request pipeline.
@@ -43,7 +56,18 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+// Support forwarded headers from ngrok / reverse proxies
+app.UseForwardedHeaders();
+
+// Only use HTTPS redirection when the app is listening on both HTTP and HTTPS.
+// When running HTTP-only (e.g., behind ngrok), this prevents 307 redirect loops.
+var serverAddresses = app.Urls;
+var hasHttpsUrl = serverAddresses.Any(u => u.StartsWith("https://", StringComparison.OrdinalIgnoreCase));
+if (hasHttpsUrl)
+{
+    app.UseHttpsRedirection();
+}
+
 app.UseStaticFiles();
 
 app.UseRouting();
@@ -53,7 +77,7 @@ app.UseSession();
 
 app.UseAuthorization();
 
-// ? Map SignalR Hub endpoint
+// Map SignalR Hub endpoint
 app.MapHub<NotificationHub>("/notifyHub");
 
 app.MapControllerRoute(

@@ -486,6 +486,9 @@
                 <button type="button" class="glass-btn btn-success" onclick="exportExcel()" id="exportExcelBtn">
                     <i class="fas fa-file-excel"></i> Export Excel
                 </button>
+                <button type="button" class="glass-btn btn-danger" onclick="confirmDeleteAll()" id="deleteAllBtn">
+                    <i class="fas fa-trash-alt"></i> Delete All Students
+                </button>
                 <a href="@Url.Action("Dashboard", "Admin")" class="glass-btn btn-back">
                     <i class="fas fa-arrow-left"></i> Back to Dashboard
                 </a>
@@ -586,6 +589,38 @@
         </div>
     </div>
 
+    <!-- Delete All Students Confirmation Modal -->
+    <div class="modal-overlay" id="deleteAllModal">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #dc3545, #c0392b);">
+                <h5><i class="fas fa-exclamation-triangle"></i> Delete All Students</h5>
+                <button class="modal-close" onclick="closeDeleteAllModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p style="color: #dc3545; font-weight: 700;">?? This is a destructive action!</p>
+                <p>This will permanently delete:</p>
+                <ul style="color: #555; line-height: 2;">
+                    <li><strong>All students</strong> in <strong>@ViewBag.AdminDepartment</strong></li>
+                    <li><strong>All formed teams</strong> and team requests</li>
+                    <li><strong>All project progress</strong>, meetings, and activity logs</li>
+                </ul>
+                <p>Faculty, problem statements, and other department data will <strong>NOT</strong> be affected.</p>
+                <p style="margin-top: 15px;">Type <strong style="color: #dc3545;">DELETE ALL</strong> below to confirm:</p>
+                <input type="text" id="deleteAllConfirmInput" class="form-control" placeholder="Type DELETE ALL" style="border-color: #dc3545;" autocomplete="off">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="glass-btn btn-back" onclick="closeDeleteAllModal()">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <button type="button" class="glass-btn btn-danger" id="confirmDeleteAllBtn" disabled>
+                    <i class="fas fa-trash-alt"></i> Delete All Students
+                </button>
+            </div>
+        </div>
+    </div>
+
     <footer class="app-footer">
         <div class="footer-content">
             <div class="footer-line guidance">Developed under the guidance of <span class="footer-highlight">Dr. P. Penchala Prasad</span>, Associate Professor, CSE(DS), RGMCET</div>
@@ -638,16 +673,38 @@
             document.getElementById('deleteModal').classList.add('show');
         }
 
-        function closeModal() {
-            document.getElementById('deleteModal').classList.remove('show');
+        // ===== Delete All Students =====
+        function confirmDeleteAll() {
+            document.getElementById('deleteAllConfirmInput').value = '';
+            document.getElementById('confirmDeleteAllBtn').disabled = true;
+            document.getElementById('deleteAllModal').classList.add('show');
         }
 
-        document.getElementById('deleteModal').addEventListener('click', function(e) {
-            if (e.target === this) closeModal();
+        function closeModal(type = '') {
+            if (type === 'all') {
+                document.getElementById('deleteAllModal').classList.remove('show');
+            } else {
+                document.getElementById('deleteModal').classList.remove('show');
+            }
+        }
+
+        function closeDeleteAllModal() {
+            document.getElementById('deleteAllModal').classList.remove('show');
+        }
+
+        document.getElementById('deleteAllModal').addEventListener('click', function(e) {
+            if (e.target === this) closeDeleteAllModal();
+        });
+
+        document.getElementById('deleteAllConfirmInput').addEventListener('input', function() {
+            document.getElementById('confirmDeleteAllBtn').disabled = this.value.trim() !== 'DELETE ALL';
         });
 
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') closeModal();
+            if (e.key === 'Escape') {
+                closeModal();
+                closeModal('all');
+            }
         });
 
         document.getElementById('confirmDeleteBtn').addEventListener('click', async function() {
@@ -674,6 +731,38 @@
                 }
             } catch (e) {
                 alert('Error deleting student.');
+            }
+        });
+
+        document.getElementById('confirmDeleteAllBtn').addEventListener('click', async function() {
+            closeDeleteAllModal();
+            var btn = document.getElementById('deleteAllBtn');
+            var originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+            btn.disabled = true;
+
+            try {
+                var formData = new FormData();
+                var tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (tokenInput) formData.append('__RequestVerificationToken', tokenInput.value);
+
+                var response = await fetch('@Url.Action("DeleteAllStudents", "Admin")', {
+                    method: 'POST',
+                    body: formData
+                });
+                var result = await response.json();
+                if (result.success) {
+                    alert(result.message);
+                    window.location.reload();
+                } else {
+                    alert(result.message);
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            } catch (e) {
+                alert('Error deleting students.');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
         });
 

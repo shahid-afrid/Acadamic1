@@ -28,17 +28,15 @@ namespace TeamPro1.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(FacultyLoginViewModel model)
         {
-            if (!ModelState.IsValid)
-                return View(model);
-
-            try
+            if (ModelState.IsValid)
             {
                 var faculty = await _context.Faculties
-                    .FirstOrDefaultAsync(f => f.Email == model.Email && f.Password == model.Password);
+                    .FirstOrDefaultAsync(f => f.Email == model.Email);
 
-                if (faculty == null)
+                // Verify password using BCrypt
+                if (faculty == null || !BCrypt.Net.BCrypt.Verify(model.Password, faculty.Password))
                 {
-                    ModelState.AddModelError("", "Invalid credentials!");
+                    ModelState.AddModelError("", "Invalid email or password");
                     return View(model);
                 }
 
@@ -56,11 +54,8 @@ namespace TeamPro1.Controllers
                 TempData["SuccessMessage"] = "Login successful!";
                 return RedirectToAction("MainDashboard");
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Login error: {ex.Message}");
-                return View(model);
-            }
+
+            return View(model);
         }
 
         // GET: Faculty/MainDashboard
@@ -210,7 +205,7 @@ namespace TeamPro1.Controllers
             // Update profile fields
             faculty.FullName = model.FullName;
             faculty.Email = model.Email;
-            faculty.Department = model.Department;
+            // Department is not updatable by faculty - keep the original value
 
             bool passwordChanged = false;
 

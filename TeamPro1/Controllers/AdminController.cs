@@ -65,39 +65,29 @@ namespace TeamPro1.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(AdminLoginViewModel model)
         {
-            if (!ModelState.IsValid)
-                return View(model);
-
-            try
+            if (ModelState.IsValid)
             {
-                // Authenticate against the Admins table in the database
-                var admin = await _context.Admins.FirstOrDefaultAsync(a =>
-                    a.Email == model.Email
-                    && a.Password == model.Password
-                    && a.Department == model.Department);
+                var admin = await _context.Admins
+                    .FirstOrDefaultAsync(a => a.Email == model.Email);
 
-                if (admin != null)
+                // Verify password using BCrypt
+                if (admin == null || !BCrypt.Net.BCrypt.Verify(model.Password, admin.Password))
                 {
-                    HttpContext.Session.Clear();
-                    HttpContext.Session.SetString("AdminId", admin.Id.ToString());
-                    HttpContext.Session.SetString("AdminEmail", admin.Email);
-                    HttpContext.Session.SetString("AdminName", admin.Name);
-                    HttpContext.Session.SetString("AdminDepartment", admin.Department);
-                    HttpContext.Session.SetString("IsAdmin", "true");
-                    await HttpContext.Session.CommitAsync();
-
-                    TempData["SuccessMessage"] = $"Welcome {admin.Name}! Logged in for {admin.Department}.";
-                    return RedirectToAction("Dashboard");
+                    ModelState.AddModelError("", "Invalid email or password");
+                    return View(model);
                 }
 
-                ModelState.AddModelError("", "Invalid credentials! Make sure email, password, and department are correct.");
-                return View(model);
+                // Set session
+                HttpContext.Session.SetInt32("AdminId", admin.Id);
+                HttpContext.Session.SetString("IsAdmin", "true");
+                HttpContext.Session.SetString("AdminName", admin.Name);
+                HttpContext.Session.SetString("AdminEmail", admin.Email);
+                HttpContext.Session.SetString("AdminDepartment", admin.Department);
+
+                return RedirectToAction("Dashboard");
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Login error: {ex.Message}");
-                return View(model);
-            }
+
+            return View(model);
         }
 
         // ===================== DASHBOARD =====================
@@ -184,35 +174,40 @@ namespace TeamPro1.Controllers
             model.Department = GetAdminDepartment()!;
             ViewBag.AdminDepartment = model.Department;
 
-            if (!ModelState.IsValid)
-                return View(model);
-
-            try
+            if (ModelState.IsValid)
             {
-                if (await _context.Students.AnyAsync(s => s.Email == model.Email))
+                // Check if email already exists
+                var existingEmail = await _context.Students
+                    .FirstOrDefaultAsync(s => s.Email == model.Email);
+
+                if (existingEmail != null)
                 {
-                    ModelState.AddModelError("Email", "A student with this email already exists.");
-                    return View(model);
+                    TempData["ErrorMessage"] = "Email already exists";
+                    return RedirectToAction("ManageStudents");
                 }
 
-                if (await _context.Students.AnyAsync(s => s.RegdNumber == model.RegdNumber))
+                // Check if registration number already exists
+                var existingRegd = await _context.Students
+                    .FirstOrDefaultAsync(s => s.RegdNumber == model.RegdNumber);
+
+                if (existingRegd != null)
                 {
-                    ModelState.AddModelError("RegdNumber", "A student with this registration number already exists.");
-                    return View(model);
+                    TempData["ErrorMessage"] = "Registration number already exists";
+                    return RedirectToAction("ManageStudents");
                 }
 
-                model.CreatedAt = DateTime.Now;
+                // Hash password using BCrypt before storing
+                model.Password = BCrypt.Net.BCrypt.HashPassword(model.Password);
+                model.Department = GetAdminDepartment() ?? "Computer Science";
+
                 _context.Students.Add(model);
                 await _context.SaveChangesAsync();
 
-                TempData["SuccessMessage"] = $"Student '{model.FullName}' added successfully!";
+                TempData["SuccessMessage"] = "Student added successfully";
                 return RedirectToAction("ManageStudents");
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Error adding student: {ex.Message}");
-                return View(model);
-            }
+
+            return RedirectToAction("ManageStudents");
         }
 
         [HttpGet]
@@ -248,10 +243,7 @@ namespace TeamPro1.Controllers
             model.Department = GetAdminDepartment()!;
             ViewBag.AdminDepartment = model.Department;
 
-            if (!ModelState.IsValid)
-                return View(model);
-
-            try
+            if (ModelState.IsValid)
             {
                 var student = await _context.Students.FindAsync(model.Id);
                 if (student == null || student.Department != GetAdminDepartment())
@@ -260,31 +252,26 @@ namespace TeamPro1.Controllers
                     return RedirectToAction("ManageStudents");
                 }
 
-                if (await _context.Students.AnyAsync(s => s.Email == model.Email && s.Id != model.Id))
-                {
-                    ModelState.AddModelError("Email", "Another student with this email already exists.");
-                    return View(model);
-                }
-
+                // Update student details
                 student.FullName = model.FullName;
                 student.Email = model.Email;
                 student.RegdNumber = model.RegdNumber;
                 student.Year = model.Year;
                 student.Semester = model.Semester;
 
+                // Only update password if a new one is provided
                 if (!string.IsNullOrEmpty(model.Password))
-                    student.Password = model.Password;
+                {
+                    student.Password = BCrypt.Net.BCrypt.HashPassword(model.Password);
+                }
 
                 await _context.SaveChangesAsync();
 
-                TempData["SuccessMessage"] = $"Student '{student.FullName}' updated successfully!";
+                TempData["SuccessMessage"] = "Student updated successfully";
                 return RedirectToAction("ManageStudents");
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Error updating student: {ex.Message}");
-                return View(model);
-            }
+
+            return RedirectToAction("ManageStudents");
         }
 
         [HttpPost]
@@ -367,29 +354,30 @@ namespace TeamPro1.Controllers
             model.Department = GetAdminDepartment()!;
             ViewBag.AdminDepartment = model.Department;
 
-            if (!ModelState.IsValid)
-                return View(model);
-
-            try
+            if (ModelState.IsValid)
             {
-                if (await _context.Faculties.AnyAsync(f => f.Email == model.Email))
+                // Check if email already exists
+                var existingFaculty = await _context.Faculties
+                    .FirstOrDefaultAsync(f => f.Email == model.Email);
+
+                if (existingFaculty != null)
                 {
-                    ModelState.AddModelError("Email", "A faculty with this email already exists.");
-                    return View(model);
+                    TempData["ErrorMessage"] = "Faculty email already exists";
+                    return RedirectToAction("ManageFaculty");
                 }
 
-                model.CreatedAt = DateTime.Now;
+                // Hash password using BCrypt before storing
+                model.Password = BCrypt.Net.BCrypt.HashPassword(model.Password);
+                model.Department = GetAdminDepartment() ?? "Computer Science";
+
                 _context.Faculties.Add(model);
                 await _context.SaveChangesAsync();
 
-                TempData["SuccessMessage"] = $"Faculty '{model.FullName}' added successfully!";
+                TempData["SuccessMessage"] = "Faculty added successfully";
                 return RedirectToAction("ManageFaculty");
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Error adding faculty: {ex.Message}");
-                return View(model);
-            }
+
+            return RedirectToAction("ManageFaculty");
         }
 
         [HttpGet]
@@ -425,10 +413,7 @@ namespace TeamPro1.Controllers
             model.Department = GetAdminDepartment()!;
             ViewBag.AdminDepartment = model.Department;
 
-            if (!ModelState.IsValid)
-                return View(model);
-
-            try
+            if (ModelState.IsValid)
             {
                 var faculty = await _context.Faculties.FindAsync(model.Id);
                 if (faculty == null || faculty.Department != GetAdminDepartment())
@@ -437,28 +422,23 @@ namespace TeamPro1.Controllers
                     return RedirectToAction("ManageFaculty");
                 }
 
-                if (await _context.Faculties.AnyAsync(f => f.Email == model.Email && f.Id != model.Id))
-                {
-                    ModelState.AddModelError("Email", "Another faculty with this email already exists.");
-                    return View(model);
-                }
-
+                // Update faculty details
                 faculty.FullName = model.FullName;
                 faculty.Email = model.Email;
 
+                // Only update password if a new one is provided
                 if (!string.IsNullOrEmpty(model.Password))
-                    faculty.Password = model.Password;
+                {
+                    faculty.Password = BCrypt.Net.BCrypt.HashPassword(model.Password);
+                }
 
                 await _context.SaveChangesAsync();
 
-                TempData["SuccessMessage"] = $"Faculty '{faculty.FullName}' updated successfully!";
+                TempData["SuccessMessage"] = "Faculty updated successfully";
                 return RedirectToAction("ManageFaculty");
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", $"Error updating faculty: {ex.Message}");
-                return View(model);
-            }
+
+            return RedirectToAction("ManageFaculty");
         }
 
         [HttpPost]
@@ -1092,7 +1072,7 @@ namespace TeamPro1.Controllers
                             FullName = fullName,
                             RegdNumber = regdNumber,
                             Email = email,
-                            Password = string.IsNullOrEmpty(password) ? "Default@123" : password,
+                            Password = BCrypt.Net.BCrypt.HashPassword(string.IsNullOrEmpty(password) ? "rgmcet@123" : password),
                             Year = year > 0 ? year : 1,
                             Semester = semester > 0 ? semester : 1,
                             Department = dept,
@@ -1520,6 +1500,114 @@ namespace TeamPro1.Controllers
             {
                 TempData["ErrorMessage"] = $"Error processing file: {ex.Message}";
                 return RedirectToAction("ManageProblemStatements");
+            }
+        }
+
+        // ===================== DELETE ALL STUDENTS =====================
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteAllStudents()
+        {
+            if (!IsAdminLoggedIn())
+                return Json(new { success = false, message = "Please login as admin." });
+
+            try
+            {
+                var dept = GetAdminDepartment()!;
+
+                // Get all student IDs in this department
+                var deptStudentIds = await DeptStudents().Select(s => s.Id).ToListAsync();
+
+                if (!deptStudentIds.Any())
+                    return Json(new { success = false, message = "No students found in your department." });
+
+                // Get all team IDs that belong to this department's students
+                var deptTeamIds = await _context.Teams
+                    .Where(t => deptStudentIds.Contains(t.Student1Id))
+                    .Select(t => t.Id)
+                    .ToListAsync();
+
+                // 1. Delete team activity logs for these teams
+                var activityLogs = await _context.TeamActivityLogs
+                    .Where(al => deptTeamIds.Contains(al.TeamId))
+                    .ToListAsync();
+                _context.TeamActivityLogs.RemoveRange(activityLogs);
+
+                // 2. Delete team meetings for these teams
+                var teamMeetings = await _context.TeamMeetings
+                    .Where(tm => deptTeamIds.Contains(tm.TeamId))
+                    .ToListAsync();
+                _context.TeamMeetings.RemoveRange(teamMeetings);
+
+                // 3. Delete project progresses for these teams
+                var projectProgresses = await _context.ProjectProgresses
+                    .Where(pp => deptTeamIds.Contains(pp.TeamId))
+                    .ToListAsync();
+                _context.ProjectProgresses.RemoveRange(projectProgresses);
+
+                // 4. Delete team requests involving these students
+                var teamRequests = await _context.TeamRequests
+                    .Where(tr => deptStudentIds.Contains(tr.SenderId) || deptStudentIds.Contains(tr.ReceiverId))
+                    .ToListAsync();
+                _context.TeamRequests.RemoveRange(teamRequests);
+
+                // 5. Delete teams
+                var teams = await _context.Teams
+                    .Where(t => deptTeamIds.Contains(t.Id))
+                    .ToListAsync();
+                _context.Teams.RemoveRange(teams);
+
+                // 6. Delete all students in this department
+                var students = await DeptStudents().ToListAsync();
+                _context.Students.RemoveRange(students);
+
+                await _context.SaveChangesAsync();
+
+                return Json(new
+                {
+                    success = true,
+                    message = $"Successfully deleted {students.Count} student(s), {teams.Count} team(s), and all related data from {dept}."
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error deleting students: {ex.Message}" });
+            }
+        }
+
+        // ===================== DELETE ALL PROBLEM STATEMENTS =====================
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteAllProblemStatements()
+        {
+            if (!IsAdminLoggedIn())
+                return Json(new { success = false, message = "Please login as admin." });
+
+            try
+            {
+                var dept = GetAdminDepartment()!;
+
+                var statements = await _context.ProblemStatementBanks
+                    .Where(ps => ps.Department == dept)
+                    .ToListAsync();
+
+                if (!statements.Any())
+                    return Json(new { success = false, message = "No problem statements found in your department." });
+
+                _context.ProblemStatementBanks.RemoveRange(statements);
+                await _context.SaveChangesAsync();
+
+                return Json(new
+                {
+                    success = true,
+                    message = $"Successfully deleted {statements.Count} problem statement(s) from {dept}."
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error deleting problem statements: {ex.Message}" });
             }
         }
     }

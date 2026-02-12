@@ -19,6 +19,7 @@
     <meta name="description" content="Student registration for TutorLiveMentor - RGMCET" />
     <title>Student Registration - TutorLiveMentor</title>
     <link href="https://fonts.googleapis.com/css?family=Montserrat:700,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <style>
         :root {
             --royal-blue: #274060;
@@ -142,6 +143,10 @@
             align-items: center;
         }
 
+        .password-container input {
+            padding-right: 90px;
+        }
+
         .password-toggle {
             position: absolute;
             right: 12px;
@@ -153,6 +158,7 @@
             padding: 4px 8px;
             border-radius: 4px;
             transition: background-color 0.2s;
+            color: var(--royal-blue);
         }
 
         .password-toggle:hover {
@@ -169,7 +175,7 @@
             right: 12px;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 1.2em;
+            font-size: 1.1em;
             opacity: 0;
             transition: opacity 0.3s ease;
             z-index: 2;
@@ -177,6 +183,14 @@
 
         .validation-icon.show {
             opacity: 1;
+        }
+
+        .validation-icon.valid {
+            color: var(--success-green);
+        }
+
+        .validation-icon.invalid {
+            color: var(--error-red);
         }
 
         /* Special positioning for password field validation icon */
@@ -199,6 +213,7 @@
             border: 2px solid var(--slate);
             transition: all 0.3s ease;
             margin-top: 20px;
+            font-family: 'Montserrat', sans-serif;
         }
 
         .glass-btn:hover:not(:disabled) {
@@ -223,6 +238,10 @@
             margin-bottom: 20px;
             color: var(--error-red);
             transition: opacity 0.5s ease;
+        }
+
+        .validation-summary-valid {
+            display: none;
         }
 
         .validation-summary-errors ul {
@@ -259,6 +278,9 @@
             border: 1px solid var(--slate);
             backdrop-filter: blur(8px);
             transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .nav-link:hover {
@@ -308,13 +330,13 @@
             .nav-link {
                 position: static;
                 margin-bottom: 20px;
-                display: inline-block;
+                display: inline-flex;
             }
         }
     </style>
 </head>
 <body>
-    <a href="@Url.Action("Index", "Student")" class="nav-link">? Back to Student</a>
+    <a href="@Url.Action("Index", "Student")" class="nav-link"><i class="fas fa-arrow-left"></i> Back to Student</a>
     
     <div class="glass-card">
         <img src="~/images/RGMCET.jpg" alt="RGMCET Logo" class="logo" />
@@ -331,7 +353,7 @@
         @using (Html.BeginForm("Register", "Student", FormMethod.Post, new { @class = "registration-form", autocomplete = "on", novalidate = "novalidate" }))
         {
             @Html.AntiForgeryToken()
-            @Html.ValidationSummary(false, "", new { @class = "validation-summary-errors" })
+            @Html.ValidationSummary(false, "", new { @class = "validation-summary-errors", id = "validationSummary" })
 
             <div class="form-group">
                 <label for="FullName" class="required">Full Name</label>
@@ -348,7 +370,7 @@
                 <input type="text" id="regdnum" name="RegdNumber" value="@regdNumber" 
                        maxlength="10" required oninput="validateRegdNum(this)" 
                        style="text-transform: uppercase;" autocomplete="off" 
-                       aria-describedby="regdError" aria-required="true" placeholder="e.g., 23091A32D4" />
+                       aria-describedby="regdError" aria-required="true" placeholder="E.G., 23091A32D4" />
                 <span class="validation-icon" id="regdnumIcon" role="status" aria-live="polite"></span>
                 <span id="regdError" class="real-time-error" role="alert"></span>
                 @Html.ValidationMessage("RegdNumber", "", new { @class = "field-validation-error" })
@@ -518,7 +540,7 @@
                     <span class="validation-icon" id="passwordIcon" role="status" aria-live="polite"></span>
                     <button type="button" class="password-toggle" onclick="togglePassword()" 
                             aria-label="Toggle password visibility" aria-pressed="false" id="passwordToggleBtn">
-                        <span id="eye" aria-hidden="true">???</span>
+                        <i class="fas fa-eye-slash" id="eyeIcon"></i>
                     </button>
                 </div>
                 <span id="passwordError" class="real-time-error" role="alert"></span>
@@ -526,13 +548,13 @@
             </div>
 
             <button type="submit" class="glass-btn" id="submitBtn" aria-label="Submit registration form">
-                <span aria-hidden="true">??</span> Register Account
+                <i class="fas fa-user-plus"></i> Register Account
             </button>
         }
     </div>
 
     <script type="text/javascript">
-        let validationState = {
+        var validationState = {
             fullName: false,
             regdNumber: false,
             year: false,
@@ -543,34 +565,34 @@
         };
 
         // Prevent double submission
-        let isSubmitting = false;
+        var isSubmitting = false;
 
         function updateProgress() {
-            const validCount = Object.values(validationState).filter(v => v).length;
-            const progress = (validCount / 7) * 100;
+            var validCount = Object.values(validationState).filter(function(v) { return v; }).length;
+            var progress = (validCount / 7) * 100;
             
-            const progressFill = document.getElementById('progressFill');
-            const progressText = document.getElementById('progressText');
-            const progressBar = progressFill ? progressFill.parentElement : null;
+            var progressFill = document.getElementById('progressFill');
+            var progressText = document.getElementById('progressText');
+            var progressBar = progressFill ? progressFill.parentElement : null;
             
             if (progressFill) progressFill.style.width = progress + '%';
             if (progressBar) progressBar.setAttribute('aria-valuenow', progress);
             
             if (progressText) {
                 if (progress === 100) {
-                    progressText.textContent = 'Ready to register! ?';
+                    progressText.textContent = 'Ready to register!';
                 } else {
-                    progressText.textContent = `${validCount}/7 fields completed`;
+                    progressText.textContent = validCount + '/7 fields completed';
                 }
             }
         }
 
-        function showValidation(fieldId, isValid, message = '') {
-            const field = document.getElementById(fieldId) || document.querySelector(`[name="${fieldId}"]`);
-            const icon = document.getElementById(fieldId + 'Icon');
-            const error = document.getElementById(fieldId + 'Error');
-            const errorId = fieldId === 'regdnum' ? 'regdError' : fieldId.toLowerCase() + 'Error';
-            const error = document.getElementById(errorId);
+        function showValidation(fieldId, isValid, message) {
+            message = message || '';
+            var field = document.getElementById(fieldId) || document.querySelector('[name="' + fieldId + '"]');
+            var icon = document.getElementById(fieldId + 'Icon');
+            var errorId = fieldId === 'regdnum' ? 'regdError' : fieldId.toLowerCase() + 'Error';
+            var errorEl = document.getElementById(errorId);
             
             if (field) {
                 field.classList.remove('input-valid', 'input-invalid');
@@ -579,20 +601,21 @@
             }
             
             if (icon) {
-                icon.textContent = isValid ? '?' : '?';
-                icon.classList.add('show');
+                icon.innerHTML = isValid ? '<i class="fas fa-check-circle"></i>' : '<i class="fas fa-times-circle"></i>';
+                icon.classList.remove('valid', 'invalid');
+                icon.classList.add('show', isValid ? 'valid' : 'invalid');
             }
             
-            if (error) {
-                error.textContent = message;
-                error.className = isValid ? 'field-validation-success' : 'real-time-error';
+            if (errorEl) {
+                errorEl.textContent = message;
+                errorEl.className = isValid ? 'field-validation-success' : 'real-time-error';
             }
         }
 
         function validateFullName(input) {
-            const value = input.value.trim();
-            const isValid = value.length >= 2 && /^[a-zA-Z\s.]+$/.test(value);
-            const message = isValid ? 'Valid name ?' : 'Name must be at least 2 characters and contain only letters, spaces, and dots';
+            var value = input.value.trim();
+            var isValid = value.length >= 2 && /^[a-zA-Z\s.]+$/.test(value);
+            var message = isValid ? 'Valid name' : 'Name must be at least 2 characters and contain only letters, spaces, and dots';
             
             validationState.fullName = isValid;
             showValidation('FullName', isValid, message);
@@ -600,19 +623,44 @@
         }
 
         function validateRegdNum(input) {
-            input.value = input.value.toUpperCase();
+            input.value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
             
-            const isValid = input.value.length === 10 && /^[A-Z0-9]+$/.test(input.value);
-            const message = isValid ? 'Valid registration number ?' : 'Registration number must be exactly 10 alphanumeric characters (uppercase)';
+            var isValid = input.value.length === 10 && /^[A-Z0-9]+$/.test(input.value);
+            var message = isValid ? 'Valid registration number' : 'Must be exactly 10 alphanumeric characters (e.g., 23091A32D4)';
             
             validationState.regdNumber = isValid;
             showValidation('regdnum', isValid, message);
             updateProgress();
+
+            // Auto-fill email from registration number
+            var emailField = document.getElementById('email');
+            if (emailField) {
+                if (isValid) {
+                    emailField.value = input.value.toLowerCase() + '@@rgmcet.edu.in';
+                    validateEmail(emailField);
+                } else if (emailField.value && emailField.value.endsWith('@@rgmcet.edu.in')) {
+                    // Clear auto-filled email if regd number becomes invalid
+                    var currentPrefix = emailField.value.replace('@@rgmcet.edu.in', '');
+                    // Only clear if the email prefix matches a partial regd number (user didn't manually type something else)
+                    if (input.value.toLowerCase().indexOf(currentPrefix) === 0 || currentPrefix.indexOf(input.value.toLowerCase()) === 0) {
+                        emailField.value = '';
+                        validationState.email = false;
+                        showValidation('email', false, '');
+                        // Reset email field styling
+                        emailField.classList.remove('input-valid', 'input-invalid');
+                        var emailIcon = document.getElementById('emailIcon');
+                        if (emailIcon) { emailIcon.classList.remove('show'); }
+                        var emailError = document.getElementById('emailError');
+                        if (emailError) { emailError.textContent = ''; }
+                        updateProgress();
+                    }
+                }
+            }
         }
 
         function validateYear(select) {
-            const isValid = select.value !== '';
-            const message = isValid ? 'Year selected ?' : 'Please select your year';
+            var isValid = select.value !== '';
+            var message = isValid ? 'Year selected' : 'Please select your year';
             
             validationState.year = isValid;
             showValidation('Year', isValid, message);
@@ -620,8 +668,8 @@
         }
 
         function validateSemester(select) {
-            const isValid = select.value !== '';
-            const message = isValid ? 'Semester selected ?' : 'Please select your semester';
+            var isValid = select.value !== '';
+            var message = isValid ? 'Semester selected' : 'Please select your semester';
             
             validationState.semester = isValid;
             showValidation('Semester', isValid, message);
@@ -629,8 +677,8 @@
         }
 
         function validateDepartment(select) {
-            const isValid = select.value !== '';
-            const message = isValid ? 'Department selected ?' : 'Please select your department';
+            var isValid = select.value !== '';
+            var message = isValid ? 'Department selected' : 'Please select your department';
             
             validationState.department = isValid;
             showValidation('Department', isValid, message);
@@ -638,9 +686,9 @@
         }
 
         function validateEmail(input) {
-            const emailPattern = /^[a-zA-Z0-9._%+-]+@@rgmcet\.edu\.in$/;
-            const isValid = emailPattern.test(input.value);
-            let message;
+            var emailPattern = /^[a-zA-Z0-9._%+-]+@@rgmcet\.edu\.in$/;
+            var isValid = emailPattern.test(input.value);
+            var message;
             
             if (!input.value) {
                 message = 'Email is required';
@@ -649,7 +697,7 @@
             } else if (!input.value.endsWith('@@rgmcet.edu.in')) {
                 message = 'Must use college email ending with @@rgmcet.edu.in';
             } else if (isValid) {
-                message = 'Valid college email ?';
+                message = 'Valid college email';
             } else {
                 message = 'Invalid email format';
             }
@@ -660,26 +708,26 @@
         }
 
         function validatePassword(input) {
-            const minLength = input.value.length >= 8;
-            const hasUppercase = /[A-Z]/.test(input.value);
-            const hasDigit = /\d/.test(input.value);
-            const hasSpecial = /[^\w\s]/.test(input.value);
+            var minLength = input.value.length >= 8;
+            var hasUppercase = /[A-Z]/.test(input.value);
+            var hasDigit = /\d/.test(input.value);
+            var hasSpecial = /[^\w\s]/.test(input.value);
             
-            const isValid = minLength && hasUppercase && hasDigit && hasSpecial;
-            let message;
+            var isValid = minLength && hasUppercase && hasDigit && hasSpecial;
+            var message;
             
             if (!input.value) {
                 message = 'Password is required';
             } else if (!minLength) {
-                message = `Password too short (${input.value.length}/8 characters)`;
+                message = 'Password too short (' + input.value.length + '/8 characters)';
             } else if (!hasUppercase) {
-                message = 'Password must contain at least 1 uppercase letter';
+                message = 'Must contain at least 1 uppercase letter';
             } else if (!hasDigit) {
-                message = 'Password must contain at least 1 digit';
+                message = 'Must contain at least 1 digit';
             } else if (!hasSpecial) {
-                message = 'Password must contain at least 1 special character';
+                message = 'Must contain at least 1 special character';
             } else {
-                message = 'Strong password ?';
+                message = 'Strong password';
             }
             
             validationState.password = isValid;
@@ -688,19 +736,19 @@
         }
 
         function togglePassword() {
-            const pwd = document.getElementById("password");
-            const eye = document.getElementById("eye");
-            const toggleBtn = document.getElementById("passwordToggleBtn");
+            var pwd = document.getElementById("password");
+            var eyeIcon = document.getElementById("eyeIcon");
+            var toggleBtn = document.getElementById("passwordToggleBtn");
             
-            if (pwd && eye && toggleBtn) {
+            if (pwd && eyeIcon && toggleBtn) {
                 if (pwd.type === "password") {
                     pwd.type = "text";
-                    eye.textContent = "??";
+                    eyeIcon.className = "fas fa-eye";
                     toggleBtn.setAttribute('aria-pressed', 'true');
                     toggleBtn.setAttribute('aria-label', 'Hide password');
                 } else {
                     pwd.type = "password";
-                    eye.textContent = "???";
+                    eyeIcon.className = "fas fa-eye-slash";
                     toggleBtn.setAttribute('aria-pressed', 'false');
                     toggleBtn.setAttribute('aria-label', 'Show password');
                 }
@@ -710,40 +758,46 @@
         // Initialize form validation and submit handler on page load
         document.addEventListener('DOMContentLoaded', function() {
             updateProgress();
-            
-            const form = document.querySelector('form.registration-form');
-            const submitBtn = document.getElementById('submitBtn');
-            
-            if (form && submitBtn) {
-                form.addEventListener('submit', function(e) {
-                    if (isSubmitting) {
-                        e.preventDefault();
-                        return false;
-                    }
-                    
-                    // Ensure registration number is uppercase before submission
-                    const regdNumInput = document.getElementById('regdnum');
-                    if (regdNumInput) {
-                        regdNumInput.value = regdNumInput.value.toUpperCase();
-                    }
-                    
-                    // Show loading state
-                    isSubmitting = true;
-                    submitBtn.disabled = true;
-                    submitBtn.innerHTML = '<span aria-hidden="true">?</span> Registering...';
-                    submitBtn.style.opacity = '0.7';
-                    submitBtn.style.cursor = 'not-allowed';
-                });
-            }
-            
-            // Auto-dismiss validation summary errors after 5 seconds
-            const validationSummary = document.querySelector('.validation-summary-errors');
+
+            // Hide empty validation summary (red block) on initial load
+            var validationSummary = document.getElementById('validationSummary');
             if (validationSummary) {
-                setTimeout(() => {
-                    validationSummary.style.transition = 'opacity 0.5s';
-                    validationSummary.style.opacity = '0';
-                    setTimeout(() => validationSummary.remove(), 500);
-                }, 5000);
+                var listItems = validationSummary.querySelectorAll('li');
+                var hasContent = false;
+                for (var i = 0; i < listItems.length; i++) {
+                    if (listItems[i].textContent.trim() !== '') {
+                        hasContent = true;
+                        break;
+                    }
+                }
+                if (!hasContent) {
+                    validationSummary.style.display = 'none';
+                }
+            }
+
+            var form = document.querySelector('.registration-form');
+            if (form) {
+                form.addEventListener('submit', function(event) {
+                    var isValidForm = !Object.values(validationState).includes(false);
+                    
+                    if (!isValidForm || isSubmitting) {
+                        event.preventDefault();
+                        
+                        if (!isValidForm) {
+                            var firstInvalidField = Object.keys(validationState).find(function(key) {
+                                return !validationState[key];
+                            });
+                            
+                            var fieldToFocus = document.getElementById(firstInvalidField) || document.querySelector('[name="' + firstInvalidField + '"]');
+                            if (fieldToFocus) {
+                                fieldToFocus.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                fieldToFocus.focus();
+                            }
+                        }
+                    } else {
+                        isSubmitting = true;
+                    }
+                });
             }
         });
     </script>

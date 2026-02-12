@@ -41,17 +41,10 @@ namespace TeamPro1.Controllers
                 var student = await _context.Students
                     .FirstOrDefaultAsync(s => s.Email == model.Email);
 
-                if (student == null)
+                // Verify password using BCrypt
+                if (student == null || !BCrypt.Net.BCrypt.Verify(model.Password, student.Password))
                 {
-                    ModelState.AddModelError("", "Invalid email or password.");
-                    return View(model);
-                }
-
-                // In a real application, you should hash passwords
-                // For now, we'll do a direct comparison
-                if (student.Password != model.Password)
-                {
-                    ModelState.AddModelError("", "Invalid email or password.");
+                    ModelState.AddModelError("", "Invalid email or password");
                     return View(model);
                 }
 
@@ -85,18 +78,7 @@ namespace TeamPro1.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(StudentRegistrationModel model)
         {
-            // Ensure registration number is uppercase before validation
-            if (!string.IsNullOrEmpty(model.RegdNumber))
-            {
-                model.RegdNumber = model.RegdNumber.ToUpper();
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
-            try
+            if (ModelState.IsValid)
             {
                 // Check if email already exists
                 var existingStudent = await _context.Students
@@ -104,48 +86,34 @@ namespace TeamPro1.Controllers
 
                 if (existingStudent != null)
                 {
-                    ModelState.AddModelError("Email", "A student with this email already exists.");
+                    ModelState.AddModelError("Email", "This email is already registered");
                     return View(model);
                 }
 
                 // Check if registration number already exists
-                var existingRegdNumber = await _context.Students
+                var existingRegd = await _context.Students
                     .FirstOrDefaultAsync(s => s.RegdNumber == model.RegdNumber);
 
-                if (existingRegdNumber != null)
+                if (existingRegd != null)
                 {
-                    ModelState.AddModelError("RegdNumber", "A student with this registration number already exists.");
+                    ModelState.AddModelError("RegdNumber", "This registration number is already registered");
                     return View(model);
                 }
 
-                // Convert year string to number (e.g., "II Year" -> 2)
-                int yearNumber = model.Year switch
-                {
-                    "II Year" => 2,
-                    "III Year" => 3,
-                    "IV Year" => 4,
-                    _ => 2
-                };
+                // Parse Year and Semester strings to integers
+                int year = model.Year.Contains("II") ? 2 : model.Year.Contains("III") ? 3 : 4;
+                int semester = model.Semester.Contains("I") ? 1 : 2;
 
-                // Convert semester string to number (e.g., "I Semester" -> 1)
-                int semesterNumber = model.Semester switch
-                {
-                    "I Semester" => 1,
-                    "II Semester" => 2,
-                    _ => 1
-                };
-
-                // Create new student
+                // Hash password using BCrypt before storing
                 var student = new Student
                 {
                     FullName = model.FullName,
                     Email = model.Email,
-                    Password = model.Password, // In a real app, hash this password
+                    Password = BCrypt.Net.BCrypt.HashPassword(model.Password), // ? BCrypt Hash
                     RegdNumber = model.RegdNumber,
-                    Year = yearNumber,
-                    Semester = semesterNumber,
-                    Department = model.Department ?? "Computer Science",
-                    CreatedAt = DateTime.Now
+                    Year = year,
+                    Semester = semester,
+                    Department = model.Department
                 };
 
                 _context.Students.Add(student);
@@ -154,12 +122,8 @@ namespace TeamPro1.Controllers
                 TempData["SuccessMessage"] = "Registration successful! Please login.";
                 return RedirectToAction("Login");
             }
-            catch (Exception ex)
-            {
-                // Log the exception (in a real app, use proper logging)
-                ModelState.AddModelError("", "An error occurred during registration. Please try again.");
-                return View(model);
-            }
+
+            return View(model);
         }
 
         // GET: Student/MainDashboard
@@ -321,64 +285,41 @@ namespace TeamPro1.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
         {
-            if (!ModelState.IsValid)
+            var studentIdString = HttpContext.Session.GetString("StudentId");
+            if (string.IsNullOrEmpty(studentIdString))
             {
-                return View(model);
-            }
-
-            try
-            {
-                // Parse student ID
-                if (!int.TryParse(model.StudentId, out int studentId))
-                {
-                    TempData["ErrorMessage"] = "Invalid student ID. Please login again.";
-                    return RedirectToAction("Login");
-                }
-
-                // Find the student in database
-                var student = await _context.Students.FindAsync(studentId);
-                
-                if (student == null)
-                {
-                    TempData["ErrorMessage"] = "Student not found. Please login again.";
-                    return RedirectToAction("Login");
-                }
-
-                // Verify current password
-                if (student.Password != model.CurrentPassword)
-                {
-                    ModelState.AddModelError("CurrentPassword", "Current password is incorrect.");
-                    TempData["ErrorMessage"] = "Current password is incorrect.";
-                    return View(model);
-                }
-
-                // Check if new password is same as current password
-                if (model.CurrentPassword == model.NewPassword)
-                {
-                    ModelState.AddModelError("NewPassword", "New password must be different from current password.");
-                    TempData["ErrorMessage"] = "New password must be different from current password.";
-                    return View(model);
-                }
-
-                // Update password
-                student.Password = model.NewPassword; // In production, hash this password
-                
-                // Mark entity as modified
-                _context.Entry(student).State = EntityState.Modified;
-                await _context.SaveChangesAsync();
-
-                TempData["SuccessMessage"] = "Password changed successfully! Please login with your new password.";
-                
-                // Clear session and redirect to login
-                HttpContext.Session.Clear();
                 return RedirectToAction("Login");
             }
-            catch (Exception ex)
+
+            if (ModelState.IsValid)
             {
-                // Log the exception (in a real app, use proper logging)
-                TempData["ErrorMessage"] = "An error occurred while changing your password. Please try again.";
-                return View(model);
+                if (!int.TryParse(studentIdString, out int studentId))
+                {
+                    return RedirectToAction("Login");
+                }
+
+                var student = await _context.Students.FindAsync(studentId);
+                if (student == null)
+                {
+                    return RedirectToAction("Login");
+                }
+
+                // Verify current password using BCrypt
+                if (!BCrypt.Net.BCrypt.Verify(model.CurrentPassword, student.Password))
+                {
+                    ModelState.AddModelError("CurrentPassword", "Current password is incorrect");
+                    return View(model);
+                }
+
+                // Hash new password using BCrypt
+                student.Password = BCrypt.Net.BCrypt.HashPassword(model.NewPassword);
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Password changed successfully!";
+                return RedirectToAction("Dashboard");
             }
+
+            return View(model);
         }
 
         // GET: Student/PoolOfStudents

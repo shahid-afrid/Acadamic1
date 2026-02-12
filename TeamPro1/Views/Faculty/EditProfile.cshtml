@@ -339,17 +339,7 @@
 
                 <div class="form-group">
                     <label asp-for="Department"><i class="fas fa-building"></i> Department</label>
-                    <select asp-for="Department" class="form-control">
-                        <option value="Computer Science">Computer Science</option>
-                        <option value="CSE(DS)">CSE(DS)</option>
-                        <option value="CSE(AI&ML)">CSE(AI&ML)</option>
-                        <option value="Information Technology">Information Technology</option>
-                        <option value="Electronics">Electronics</option>
-                        <option value="Electrical">Electrical</option>
-                        <option value="Mechanical">Mechanical</option>
-                        <option value="Civil">Civil</option>
-                    </select>
-                    <span asp-validation-for="Department" class="field-validation-error"></span>
+                    <input asp-for="Department" class="form-control" readonly style="background-color: #e9ecef; cursor: not-allowed;" />
                 </div>
 
                 <div class="form-section">

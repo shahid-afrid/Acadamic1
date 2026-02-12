@@ -11,9 +11,6 @@ namespace TeamPro1.Models
         [Required(ErrorMessage = "Password is required")]
         [DataType(DataType.Password)]
         public string Password { get; set; }
-
-        [Required(ErrorMessage = "Please select your department")]
-        public string Department { get; set; }
     }
 
     public class AdminDashboardViewModel
