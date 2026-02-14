@@ -607,6 +607,155 @@
             margin-bottom: 10px;
         }
 
+        /* Be Individual Button */
+        .btn-individual {
+            background: linear-gradient(135deg, #6f42c1, #9b59b6);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 0.95em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(111, 66, 193, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Montserrat', Arial, sans-serif;
+        }
+
+        .btn-individual:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(111, 66, 193, 0.5);
+            background: linear-gradient(135deg, #5a32a3, #8e44ad);
+        }
+
+        .btn-individual:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+            transform: none;
+        }
+
+        /* Search Bar Styles */
+        .search-container {
+            background: rgba(249,250,242,0.95);
+            border-radius: 15px;
+            padding: 20px 25px;
+            backdrop-filter: blur(12px);
+            border: 2px solid var(--slate);
+            box-shadow: 0 6px 25px var(--card-shadow);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .search-container label {
+            font-weight: 700;
+            color: var(--royal-blue);
+            font-size: 1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-input-wrapper {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 45px 12px 18px;
+            border: 2px solid var(--slate);
+            border-radius: 25px;
+            font-size: 1em;
+            font-family: 'Montserrat', Arial, sans-serif;
+            transition: all 0.3s ease;
+            background: white;
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: var(--warm-gold);
+            box-shadow: 0 0 0 3px rgba(255, 200, 87, 0.25);
+        }
+
+        .search-input::placeholder {
+            color: #999;
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--royal-blue);
+            font-size: 1.1em;
+            pointer-events: none;
+        }
+
+        .search-clear {
+            position: absolute;
+            right: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 1em;
+            padding: 5px;
+            display: none;
+        }
+
+        .search-clear:hover {
+            color: var(--error-red);
+        }
+
+        .search-clear.visible {
+            display: block;
+        }
+
+        .search-results-count {
+            font-size: 0.9em;
+            color: #666;
+            padding: 8px 15px;
+            background: rgba(39, 64, 96, 0.08);
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        .search-results-count strong {
+            color: var(--royal-blue);
+        }
+
+        .no-search-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+            display: none;
+        }
+
+        .no-search-results.visible {
+            display: block;
+        }
+
+        .no-search-results i {
+            font-size: 3em;
+            color: var(--slate);
+            margin-bottom: 15px;
+        }
+
+        .no-search-results h4 {
+            color: var(--royal-blue);
+            margin-bottom: 10px;
+        }
+
         @@media (max-width: 768px) {
             .main-container {
                 padding: 0 15px;
@@ -676,6 +825,19 @@
             .students-table th:nth-child(4),
             .students-table td:nth-child(4) {
                 display: none;
+            }
+
+            .search-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-input-wrapper {
+                min-width: 100%;
+            }
+
+            .search-results-count {
+                text-align: center;
             }
         }
 
@@ -773,38 +935,6 @@
             color: #274060;
             font-weight: 600;
         }
-
-        /* Be Individual Button */
-        .btn-individual {
-            background: linear-gradient(135deg, #6f42c1, #9b59b6);
-            color: white;
-            border: none;
-            padding: 12px 28px;
-            border-radius: 25px;
-            font-weight: 700;
-            font-size: 0.95em;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(111, 66, 193, 0.3);
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-family: 'Montserrat', Arial, sans-serif;
-        }
-
-        .btn-individual:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(111, 66, 193, 0.5);
-            background: linear-gradient(135deg, #5a32a3, #8e44ad);
-        }
-
-        .btn-individual:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            opacity: 0.6;
-            transform: none;
-            box-shadow: none;
-        }
     </style>
 </head>
 <body>
@@ -881,8 +1011,29 @@
 
         @if (ViewBag.StudentPool != null && ViewBag.StudentPool.Count > 0)
         {
+            <!-- Search Bar -->
+            <div class="search-container">
+                <label for="studentSearch">
+                    <i class="fas fa-search"></i> Search Student:
+                </label>
+                <div class="search-input-wrapper">
+                    <input type="text" 
+                           id="studentSearch" 
+                           class="search-input" 
+                           placeholder="Enter name or registration number..."
+                           autocomplete="off">
+                    <button type="button" class="search-clear" id="searchClear" onclick="clearSearch()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+                <div class="search-results-count" id="searchResultsCount">
+                    Showing <strong id="visibleCount">@ViewBag.StudentPool.Count</strong> of <strong>@ViewBag.StudentPool.Count</strong> students
+                </div>
+            </div>
+
             <div class="table-container">
-                <table class="students-table">
+                <table class="students-table" id="studentsTable">
                     <thead>
                         <tr>
                             <th>S.No</th>
@@ -903,7 +1054,7 @@
                             var hasPendingRequest = item.HasPendingRequest;
                             var isInTeam = item.IsInTeam;
 
-                            <tr class="@(isInTeam ? "row-disabled" : "")">
+                            <tr class="@(isInTeam ? "row-disabled" : "")" data-name="@student.FullName" data-regdnumber="@student.RegdNumber">
                                 <td class="text-center">@serialNo</td>
                                 <td class="font-bold text-royal">@student.RegdNumber</td>
                                 <td>@student.FullName</td>
@@ -958,6 +1109,13 @@
                         }
                     </tbody>
                 </table>
+            </div>
+
+            <!-- No Search Results Message -->
+            <div class="no-search-results" id="noSearchResults">
+                <i class="fas fa-search"></i>
+                <h4>No Students Found</h4>
+                <p>No students match your search criteria. Try a different name or registration number.</p>
             </div>
         }
         else
@@ -1027,6 +1185,69 @@
     </footer>
 
     <script>
+        // Search functionality
+        const searchInput = document.getElementById('studentSearch');
+        const searchClear = document.getElementById('searchClear');
+        const visibleCountEl = document.getElementById('visibleCount');
+        const noSearchResults = document.getElementById('noSearchResults');
+        const tableContainer = document.querySelector('.table-container');
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase().trim();
+                
+                // Show/hide clear button
+                if (searchClear) {
+                    searchClear.classList.toggle('visible', searchTerm.length > 0);
+                }
+                
+                filterStudents(searchTerm);
+            });
+        }
+
+        function filterStudents(searchTerm) {
+            const tableRows = document.querySelectorAll('.students-table tbody tr');
+            let visibleCount = 0;
+
+            tableRows.forEach(row => {
+                const regdNumber = row.querySelector('td:nth-child(2)')?.textContent.toLowerCase() || '';
+                const studentName = row.querySelector('td:nth-child(3)')?.textContent.toLowerCase() || '';
+                
+                const matches = regdNumber.includes(searchTerm) || studentName.includes(searchTerm);
+                
+                if (matches || searchTerm === '') {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            // Update count
+            if (visibleCountEl) {
+                visibleCountEl.textContent = visibleCount;
+            }
+
+            // Show/hide no results message
+            if (noSearchResults && tableContainer) {
+                if (visibleCount === 0 && searchTerm !== '') {
+                    noSearchResults.classList.add('visible');
+                    tableContainer.style.display = 'none';
+                } else {
+                    noSearchResults.classList.remove('visible');
+                    tableContainer.style.display = '';
+                }
+            }
+        }
+
+        function clearSearch() {
+            if (searchInput) {
+                searchInput.value = '';
+                searchInput.dispatchEvent(new Event('input'));
+                searchInput.focus();
+            }
+        }
+
         function sendRequest(receiverId, regdNumber) {
             if (!confirm(`Send team request to ${regdNumber}?`)) {
                 return;
