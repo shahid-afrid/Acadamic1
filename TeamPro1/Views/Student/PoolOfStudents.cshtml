@@ -354,257 +354,22 @@
             opacity: 0.6;
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            background: rgba(249,250,242,0.95);
-            border-radius: 20px;
-            backdrop-filter: blur(12px);
-            border: 2px solid var(--slate);
-        }
-
-        .empty-state i {
-            font-size: 4em;
-            color: var(--slate);
-            margin-bottom: 20px;
-        }
-
-        .empty-state h3 {
-            color: var(--royal-blue);
-            font-size: 1.5em;
-            margin-bottom: 10px;
-        }
-
-        .empty-state p {
-            color: #666;
-            font-size: 1em;
-        }
-
-        /* Notification Bell Icon */
-        .notification-bell {
-            position: fixed;
-            top: 20px;
-            right: 80px;
-            background: rgba(249,250,242,0.95);
-            color: var(--royal-blue);
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5em;
-            cursor: pointer;
-            border: 2px solid var(--slate);
-            backdrop-filter: blur(8px);
-            transition: all 0.3s ease;
-            z-index: 100;
-            box-shadow: 0 4px 15px var(--card-shadow);
-        }
-
-        .notification-bell:hover {
-            background: var(--warm-gold);
-            transform: translateY(-3px) scale(1.1);
-            box-shadow: 0 6px 20px rgba(255, 200, 87, 0.4);
-        }
-
-        .notification-bell .badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: var(--error-red);
-            color: white;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7em;
-            font-weight: 700;
-            border: 2px solid white;
-            animation: pulse 2s infinite;
-        }
-
-        @@keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        /* Modal Dialog */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        @@keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .modal-dialog {
-            background: rgba(249,250,242,0.98);
-            border-radius: 20px;
-            padding: 0;
-            max-width: 600px;
-            width: 90%;
-            max-height: 80vh;
-            overflow: hidden;
-            backdrop-filter: blur(12px);
-            border: 3px solid var(--slate);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            animation: slideIn 0.3s ease;
-        }
-
-        @@keyframes slideIn {
-            from { transform: translateY(-50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .modal-header {
+        .btn-notification-ok {
             background: linear-gradient(135deg, var(--royal-blue), var(--warm-gold));
             color: white;
-            padding: 25px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-header h3 {
-            margin: 0;
-            font-size: 1.5em;
-            font-weight: 700;
-        }
-
-        .modal-close {
-            background: transparent;
-            border: none;
-            color: white;
-            font-size: 1.8em;
-            cursor: pointer;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: all 0.3s ease;
-        }
-
-        .modal-close:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: rotate(90deg);
-        }
-
-        .modal-body {
-            padding: 30px;
-            max-height: 60vh;
-            overflow-y: auto;
-        }
-
-        .request-card {
-            background: rgba(255, 255, 255, 0.8);
-            border: 2px solid var(--slate);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: all 0.3s ease;
-        }
-
-        .request-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px var(--card-shadow);
-            border-color: var(--warm-gold);
-        }
-
-        .request-info {
-            flex-grow: 1;
-        }
-
-        .request-from {
-            font-size: 1.2em;
-            font-weight: 700;
-            color: var(--royal-blue);
-            margin-bottom: 5px;
-        }
-
-        .request-regd {
-            font-size: 0.95em;
-            color: #666;
-        }
-
-        .request-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-accept {
-            background: linear-gradient(135deg, var(--success-green), #218838);
-            color: white;
             border: none;
             border-radius: 25px;
-            padding: 10px 20px;
-            font-size: 0.9em;
+            padding: 12px 28px;
+            font-size: 1em;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+            box-shadow: 0 4px 15px rgba(39, 64, 96, 0.3);
         }
 
-        .btn-accept:hover {
+        .btn-notification-ok:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.5);
-        }
-
-        .btn-reject {
-            background: linear-gradient(135deg, var(--error-red), #c82333);
-            color: white;
-            border: none;
-            border-radius: 25px;
-            padding: 10px 20px;
-            font-size: 0.9em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
-        }
-
-        .btn-reject:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.5);
-        }
-
-        .no-requests {
-            text-align: center;
-            padding: 40px 20px;
-            color: #666;
-        }
-
-        .no-requests i {
-            font-size: 3em;
-            color: var(--slate);
-            margin-bottom: 15px;
-        }
-
-        .no-requests h4 {
-            color: var(--royal-blue);
-            margin-bottom: 10px;
+            box-shadow: 0 6px 20px rgba(255, 200, 87, 0.5);
         }
 
         /* Be Individual Button */
@@ -756,13 +521,14 @@
             margin-bottom: 10px;
         }
 
+        /* Responsive Styles */
         @@media (max-width: 768px) {
             .main-container {
                 padding: 0 15px;
             }
 
             .dashboard-header {
-                padding: 25px 20px;
+                padding: 20px 15px;
             }
 
             .dashboard-header h2 {
@@ -771,60 +537,19 @@
 
             .nav-link {
                 position: static;
-                display: inline-flex;
-                margin-bottom: 20px;
+                display: inline-block;
+                margin-bottom: 15px;
             }
 
             .notification-bell {
                 position: static;
+                display: inline-flex;
+                margin-bottom: 15px;
                 margin-left: 10px;
             }
 
-            .modal-dialog {
-                width: 95%;
-            }
-
-            .request-card {
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            .request-actions {
-                width: 100%;
-            }
-
-            .btn-accept, .btn-reject {
-                flex: 1;
-            }
-
-            /* Mobile Table Styles */
-            .table-container {
-                padding: 15px;
-                overflow-x: auto;
-            }
-
-            .students-table {
-                font-size: 0.85em;
-            }
-
-            .students-table thead th {
-                padding: 12px 8px;
-                font-size: 0.9em;
-            }
-
-            .students-table tbody td {
-                padding: 12px 8px;
-            }
-
-            .btn-table {
-                padding: 6px 10px;
-                font-size: 0.75em;
-            }
-
-            /* Hide some columns on mobile */
-            .students-table th:nth-child(4),
-            .students-table td:nth-child(4) {
-                display: none;
+            .info-card {
+                padding: 15px 20px;
             }
 
             .search-container {
@@ -836,46 +561,23 @@
                 min-width: 100%;
             }
 
-            .search-results-count {
-                text-align: center;
-            }
-        }
-
-        @@media (max-width: 480px) {
-            /* Stack table for very small screens */
-            .students-table thead {
-                display: none;
+            .table-container {
+                padding: 15px;
+                overflow-x: auto;
             }
 
-            .students-table tbody tr {
-                display: block;
-                margin-bottom: 15px;
-                border: 2px solid var(--slate);
-                border-radius: 12px;
-                overflow: hidden;
+            .students-table {
+                font-size: 0.85em;
             }
 
+            .students-table thead th,
             .students-table tbody td {
-                display: block;
-                text-align: right;
-                padding: 10px 15px;
-                border-bottom: 1px solid var(--slate);
-                position: relative;
+                padding: 12px 8px;
             }
 
-            .students-table tbody td::before {
-                content: attr(data-label);
-                float: left;
-                font-weight: 700;
-                color: var(--royal-blue);
-            }
-
-            .students-table tbody td:last-child {
-                border-bottom: none;
-            }
-
-            .text-center {
-                text-align: right !important;
+            .btn-table {
+                font-size: 0.75em;
+                padding: 6px 12px;
             }
         }
 
@@ -934,6 +636,297 @@
         .footer-name {
             color: #274060;
             font-weight: 600;
+        }
+
+        /* Notification Bell Icon */
+        .notification-bell {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(249,250,242,0.95);
+            color: var(--royal-blue);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            cursor: pointer;
+            border: 2px solid var(--slate);
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+            z-index: 100;
+            box-shadow: 0 4px 15px var(--card-shadow);
+        }
+
+        .notification-bell:hover {
+            background: var(--warm-gold);
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: 0 6px 20px rgba(255, 200, 87, 0.4);
+        }
+
+        .notification-bell .badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--error-red);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7em;
+            font-weight: 700;
+            border: 2px solid white;
+            animation: pulse 2s infinite;
+            padding: 0;
+        }
+
+        /* Notification Popup/Modal Styles */
+        .notification-popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(39, 64, 96, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .notification-popup-overlay.show {
+            display: flex;
+        }
+
+        .notification-popup {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            max-width: 500px;
+            width: 90%;
+            animation: slideIn 0.3s ease;
+            overflow: hidden;
+        }
+
+        @@keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @@keyframes slideIn {
+            from {
+                transform: translateY(-30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .notification-popup-header {
+            background: linear-gradient(135deg, var(--royal-blue), var(--warm-gold));
+            color: white;
+            padding: 25px 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .notification-popup-header i {
+            font-size: 2em;
+        }
+
+        .notification-popup-header h3 {
+            margin: 0;
+            font-size: 1.4em;
+            font-weight: 700;
+            color: white;
+        }
+
+        .notification-popup-body {
+            padding: 30px;
+            text-align: center;
+        }
+
+        .notification-popup-body p {
+            font-size: 1.1em;
+            color: #333;
+            margin: 0 0 25px 0;
+            line-height: 1.6;
+        }
+
+        .notification-popup-footer {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Notification Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(39, 64, 96, 0.75);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-dialog {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 90%;
+            overflow: hidden;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--royal-blue), var(--warm-gold));
+            color: white;
+            padding: 25px 30px;
+            border-radius: 24px 24px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.4em;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-header .modal-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .modal-header .modal-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 30px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .request-card {
+            background: rgba(249,250,242,0.5);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 2px solid var(--slate);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .request-info {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .request-info .request-from {
+            font-weight: 700;
+            color: var(--royal-blue);
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .request-info .request-regd {
+            color: #666;
+            font-size: 0.9em;
+            font-family: 'Courier New', monospace;
+        }
+
+        .request-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-accept,
+        .btn-reject {
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .btn-accept {
+            background: linear-gradient(135deg, var(--success-green), #20c997);
+        }
+
+        .btn-accept:hover {
+            opacity: 0.9;
+        }
+
+        .btn-reject {
+            background: linear-gradient(135deg, var(--error-red), #c82333);
+        }
+
+        .btn-reject:hover {
+            opacity: 0.9;
+        }
+
+        /* Close button for modal */
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 1.5em;
+            padding: 0;
+            transition: color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: var(--error-red);
         }
     </style>
 </head>
@@ -1129,29 +1122,31 @@
     </div>
 
     <!-- Notification Modal -->
-    <div class="modal-overlay" id="notificationModal">
-        <div class="modal-dialog">
-            <div class="modal-header">
-                <h3><i class="fas fa-bell"></i> Team Requests</h3>
-                <button class="modal-close" onclick="closeNotificationModal()" aria-label="Close">
+    <div class="modal-overlay" id="notificationModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(39, 64, 96, 0.75); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center;">
+        <div class="modal-dialog" style="background: white; border-radius: 24px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3); max-width: 600px; width: 90%; overflow: hidden; animation: slideDown 0.3s ease-out;">
+            <div class="modal-header" style="background: linear-gradient(135deg, var(--royal-blue), var(--warm-gold)); color: white; padding: 25px 30px; display: flex; justify-content: space-between; align-items: center; position: relative;">
+                <h3 style="margin: 0; font-size: 1.4em; font-weight: 700; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-bell"></i> Team Requests
+                </h3>
+                <button class="modal-close" onclick="closeNotificationModal()" aria-label="Close" style="background: rgba(255, 255, 255, 0.2); border: none; color: white; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 1.2em; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; flex-shrink: 0;">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="padding: 30px; max-height: 500px; overflow-y: auto;">
                 @if (ViewBag.ReceivedRequests != null && ViewBag.ReceivedRequests.Count > 0)
                 {
                     foreach (var request in ViewBag.ReceivedRequests)
                     {
-                        <div class="request-card" id="request-@request.Id">
-                            <div class="request-info">
-                                <div class="request-from">@request.Sender.FullName</div>
-                                <div class="request-regd">@request.Sender.RegdNumber</div>
+                        <div class="request-card" id="request-@request.Id" style="background: rgba(249,250,242,0.5); border-radius: 12px; padding: 20px; margin-bottom: 15px; border: 2px solid var(--slate); display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap;">
+                            <div class="request-info" style="flex: 1; min-width: 200px;">
+                                <div class="request-from" style="font-weight: 700; color: var(--royal-blue); font-size: 1.1em; margin-bottom: 5px;">@request.Sender.FullName</div>
+                                <div class="request-regd" style="color: #666; font-size: 0.9em; font-family: 'Courier New', monospace;">@request.Sender.RegdNumber</div>
                             </div>
-                            <div class="request-actions">
-                                <button class="btn-accept" onclick="acceptRequest(@request.Id, '@request.Sender.RegdNumber')">
+                            <div class="request-actions" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <button class="btn-accept" onclick="acceptRequest(@request.Id, '@request.Sender.RegdNumber')" style="background: linear-gradient(135deg, var(--success-green), #20c997); color: white; border: none; border-radius: 20px; padding: 10px 20px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 6px; font-family: 'Montserrat', sans-serif;">
                                     <i class="fas fa-check"></i> Accept
                                 </button>
-                                <button class="btn-reject" onclick="rejectRequest(@request.Id, '@request.Sender.RegdNumber')">
+                                <button class="btn-reject" onclick="rejectRequest(@request.Id, '@request.Sender.RegdNumber')" style="background: linear-gradient(135deg, var(--error-red), #c82333); color: white; border: none; border-radius: 20px; padding: 10px 20px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 6px; font-family: 'Montserrat', sans-serif;">
                                     <i class="fas fa-times"></i> Reject
                                 </button>
                             </div>
@@ -1160,12 +1155,28 @@
                 }
                 else
                 {
-                    <div class="no-requests">
-                        <i class="fas fa-inbox"></i>
-                        <h4>No Pending Requests</h4>
-                        <p>You don't have any team requests at the moment.</p>
+                    <div class="no-requests" style="text-align: center; padding: 40px 20px; color: #666;">
+                        <i class="fas fa-inbox" style="font-size: 3em; color: var(--slate); margin-bottom: 15px; display: block;"></i>
+                        <h4 style="color: var(--royal-blue); margin-bottom: 10px; font-size: 1.2em;">No Pending Requests</h4>
+                        <p style="margin: 0;">You don't have any team requests at the moment.</p>
                     </div>
                 }
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Pop-up Overlay -->
+    <div class="notification-popup-overlay" id="notificationPopupOverlay">
+        <div class="notification-popup">
+            <div class="notification-popup-header">
+                <i class="fas fa-bell"></i>
+                <h3 id="popupTitle">Notification</h3>
+            </div>
+            <div class="notification-popup-body">
+                <p id="popupMessage"></p>
+            </div>
+            <div class="notification-popup-footer">
+                <button type="button" class="btn-notification-ok" onclick="closePopup()">OK</button>
             </div>
         </div>
     </div>
@@ -1184,38 +1195,26 @@
         </div>
     </footer>
 
+    @Html.AntiForgeryToken()
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
     <script>
         // Search functionality
         const searchInput = document.getElementById('studentSearch');
         const searchClear = document.getElementById('searchClear');
-        const visibleCountEl = document.getElementById('visibleCount');
-        const noSearchResults = document.getElementById('noSearchResults');
-        const tableContainer = document.querySelector('.table-container');
+        const tableRows = document.querySelectorAll('#studentsTable tbody tr');
+        const visibleCountSpan = document.getElementById('visibleCount');
+        const noResultsDiv = document.getElementById('noSearchResults');
 
-        if (searchInput) {
-            searchInput.addEventListener('input', function() {
-                const searchTerm = this.value.toLowerCase().trim();
-                
-                // Show/hide clear button
-                if (searchClear) {
-                    searchClear.classList.toggle('visible', searchTerm.length > 0);
-                }
-                
-                filterStudents(searchTerm);
-            });
-        }
-
-        function filterStudents(searchTerm) {
-            const tableRows = document.querySelectorAll('.students-table tbody tr');
+        searchInput?.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
             let visibleCount = 0;
 
             tableRows.forEach(row => {
-                const regdNumber = row.querySelector('td:nth-child(2)')?.textContent.toLowerCase() || '';
-                const studentName = row.querySelector('td:nth-child(3)')?.textContent.toLowerCase() || '';
+                const name = row.getAttribute('data-name')?.toLowerCase() || '';
+                const regdNumber = row.getAttribute('data-regdnumber')?.toLowerCase() || '';
                 
-                const matches = regdNumber.includes(searchTerm) || studentName.includes(searchTerm);
-                
-                if (matches || searchTerm === '') {
+                if (name.includes(searchTerm) || regdNumber.includes(searchTerm)) {
                     row.style.display = '';
                     visibleCount++;
                 } else {
@@ -1223,22 +1222,16 @@
                 }
             });
 
-            // Update count
-            if (visibleCountEl) {
-                visibleCountEl.textContent = visibleCount;
+            visibleCountSpan.textContent = visibleCount;
+            
+            if (searchClear) {
+                searchClear.classList.toggle('visible', searchTerm.length > 0);
             }
 
-            // Show/hide no results message
-            if (noSearchResults && tableContainer) {
-                if (visibleCount === 0 && searchTerm !== '') {
-                    noSearchResults.classList.add('visible');
-                    tableContainer.style.display = 'none';
-                } else {
-                    noSearchResults.classList.remove('visible');
-                    tableContainer.style.display = '';
-                }
+            if (noResultsDiv) {
+                noResultsDiv.classList.toggle('visible', visibleCount === 0 && searchTerm.length > 0);
             }
-        }
+        });
 
         function clearSearch() {
             if (searchInput) {
@@ -1248,178 +1241,176 @@
             }
         }
 
-        function sendRequest(receiverId, regdNumber) {
-            if (!confirm(`Send team request to ${regdNumber}?`)) {
-                return;
-            }
-
-            fetch('@Url.Action("SendTeamRequest", "Student")', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
-                },
-                body: `receiverId=${receiverId}&__RequestVerificationToken=${getAntiForgeryToken()}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    location.reload();
-                } else {
-                    alert(data.message);
-                }
-            })
-            .catch(error => {
-                alert('An error occurred. Please try again.');
-                console.error('Error:', error);
-            });
-        }
-
-        function cancelRequest(receiverId, regdNumber) {
-            if (!confirm(`Cancel team request to ${regdNumber}?`)) {
-                return;
-            }
-
-            fetch('@Url.Action("CancelTeamRequest", "Student")', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
-                },
-                body: `receiverId=${receiverId}&__RequestVerificationToken=${getAntiForgeryToken()}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    location.reload();
-                } else {
-                    alert(data.message);
-                }
-            })
-            .catch(error => {
-                alert('An error occurred. Please try again.');
-                console.error('Error:', error);
-            });
-        }
-
-        // Modal functions
+        // Notification Modal functions
         function openNotificationModal() {
-            document.getElementById('notificationModal').classList.add('active');
+            const modal = document.getElementById('notificationModal');
+            if (modal) {
+                modal.style.display = 'flex';
+            }
         }
 
         function closeNotificationModal() {
-            document.getElementById('notificationModal').classList.remove('active');
+            const modal = document.getElementById('notificationModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
         }
 
-        // Close modal when clicking outside
+        // Close modal when clicking outside (on the overlay)
         document.getElementById('notificationModal')?.addEventListener('click', function(e) {
             if (e.target === this) {
                 closeNotificationModal();
             }
         });
 
-        // Accept request function
-        function acceptRequest(requestId, regdNumber) {
-            if (!confirm(`Accept team request from ${regdNumber}? This will form a team.`)) {
-                return;
+        // Close modal when pressing Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeNotificationModal();
+                closePopup();
             }
+        });
 
-            fetch('@Url.Action("AcceptRequest", "Student")', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
-                },
-                body: `requestId=${requestId}&__RequestVerificationToken=${getAntiForgeryToken()}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
-                if (data.success) {
-                    closeNotificationModal();
-                    location.reload();
-                }
-            })
-            .catch(error => {
-                alert('An error occurred. Please try again.');
-                console.error('Error:', error);
-            });
+        // Popup functions
+        function showPopup(title, message) {
+            document.getElementById('popupTitle').textContent = title;
+            document.getElementById('popupMessage').textContent = message;
+            document.getElementById('notificationPopupOverlay').classList.add('show');
         }
 
-        // Reject request function
-        function rejectRequest(requestId, regdNumber) {
-            if (!confirm(`Reject team request from ${regdNumber}?`)) {
-                return;
-            }
-
-            fetch('@Url.Action("RejectRequest", "Student")', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
-                },
-                body: `requestId=${requestId}&__RequestVerificationToken=${getAntiForgeryToken()}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
-                if (data.success) {
-                    // Remove the request card
-                    const requestCard = document.getElementById(`request-${requestId}`);
-                    if (requestCard) {
-                        requestCard.style.transition = 'all 0.3s ease';
-                        requestCard.style.opacity = '0';
-                        requestCard.style.transform = 'translateX(100%)';
-                        setTimeout(() => {
-                            requestCard.remove();
-                            // Check if no more requests
-                            const remainingRequests = document.querySelectorAll('.request-card');
-                            if (remainingRequests.length === 0) {
-                                location.reload();
-                            }
-                        }, 300);
-                    }
-                }
-            })
-            .catch(error => {
-                alert('An error occurred. Please try again.');
-                console.error('Error:', error);
-            });
+        function closePopup() {
+            document.getElementById('notificationPopupOverlay').classList.remove('show');
         }
 
-        function getAntiForgeryToken() {
-            return document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+        // Team request functions
+        async function sendRequest(studentId, regdNumber) {
+            if (!confirm('Send team request to ' + regdNumber + '?')) return;
+
+            try {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                const formData = new FormData();
+                formData.append('receiverId', studentId);
+                formData.append('__RequestVerificationToken', token);
+
+                const response = await fetch('@Url.Action("SendTeamRequest", "Student")', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showPopup('Success', result.message);
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showPopup('Error', result.message);
+                }
+            } catch (error) {
+                showPopup('Error', 'An error occurred. Please try again.');
+            }
         }
 
-        function beIndividual() {
-            if (!confirm('Are you sure you want to register as an individual team?\n\nThis means you will work alone without a teammate.\nAny pending requests will be cancelled.\n\nThis action cannot be undone.')) {
-                return;
-            }
+        async function cancelRequest(studentId, regdNumber) {
+            if (!confirm('Cancel team request to ' + regdNumber + '?')) return;
 
-            fetch('@Url.Action("BeIndividual", "Student")', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
-                },
-                body: `__RequestVerificationToken=${getAntiForgeryToken()}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
-                if (data.success) {
-                    location.reload();
+            try {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                const formData = new FormData();
+                formData.append('receiverId', studentId);
+                formData.append('__RequestVerificationToken', token);
+
+                const response = await fetch('@Url.Action("CancelTeamRequest", "Student")', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showPopup('Success', result.message);
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showPopup('Error', result.message);
                 }
-            })
-            .catch(error => {
-                alert('An error occurred. Please try again.');
-                console.error('Error:', error);
-            });
+            } catch (error) {
+                showPopup('Error', 'An error occurred. Please try again.');
+            }
+        }
+
+        async function acceptRequest(requestId, senderRegdNumber) {
+            if (!confirm('Accept team request from ' + senderRegdNumber + '?')) return;
+
+            try {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                const formData = new FormData();
+                formData.append('requestId', requestId);
+                formData.append('__RequestVerificationToken', token);
+
+                const response = await fetch('@Url.Action("AcceptRequest", "Student")', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showPopup('Success', result.message);
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showPopup('Error', result.message);
+                }
+            } catch (error) {
+                showPopup('Error', 'An error occurred. Please try again.');
+            }
+        }
+
+        async function rejectRequest(requestId, senderRegdNumber) {
+            if (!confirm('Reject team request from ' + senderRegdNumber + '?')) return;
+
+            try {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                const formData = new FormData();
+                formData.append('requestId', requestId);
+                formData.append('__RequestVerificationToken', token);
+
+                const response = await fetch('@Url.Action("RejectRequest", "Student")', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showPopup('Success', result.message);
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showPopup('Error', result.message);
+                }
+            } catch (error) {
+                showPopup('Error', 'An error occurred. Please try again.');
+            }
+        }
+
+        async function beIndividual() {
+            if (!confirm('Register as an individual team? You will work alone on your project.')) return;
+
+            try {
+                const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                const formData = new FormData();
+                formData.append('__RequestVerificationToken', token);
+
+                const response = await fetch('@Url.Action("BeIndividual", "Student")', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showPopup('Success', result.message);
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showPopup('Error', result.message);
+                }
+            } catch (error) {
+                showPopup('Error', 'An error occurred. Please try again.');
+            }
         }
     </script>
-
-    @Html.AntiForgeryToken()
 </body>
 </html>

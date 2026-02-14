@@ -394,6 +394,12 @@ namespace TeamPro1.Controllers
                     IsInTeam = existingTeams.Any(t => t.Student1Id == s.Id || t.Student2Id == s.Id)
                 }).ToList();
 
+                // Get unread notifications for pop-up display
+                var unreadNotifications = await _context.Notifications
+                    .Where(n => n.StudentId == currentStudentId && !n.IsRead)
+                    .OrderByDescending(n => n.CreatedAt)
+                    .ToListAsync();
+
                 ViewBag.CurrentStudentId = currentStudentId;
                 ViewBag.CurrentStudentName = currentStudent.FullName;
                 ViewBag.CurrentStudentRegdNumber = currentStudent.RegdNumber;
@@ -402,6 +408,7 @@ namespace TeamPro1.Controllers
                 ViewBag.ReceivedRequests = receivedRequests; // NEW: Pass received requests
                 ViewBag.ReceivedRequestsCount = receivedRequests.Count; // NEW: Count for badge
                 ViewBag.StudentPool = studentPool;
+                ViewBag.UnreadNotifications = unreadNotifications; // NEW: Pass unread notifications
 
                 return View();
             }
@@ -616,6 +623,8 @@ namespace TeamPro1.Controllers
 
                 // Find the request
                 var request = await _context.TeamRequests
+                    .Include(tr => tr.Sender)
+                    .Include(tr => tr.Receiver)
                     .FirstOrDefaultAsync(tr => tr.Id == requestId && 
                                               tr.ReceiverId == currentStudentId && 
                                               tr.Status == "Pending");
@@ -629,6 +638,17 @@ namespace TeamPro1.Controllers
                 request.Status = "Rejected";
                 request.UpdatedAt = DateTime.Now;
 
+                // Create notification for the sender
+                var notification = new Notification
+                {
+                    StudentId = request.SenderId,
+                    Message = $"{request.Receiver.FullName} ({request.Receiver.RegdNumber}) has rejected your team request.",
+                    Type = "danger",
+                    IsRead = false,
+                    CreatedAt = DateTime.Now
+                };
+
+                _context.Notifications.Add(notification);
                 await _context.SaveChangesAsync();
 
                 return Json(new { success = true, message = "Request rejected successfully!" });
@@ -1300,6 +1320,44 @@ namespace TeamPro1.Controllers
             catch (Exception ex)
             {
                 return Json(new { success = false, message = "An error occurred. Please try again." });
+            }
+        }
+
+        // POST: Student/MarkNotificationsRead
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MarkNotificationsRead()
+        {
+            var studentIdString = HttpContext.Session.GetString("StudentId");
+            if (string.IsNullOrEmpty(studentIdString))
+            {
+                return Json(new { success = false, message = "Please login first." });
+            }
+
+            try
+            {
+                if (!int.TryParse(studentIdString, out int currentStudentId))
+                {
+                    return Json(new { success = false, message = "Invalid session." });
+                }
+
+                // Mark all unread notifications as read
+                var unreadNotifications = await _context.Notifications
+                    .Where(n => n.StudentId == currentStudentId && !n.IsRead)
+                    .ToListAsync();
+
+                foreach (var notification in unreadNotifications)
+                {
+                    notification.IsRead = true;
+                }
+
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "An error occurred." });
             }
         }
     }

@@ -32,6 +32,9 @@ namespace TeamPro1.Models
         // Team Formation Schedule
         public DbSet<TeamFormationSchedule> TeamFormationSchedules { get; set; }
 
+        // Notifications
+        public DbSet<Notification> Notifications { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -98,6 +101,13 @@ namespace TeamPro1.Models
                 .HasOne(al => al.Team)
                 .WithMany()
                 .HasForeignKey(al => al.TeamId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Configure Notification relationships
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.Student)
+                .WithMany()
+                .HasForeignKey(n => n.StudentId)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }
