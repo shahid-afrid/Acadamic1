@@ -260,35 +260,6 @@ namespace TeamPro1.Controllers
             return View(assignedTeams);
         }
 
-        // GET: Faculty/AllTeams - View all teams
-        [HttpGet]
-        public async Task<IActionResult> AllTeams()
-        {
-            var facultyId = HttpContext.Session.GetInt32("FacultyId");
-            if (facultyId == null)
-            {
-                TempData["ErrorMessage"] = "Please login to view teams.";
-                return RedirectToAction("Login");
-            }
-
-            var teams = await _context.Teams
-                .Include(t => t.Student1)
-                .Include(t => t.Student2)
-                .OrderBy(t => t.TeamNumber)
-                .ToListAsync();
-
-            // Get project progress for each team
-            var projectProgresses = await _context.ProjectProgresses
-                .Include(pp => pp.AssignedFaculty)
-                .ToListAsync();
-
-            ViewBag.ProjectProgresses = projectProgresses;
-            ViewBag.FacultyName = HttpContext.Session.GetString("FacultyName");
-            ViewBag.CurrentFacultyId = facultyId.Value;
-
-            return View(teams);
-        }
-
         // GET: Faculty/TeamDetails/{id}
         [HttpGet]
         public async Task<IActionResult> TeamDetails(int id)

@@ -1,0 +1,8 @@
+[33m56ee5db[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Update project with security improvements and batch files
+[33m2377eab[m[33m ([m[1;31mcasestudy/main[m[33m)[m Update student dashboard and add admin/faculty features with team formation schedule
+[33m80dfba9[m feat: Complete Team Formation System with SignalR, Meeting Tracking, and All Features
+[33m7aaa55f[m fix: Restore TeamPro1.csproj that was deleted during merge
+[33mff8d3b1[m Merge remote changes and keep local working code
+[33m81e9477[m feat: Add meeting tracking system with lock/unlock logic and comprehensive error handling
+[33m24a6a91[m Delete TeamPro1 directory
+[33m282dc1f[m Initial commit: Team Formation System
