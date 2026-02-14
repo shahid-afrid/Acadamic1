@@ -54,13 +54,13 @@ dotnet ef database update
 **Test Credentials (After Fresh Start):**
 
 **Admin:**
-- Email: `admin.cseds@rgm.ac.in`
-- Password: `admin123`
+- Email: ``
+- Password: ``
 - Department: `CSE(DS)`
 
 **Faculty:**
-- Email: `penchala.prasad@rgm.ac.in`
-- Password: `faculty123`
+- Email: ``
+- Password: ``
 
 **Students:**
 - Any registered students will use their original passwords (now securely hashed)
