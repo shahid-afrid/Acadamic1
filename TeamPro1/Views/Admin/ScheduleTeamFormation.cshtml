@@ -270,7 +270,7 @@
         .alert-danger {
             background: rgba(220,53,69,0.15);
             color: var(--error-red);
-            border: 1px solid var(--error-red);
+            border: 1px solid var,--error-red);
         }
 
         /* Toast notification */
@@ -331,13 +331,11 @@
     </style>
 </head>
 <body>
+    @Html.Partial("_AdminBackButton")
+    
     <div id="toastNotification" class="toast-notification"></div>
 
     <div class="main-container">
-        <a href="@Url.Action("Dashboard", "Admin")" class="back-btn">
-            <i class="fas fa-arrow-left"></i> Back to Dashboard
-        </a>
-
         @* Hidden form just to render the anti-forgery token into the DOM *@
         <form id="antiForgeryForm" style="display:none;">
             @Html.AntiForgeryToken()

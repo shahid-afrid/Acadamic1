@@ -279,7 +279,7 @@
         .logout-btn {
             position: fixed;
             top: 20px;
-            right: 20px;
+            left: 20px;
             background: linear-gradient(135deg, var(--error-red), #a71d2a);
             color: white;
             padding: 10px 20px;
@@ -308,16 +308,10 @@
             font-size: 1.1em;
         }
 
-        /* Adjust nav-link for logout button */
-        .nav-link {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-        }
-
         @@media (max-width: 768px) {
             .main-container {
                 padding: 0 15px;
+                margin-top: 80px; /* Add margin to avoid overlap with logout/bell on mobile */
             }
 
             .dashboard-header {
@@ -345,26 +339,6 @@
 
             .card-icon {
                 font-size: 3em;
-            }
-
-            .nav-link {
-                position: static;
-                display: inline-block;
-                margin-bottom: 20px;
-            }
-
-            .logout-btn {
-                position: static;
-                display: inline-flex;
-                margin-bottom: 10px;
-                margin-left: 10px;
-            }
-
-            .mobile-nav {
-                display: flex;
-                gap: 10px;
-                flex-wrap: wrap;
-                margin-bottom: 20px;
             }
         }
     
@@ -441,13 +415,7 @@
     </style>
 </head>
 <body>
-    <div class="mobile-nav" style="padding: 20px;">
-        <a href="@Url.Action("Index", "Home")" class="nav-link">Home</a>
-        <a href="@Url.Action("Logout", "Student")" class="logout-btn" 
-           onclick="return confirm('Are you sure you want to logout?')">
-            <i class="fas fa-sign-out-alt"></i> Logout
-        </a>
-    </div>
+    @Html.Partial("_NotificationBell")
     
     <div class="main-container">
         <div class="dashboard-header">

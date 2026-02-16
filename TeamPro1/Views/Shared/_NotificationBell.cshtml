@@ -1,0 +1,644 @@
+@* Notification Bell Component - Reusable across all student pages *@
+
+<style>
+    .notification-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .notification-bell-icon {
+        position: relative;
+        cursor: pointer;
+        background: linear-gradient(135deg, var(--royal-blue), #1a2f47);
+        color: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(39, 64, 96, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .notification-bell-icon:hover {
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 6px 20px rgba(39, 64, 96, 0.4);
+    }
+
+    .notification-bell-icon i {
+        font-size: 1.3em;
+    }
+
+    .notification-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: white;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75em;
+        font-weight: 700;
+        box-shadow: 0 2px 8px rgba(220, 53, 69, 0.4);
+        animation: pulse 2s infinite;
+    }
+
+    @@keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+
+    /* NEW: Logout button styles */
+    .logout-btn-bell {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: white;
+        border: none;
+        border-radius: 25px;
+        padding: 12px 20px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        transition: all 0.3s ease;
+        font-size: 0.95em;
+    }
+
+    .logout-btn-bell:hover {
+        background: linear-gradient(135deg, #c82333, #dc3545);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(220, 53, 69, 0.4);
+        text-decoration: none;
+        color: white;
+    }
+
+    .logout-btn-bell i {
+        font-size: 1.1em;
+    }
+
+    .notification-dropdown {
+        position: absolute;
+        top: 60px;
+        right: 0;
+        width: 380px;
+        max-height: 500px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+        display: none;
+        animation: slideDown 0.3s ease;
+    }
+
+    .notification-dropdown.show {
+        display: block;
+    }
+
+    @@keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .notification-header {
+        background: linear-gradient(135deg, var(--royal-blue), #1a2f47);
+        color: white;
+        padding: 18px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 2px solid var(--warm-gold);
+    }
+
+    .notification-header h4 {
+        margin: 0;
+        font-size: 1.1em;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .notification-close {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .notification-close:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: rotate(90deg);
+    }
+
+    .notification-list {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .notification-item {
+        padding: 15px 20px;
+        border-bottom: 1px solid #eee;
+        transition: background 0.3s ease;
+        cursor: pointer;
+    }
+
+    .notification-item:hover {
+        background: rgba(255, 200, 87, 0.05);
+    }
+
+    .notification-item.unread {
+        background: rgba(255, 200, 87, 0.1);
+        border-left: 4px solid var(--warm-gold);
+    }
+
+    .notification-item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 8px;
+    }
+
+    .notification-title {
+        font-weight: 700;
+        color: var(--royal-blue);
+        font-size: 0.95em;
+        flex: 1;
+    }
+
+    .notification-time {
+        font-size: 0.75em;
+        color: #999;
+        white-space: nowrap;
+        margin-left: 10px;
+    }
+
+    .notification-message {
+        font-size: 0.85em;
+        color: #666;
+        line-height: 1.5;
+        margin-bottom: 10px;
+    }
+
+    .notification-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+    }
+
+    .notification-btn {
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.8em;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .notification-btn-accept {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+    }
+
+    .notification-btn-accept:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+
+    .notification-btn-reject {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: white;
+    }
+
+    .notification-btn-reject:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    }
+
+    .notification-empty {
+        padding: 40px 20px;
+        text-align: center;
+        color: #999;
+    }
+
+    .notification-empty i {
+        font-size: 3em;
+        color: #ddd;
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    .notification-footer {
+        padding: 12px 20px;
+        text-align: center;
+        border-top: 1px solid #eee;
+        background: #f8f9fa;
+    }
+
+    .notification-footer a {
+        color: var(--royal-blue);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9em;
+        transition: color 0.3s ease;
+    }
+
+    .notification-footer a:hover {
+        color: var(--warm-gold);
+    }
+
+    .loading-spinner {
+        text-align: center;
+        padding: 30px;
+        color: #999;
+    }
+
+    .loading-spinner i {
+        font-size: 2em;
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        100% { transform: rotate(360deg); }
+    }
+
+    @@media (max-width: 768px) {
+        .notification-container {
+            top: 10px;
+            right: 10px;
+            flex-direction: column-reverse;
+            gap: 10px;
+        }
+
+        .notification-dropdown {
+            width: calc(100vw - 20px);
+            right: -15px;
+        }
+
+        .logout-btn-bell {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            padding: 0;
+            justify-content: center;
+        }
+
+        .logout-btn-bell span {
+            display: none;
+        }
+
+        .logout-btn-bell i {
+            margin: 0;
+        }
+    }
+</style>
+
+<div class="notification-container">
+    <!-- Logout Button -->
+    <a href="@Url.Action("Logout", "Student")" class="logout-btn-bell" 
+       onclick="return confirm('Are you sure you want to logout?')">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
+    </a>
+
+    <!-- Notification Bell -->
+    <div class="notification-bell-icon" onclick="toggleNotifications()">
+        <i class="fas fa-bell"></i>
+        <span id="notificationBadge" class="notification-badge" style="display: none;">0</span>
+    </div>
+
+    <div id="notificationDropdown" class="notification-dropdown">
+        <div class="notification-header">
+            <h4>
+                <i class="fas fa-bell"></i>
+                Notifications
+            </h4>
+            <button class="notification-close" onclick="closeNotifications()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="notification-list" id="notificationList">
+            <div class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading notifications...</p>
+            </div>
+        </div>
+
+        <div class="notification-footer">
+            <a href="@Url.Action("MeetingInvitations", "Student")">
+                <i class="fas fa-calendar-alt"></i> View All Meetings
+            </a>
+        </div>
+    </div>
+</div>
+
+@Html.AntiForgeryToken()
+
+<script>
+    let notificationDropdownOpen = false;
+    let hasViewedNotifications = false;
+
+    // Toggle notification dropdown
+    function toggleNotifications() {
+        notificationDropdownOpen = !notificationDropdownOpen;
+        const dropdown = document.getElementById('notificationDropdown');
+        
+        if (notificationDropdownOpen) {
+            dropdown.classList.add('show');
+            loadNotifications();
+            hasViewedNotifications = true;
+        } else {
+            dropdown.classList.remove('show');
+        }
+    }
+
+    // Close notification dropdown
+    function closeNotifications() {
+        notificationDropdownOpen = false;
+        document.getElementById('notificationDropdown').classList.remove('show');
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        const container = document.querySelector('.notification-container');
+        if (container && !container.contains(event.target) && notificationDropdownOpen) {
+            closeNotifications();
+        }
+    });
+
+    // Load notifications
+    async function loadNotifications() {
+        const listDiv = document.getElementById('notificationList');
+        
+        try {
+            const response = await fetch('@Url.Action("GetMeetingInvitations", "Student")');
+            const result = await response.json();
+            
+            if (result.success && result.invitations && result.invitations.length > 0) {
+                // Filter out invitations older than 48 hours
+                const now = new Date();
+                const cutoff48Hours = new Date(now.getTime() - (48 * 60 * 60 * 1000));
+                
+                const validInvitations = result.invitations.filter(invite => {
+                    try {
+                        // Parse the meeting date string (format: "MMM dd, yyyy hh:mm tt")
+                        const meetingDate = new Date(invite.meetingDateTime);
+                        return meetingDate >= cutoff48Hours;
+                    } catch (e) {
+                        // If date parsing fails, keep the invitation
+                        return true;
+                    }
+                });
+                
+                if (validInvitations.length > 0) {
+                    let html = '';
+                    
+                    validInvitations.forEach(invite => {
+                        const isUnread = invite.canRespond;
+                        const unreadClass = isUnread ? 'unread' : '';
+                        
+                        html += `<div class="notification-item ${unreadClass}">`;
+                        html += `  <div class="notification-item-header">`;
+                        html += `    <div class="notification-title">`;
+                        html += `      <i class="fas fa-calendar-check"></i> ${invite.title}`;
+                        html += `    </div>`;
+                        html += `    <div class="notification-time">`;
+                        html += `      <i class="fas fa-clock"></i> ${getTimeAgo(invite.meetingDateTime)}`;
+                        html += `    </div>`;
+                        html += `  </div>`;
+                        html += `  <div class="notification-message">`;
+                        html += `    <strong>From:</strong> ${invite.facultyName}<br>`;
+                        html += `    <strong>When:</strong> ${invite.meetingDateTime}<br>`;
+                        if (invite.location) {
+                            html += `    <strong>Where:</strong> ${invite.location}<br>`;
+                        }
+                        if (invite.description) {
+                            html += `    <strong>Agenda:</strong> ${invite.description.substring(0, 100)}${invite.description.length > 100 ? '...' : ''}`;
+                        }
+                        html += `  </div>`;
+                        
+                        if (invite.canRespond) {
+                            html += `  <div class="notification-actions">`;
+                            html += `    <button class="notification-btn notification-btn-accept" onclick="respondToInvite(${invite.id}, 'Accepted')">`;
+                            html += `      <i class="fas fa-check"></i> Accept`;
+                            html += `    </button>`;
+                            html += `    <button class="notification-btn notification-btn-reject" onclick="respondToInvite(${invite.id}, 'Rejected')">`;
+                            html += `      <i class="fas fa-times"></i> Decline`;
+                            html += `    </button>`;
+                            html += `  </div>`;
+                        } else {
+                            html += `  <div style="padding: 8px 0; font-size: 0.85em; color: #666;">`;
+                            html += `    <i class="fas fa-info-circle"></i> Your response: <strong>${invite.myResponse}</strong>`;
+                            html += `  </div>`;
+                        }
+                        
+                        html += `</div>`;
+                    });
+                    
+                    listDiv.innerHTML = html;
+                } else {
+                    listDiv.innerHTML = `
+                        <div class="notification-empty">
+                            <i class="fas fa-inbox"></i>
+                            <p>No meeting invitations yet</p>
+                        </div>
+                    `;
+                }
+            } else {
+                listDiv.innerHTML = `
+                    <div class="notification-empty">
+                        <i class="fas fa-inbox"></i>
+                        <p>No meeting invitations yet</p>
+                    </div>
+                `;
+            }
+        } catch (error) {
+            console.error('Error loading notifications:', error);
+            listDiv.innerHTML = `
+                <div class="notification-empty">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>Error loading notifications</p>
+                </div>
+            `;
+        }
+    }
+
+    // Update notification badge count
+    async function updateNotificationBadge() {
+        try {
+            const response = await fetch('@Url.Action("GetMeetingInvitations", "Student")');
+            const result = await response.json();
+            
+            if (result.success && result.invitations) {
+                // Filter out invitations older than 48 hours
+                const now = new Date();
+                const cutoff48Hours = new Date(now.getTime() - (48 * 60 * 60 * 1000));
+                
+                const validInvitations = result.invitations.filter(invite => {
+                    try {
+                        const meetingDate = new Date(invite.meetingDateTime);
+                        return meetingDate >= cutoff48Hours;
+                    } catch (e) {
+                        return true;
+                    }
+                });
+                
+                // Count only pending invitations that user can respond to
+                const pendingCount = validInvitations.filter(i => i.canRespond).length;
+                const badge = document.getElementById('notificationBadge');
+                
+                if (pendingCount > 0 && !hasViewedNotifications) {
+                    // Show badge only if user hasn't viewed notifications yet
+                    badge.textContent = pendingCount;
+                    badge.style.display = 'flex';
+                } else {
+                    // Hide badge after user views notifications or if no pending
+                    badge.style.display = 'none';
+                }
+            }
+        } catch (error) {
+            console.error('Error updating badge:', error);
+        }
+    }
+
+    // Respond to meeting invitation
+    async function respondToInvite(invitationId, response) {
+        try {
+            const formData = new FormData();
+            formData.append('invitationId', invitationId);
+            formData.append('response', response);
+            
+            const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+            if (tokenInput) {
+                formData.append('__RequestVerificationToken', tokenInput.value);
+            }
+            
+            const result = await fetch('@Url.Action("RespondToMeetingInvite", "Student")', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await result.json();
+            
+            if (data.success) {
+                // Show success message
+                showNotificationMessage(data.message, 'success');
+                
+                // Reload notifications and update badge
+                await loadNotifications();
+                hasViewedNotifications = false; // Reset so badge shows new count
+                await updateNotificationBadge();
+            } else {
+                showNotificationMessage(data.message, 'error');
+            }
+        } catch (error) {
+            console.error('Error responding to invitation:', error);
+            showNotificationMessage('Error responding to invitation', 'error');
+        }
+    }
+
+    // Show notification message
+    function showNotificationMessage(message, type) {
+        const color = type === 'success' ? '#28a745' : '#dc3545';
+        const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+        
+        const msgDiv = document.createElement('div');
+        msgDiv.style.cssText = `
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            border-left: 4px solid ${color};
+            z-index: 10000;
+            animation: slideIn 0.3s ease;
+        `;
+        msgDiv.innerHTML = `
+            <i class="fas ${icon}" style="color: ${color}; margin-right: 10px;"></i>
+            <span style="color: #333; font-weight: 600;">${message}</span>
+        `;
+        
+        document.body.appendChild(msgDiv);
+        
+        setTimeout(() => {
+            msgDiv.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => msgDiv.remove(), 300);
+        }, 3000);
+    }
+
+    // Helper function to get relative time
+    function getTimeAgo(dateTimeString) {
+        const date = new Date(dateTimeString);
+        const now = new Date();
+        const diffMs = date - now;
+        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        
+        if (diffDays > 0) {
+            return `in ${diffDays} day${diffDays > 1 ? 's' : ''}`;
+        } else if (diffHours > 0) {
+            return `in ${diffHours} hour${diffHours > 1 ? 's' : ''}`;
+        } else if (diffMs > 0) {
+            return 'soon';
+        } else {
+            // For past meetings
+            const pastDiffHours = Math.abs(diffHours);
+            const pastDiffDays = Math.abs(diffDays);
+            
+            if (pastDiffDays > 0) {
+                return `${pastDiffDays} day${pastDiffDays > 1 ? 's' : ''} ago`;
+            } else if (pastDiffHours > 0) {
+                return `${pastDiffHours} hour${pastDiffHours > 1 ? 's' : ''} ago`;
+            } else {
+                return 'just passed';
+            }
+        }
+    }
+
+    // Update badge on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        updateNotificationBadge();
+        
+        // Update badge every 30 seconds
+        setInterval(updateNotificationBadge, 30000);
+    });
+
+    // Reset the "viewed" flag when user navigates away and comes back
+    window.addEventListener('focus', function() {
+        if (!notificationDropdownOpen) {
+            hasViewedNotifications = false;
+            updateNotificationBadge();
+        }
+    });
+</script>

@@ -1,0 +1,488 @@
+[1mdiff --git a/TeamPro1/Views/Student/StatusUpdate.cshtml b/TeamPro1/Views/Student/StatusUpdate.cshtml[m
+[1mindex b98e791..51e1827 100644[m
+[1m--- a/TeamPro1/Views/Student/StatusUpdate.cshtml[m
+[1m+++ b/TeamPro1/Views/Student/StatusUpdate.cshtml[m
+[36m@@ -975,35 +975,192 @@[m
+             padding: 10px;[m
+         }[m
+ [m
+[31m-        @@media (max-width: 768px) {[m
+[31m-            .page-header {[m
+[31m-                flex-direction: column;[m
+[31m-                gap: 20px;[m
+[31m-                text-align: center;[m
+[31m-            }[m
+[32m+[m[32m        /* Meeting Invitations Styles */[m
+[32m+[m[32m        .meeting-invitation-card {[m
+[32m+[m[32m            background: white;[m
+[32m+[m[32m            border: 2px solid var(--slate);[m
+[32m+[m[32m            border-radius: 15px;[m
+[32m+[m[32m            padding: 20px;[m
+[32m+[m[32m            margin-bottom: 15px;[m
+[32m+[m[32m            transition: all 0.3s ease;[m
+[32m+[m[32m        }[m
+ [m
+[31m-            .page-header h1 {[m
+[31m-                font-size: 1.6em;[m
+[31m-            }[m
+[32m+[m[32m        .meeting-invitation-card.pending {[m
+[32m+[m[32m            border-left: 5px solid var(--warning-orange);[m
+[32m+[m[32m        }[m
+ [m
+[31m-            .info-grid {[m
+[31m-                grid-template-columns: 1fr;[m
+[31m-            }[m
+[32m+[m[32m        .meeting-invitation-card.accepted {[m
+[32m+[m[32m            border-left: 5px solid var(--success-green);[m
+[32m+[m[32m            background: rgba(40, 167, 69, 0.05);[m
+[32m+[m[32m        }[m
+ [m
+[31m-            .info-row {[m
+[31m-                flex-direction: column;[m
+[31m-                gap: 8px;[m
+[31m-            }[m
+[32m+[m[32m        .meeting-invitation-card.attended {[m
+[32m+[m[32m            border-left: 5px solid var(--info-blue);[m
+[32m+[m[32m            background: rgba(23, 162, 184, 0.05);[m
+[32m+[m[32m        }[m
+ [m
+[31m-            .info-row-label {[m
+[31m-                min-width: auto;[m
+[31m-            }[m
+[32m+[m[32m        .meeting-invitation-card:hover {[m
+[32m+[m[32m            box-shadow: 0 5px 20px rgba(0,0,0,0.1);[m
+[32m+[m[32m            transform: translateY(-2px);[m
+[32m+[m[32m        }[m
+ [m
+[31m-            .status-table th,[m
+[31m-            .status-table td {[m
+[31m-                padding: 12px 10px;[m
+[31m-                font-size: 0.85em;[m
+[31m-            }[m
+[32m+[m[32m        .meeting-inv-header {[m
+[32m+[m[32m            display: flex;[m
+[32m+[m[32m            justify-content: space-between;[m
+[32m+[m[32m            align-items: flex-start;[m
+[32m+[m[32m            margin-bottom: 15px;[m
+[32m+[m[32m            padding-bottom: 15px;[m
+[32m+[m[32m            border-bottom: 2px solid var(--slate);[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        .meeting-inv-title {[m
+[32m+[m[32m            font-size: 1.2em;[m
+[32m+[m[32m            font-weight: 700;[m
+[32m+[m[32m            color: var(--royal-blue);[m
+[32m+[m[32m            display: flex;[m
+[32m+[m[32m            align-items: center;[m
+[32m+[m[32m            gap: 10px;[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        .meeting-inv-status {[m
+[32m+[m[32m            padding: 6px 16px;[m
+[32m+[m[32m            border-radius: 20px;[m
+[32m+[m[32m            font-size: 0.85em;[m
+[32m+[m[32m            font-weight: 700;[m
+[32m+[m[32m            text-transform: uppercase;[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        .meeting-inv-status.pending {[m
+[32m+[m[32m            background: linear-gradient(135deg, rgba(255, 152, 0, 0.2), rgba(255, 152, 0, 0.3));[m
+[32m+[m[32m            color: var(--warning-orange);[m
+[32m+[m[32m            border: 2px solid var(--warning-orange);[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        .meeting-inv-status.accepted {[m
+[32m+[m[32m            background: linear-gradient(135deg, rgba(40, 167, 69, 0.2), rgba(40, 167, 69, 0.3));[m
+[32m+[m[32m            color: var(--success-green);[m
+[32m+[m[32m            border: 2px solid var(--success-green);[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        .meeting-inv-status.attended {[m
+[32m+[m[32m            background: linear-gradient(135deg, rgba(23, 162, 184, 0.2), rgba(23, 162, 184, 0.3));[m
+[32m+[m[32m            color: var(--info-blue);[m
+[32m+[m[32m            border: 2px solid var(--info-blue);[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        .meeting-inv-body {[m
+[32m+[m[32m            display: grid;[m
+[32m+[m[32m            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));[m
+[32m+[m[32m            gap: 15px;[m
+[32m+[m[32m            margin-bottom: 15px;[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        .meeting-inv-detail {[m
+[32m+[m[32m            display: flex;[m
+[32m+[m[32m            align-items: flex-start;[m
+[32m+[m[32m            gap: 10px;[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        .meeting-inv-detail i {[m
+[32m+[m[32m            color: var(--warm-gold);[m
+[32m+[m[32m            font-size: 1.1em;[m
+[32m+[m[32m            margin-top: 2px;[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        .meeting-inv-detail-content {[m
+[32m+[m[32m            flex: 1;[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        .meeting-inv-detail-label {[m
+[32m+[m[32m            font-size: 0.8em;[m
+[32m+[m[32m            color: #666;[m
+[32m+[m[32m            font-weight: 600;[m
+[32m+[m[32m            text-transform: uppercase;[m
+[32m+[m[32m            margin-bottom: 3px;[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        .meeting-inv-detail-value {[m
+[32m+[m[32m            color: #333;[m
+[32m+[m[32m            font-weight: 600;[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        .meeting-inv-description {[m
+[32m+[m[32m            background: rgba(255, 200, 87, 0.1);[m
+[32m+[m[32m            padding: 12px;[m
+[32m+[m[32m            border-radius: 8px;[m
+[32m+[m[32m            margin-bottom: 15px;[m
+[32m+[m[32m            border-left: 3px solid var(--warm-gold);[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        .meeting-inv-description strong {[m
+[32m+[m[32m            color: var(--royal-blue);[m
+[32m+[m[32m            display: block;[m
+[32m+[m[32m            margin-bottom: 5px;[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        .meeting-inv-actions {[m
+[32m+[m[32m            display: flex;[m
+[32m+[m[32m            gap: 10px;[m
+[32m+[m[32m            flex-wrap: wrap;[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        .meeting-inv-btn {[m
+[32m+[m[32m            padding: 10px 24px;[m
+[32m+[m[32m            border: none;[m
+[32m+[m[32m            border-radius: 25px;[m
+[32m+[m[32m            font-weight: 700;[m
+[32m+[m[32m            font-size: 0.9em;[m
+[32m+[m[32m            cursor: pointer;[m
+[32m+[m[32m            transition: all 0.3s ease;[m
+[32m+[m[32m            display: inline-flex;[m
+[32m+[m[32m            align-items: center;[m
+[32m+[m[32m            gap: 8px;[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        .meeting-inv-btn-accept {[m
+[32m+[m[32m            background: linear-gradient(135deg, var(--success-green), #66bb6a);[m
+[32m+[m[32m            color: white;[m
+[32m+[m[32m            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        .meeting-inv-btn-accept:hover {[m
+[32m+[m[32m            transform: translateY(-2px);[m
+[32m+[m[32m            box-shadow: 0 6px 18px rgba(40, 167, 69, 0.4);[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        .meeting-inv-btn-reject {[m
+[32m+[m[32m            background: linear-gradient(135deg, var(--error-red), #c82333);[m
+[32m+[m[32m            color: white;[m
+[32m+[m[32m            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        .meeting-inv-btn-reject:hover {[m
+[32m+[m[32m            transform: translateY(-2px);[m
+[32m+[m[32m            box-shadow: 0 6px 18px rgba(220, 53, 69, 0.4);[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        .meeting-inv-btn-attended {[m
+[32m+[m[32m            background: linear-gradient(135deg, var(--info-blue), #20c1da);[m
+[32m+[m[32m            color: white;[m
+[32m+[m[32m            box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        .meeting-inv-btn-attended:hover {[m
+[32m+[m[32m            transform: translateY(-2px);[m
+[32m+[m[32m            box-shadow: 0 6px 18px rgba(23, 162, 184, 0.4);[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        .no-invitations-message {[m
+[32m+[m[32m            text-align: center;[m
+[32m+[m[32m            padding: 40px 20px;[m
+[32m+[m[32m            color: #666;[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        .no-invitations-message i {[m
+[32m+[m[32m            font-size: 3em;[m
+[32m+[m[32m            color: var(--slate);[m
+[32m+[m[32m            margin-bottom: 15px;[m
+[32m+[m[32m            display: block;[m
+         }[m
+ [m
+         /* Footer Styling */[m
+[36m@@ -1048,6 +1205,8 @@[m
+     </style>[m
+ </head>[m
+ <body>[m
+[32m+[m[32m    @Html.Partial("_NotificationBell")[m
+[32m+[m[41m    [m
+     <div class="main-container">[m
+         <!-- Page Header -->[m
+         <div class="page-header">[m
+[36m@@ -1211,6 +1370,21 @@[m
+                 </div>[m
+             </div>[m
+ [m
+[32m+[m[32m            <!-- MEETING INVITATIONS SECTION (NEW) -->[m
+[32m+[m[32m            <div class="status-card">[m
+[32m+[m[32m                <div class="section-title">[m
+[32m+[m[32m                    <i class="fas fa-calendar-check"></i>[m
+[32m+[m[32m                    Scheduled Meetings[m
+[32m+[m[32m                </div>[m
+[32m+[m
+[32m+[m[32m                <div id="meetingInvitationsContainer">[m
+[32m+[m[32m                    <div style="text-align:center;padding:30px;">[m
+[32m+[m[32m                        <i class="fas fa-spinner fa-spin" style="font-size:2em;color:var(--royal-blue);"></i>[m
+[32m+[m[32m                        <p style="margin-top:15px;color:#666;">Loading scheduled meetings...</p>[m
+[32m+[m[32m                    </div>[m
+[32m+[m[32m                </div>[m
+[32m+[m[32m            </div>[m
+[32m+[m
+             <!-- Project Progress Details - Meeting Table -->[m
+             <div class="status-card">[m
+                 <div class="section-title">[m
+[36m@@ -1494,6 +1668,235 @@[m
+                 var nextMeetingNumber = @nextMeetingNumber;[m
+                 var lastCompletionPercentage = @lastCompletionPercentage;[m
+ [m
+[32m+[m[32m                // Load meeting invitations on page load[m
+[32m+[m[32m                document.addEventListener('DOMContentLoaded', function() {[m
+[32m+[m[32m                    loadMeetingInvitations();[m
+[32m+[m[32m                });[m
+[32m+[m
+[32m+[m[32m                // Load meeting invitations[m
+[32m+[m[32m                async function loadMeetingInvitations() {[m
+[32m+[m[32m                    const container = document.getElementById('meetingInvitationsContainer');[m
+[32m+[m[41m                    [m
+[32m+[m[32m                    try {[m
+[32m+[m[32m                        const response = await fetch('@Url.Action("GetMeetingInvitations", "Student")');[m
+[32m+[m[32m                        const result = await response.json();[m
+[32m+[m[41m                        [m
+[32m+[m[32m                        if (result.success && result.invitations && result.invitations.length > 0) {[m
+[32m+[m[32m                            let html = '';[m
+[32m+[m[41m                            [m
+[32m+[m[32m                            result.invitations.forEach(invite => {[m
+[32m+[m[32m                                const myResponse = invite.MyResponse || 'Pending';[m
+[32m+[m[32m                                const canRespond = invite.CanRespond;[m
+[32m+[m[32m                                const isAccepted = myResponse === 'Accepted';[m
+[32m+[m[32m                                const isPending = myResponse === 'Pending';[m
+[32m+[m[41m                                [m
+[32m+[m[32m                                let statusClass = isPending ? 'pending' : (isAccepted ? 'accepted' : 'attended');[m
+[32m+[m[32m                                let statusText = isPending ? 'Awaiting Response' : (isAccepted ? 'Accepted' : myResponse);[m
+[32m+[m[41m                                [m
+[32m+[m[32m                                html += `<div class="meeting-invitation-card ${statusClass}">`;[m
+[32m+[m[32m                                html += `  <div class="meeting-inv-header">`;[m
+[32m+[m[32m                                html += `    <div class="meeting-inv-title">`;[m
+[32m+[m[32m                                html += `      <i class="fas fa-calendar-check"></i>`;[m
+[32m+[m[32m                                html += `      ${invite.Title}`;[m
+[32m+[m[32m                                html += `    </div>`;[m
+[32m+[m[32m                                html += `    <div class="meeting-inv-status ${statusClass}">`;[m
+[32m+[m[32m                                html += `      ${statusText}`;[m
+[32m+[m[32m                                html += `    </div>`;[m
+[32m+[m[32m                                html += `  </div>`;[m
+[32m+[m[41m                                [m
+[32m+[m[32m                                html += `  <div class="meeting-inv-body">`;[m
+[32m+[m[32m                                html += `    <div class="meeting-inv-detail">`;[m
+[32m+[m[32m                                html += `      <i class="fas fa-user-tie"></i>`;[m
+[32m+[m[32m                                html += `      <div class="meeting-inv-detail-content">`;[m
+[32m+[m[32m                                html += `        <div class="meeting-inv-detail-label">Faculty</div>`;[m
+[32m+[m[32m                                html += `        <div class="meeting-inv-detail-value">${invite.FacultyName}</div>`;[m
+[32m+[m[32m                                html += `      </div>`;[m
+[32m+[m[32m                                html += `    </div>`;[m
+[32m+[m[41m                                [m
+[32m+[m[32m                                html += `    <div class="meeting-inv-detail">`;[m
+[32m+[m[32m                                html += `      <i class="fas fa-calendar-alt"></i>`;[m
+[32m+[m[32m                                html += `      <div class="meeting-inv-detail-content">`;[m
+[32m+[m[32m                                html += `        <div class="meeting-inv-detail-label">Date & Time</div>`;[m
+[32m+[m[32m                                html += `        <div class="meeting-inv-detail-value">${invite.MeetingDateTime}</div>`;[m
+[32m+[m[32m                                html += `      </div>`;[m
+[32m+[m[32m                                html += `    </div>`;[m
+[32m+[m[41m                                [m
+[32m+[m[32m                                if (invite.Location) {[m
+[32m+[m[32m                                    html += `    <div class="meeting-inv-detail">`;[m
+[32m+[m[32m                                    html += `      <i class="fas fa-map-marker-alt"></i>`;[m
+[32m+[m[32m                                    html += `      <div class="meeting-inv-detail-content">`;[m
+[32m+[m[32m                                    html += `        <div class="meeting-inv-detail-label">Location</div>`;[m
+[32m+[m[32m                                    html += `        <div class="meeting-inv-detail-value">${invite.Location}</div>`;[m
+[32m+[m[32m                                    html += `      </div>`;[m
+[32m+[m[32m                                    html += `    </div>`;[m
+[32m+[m[32m                                }[m
+[32m+[m[41m                                [m
+[32m+[m[32m                                if (invite.DurationMinutes) {[m
+[32m+[m[32m                                    html += `    <div class="meeting-inv-detail">`;[m
+[32m+[m[32m                                    html += `      <i class="fas fa-hourglass-half"></i>`;[m
+[32m+[m[32m                                    html += `      <div class="meeting-inv-detail-content">`;[m
+[32m+[m[32m                                    html += `        <div class="meeting-inv-detail-label">Duration</div>`;[m
+[32m+[m[32m                                    html += `        <div class="meeting-inv-detail-value">${invite.DurationMinutes} minutes</div>`;[m
+[32m+[m[32m                                    html += `      </div>`;[m
+[32m+[m[32m                                    html += `    </div>`;[m
+[32m+[m[32m                                }[m
+[32m+[m[32m                                html += `  </div>`;[m
+[32m+[m[41m                                [m
+[32m+[m[32m                                if (invite.Description) {[m
+[32m+[m[32m                                    html += `  <div class="meeting-inv-description">`;[m
+[32m+[m[32m                                    html += `    <strong><i class="fas fa-clipboard-list"></i> Agenda:</strong>`;[m
+[32m+[m[32m                                    html += `    ${invite.Description}`;[m
+[32m+[m[32m                                    html += `  </div>`;[m
+[32m+[m[32m                                }[m
+[32m+[m[41m                                [m
+[32m+[m[32m                                html += `  <div class="meeting-inv-actions">`;[m
+[32m+[m[32m                                if (canRespond) {[m
+[32m+[m[32m                                    html += `    <button class="meeting-inv-btn meeting-inv-btn-accept" onclick="respondToMeetingInvite(${invite.Id}, 'Accepted')">`;[m
+[32m+[m[32m                                    html += `      <i class="fas fa-check"></i> Accept`;[m
+[32m+[m[32m                                    html += `    </button>`;[m
+[32m+[m[32m                                    html += `    <button class="meeting-inv-btn meeting-inv-btn-reject" onclick="respondToMeetingInvite(${invite.Id}, 'Rejected')">`;[m
+[32m+[m[32m                                    html += `      <i class="fas fa-times"></i> Decline`;[m
+[32m+[m[32m                                    html += `    </button>`;[m
+[32m+[m[32m                                } else if (isAccepted) {[m
+[32m+[m[32m                                    html += `    <button class="meeting-inv-btn meeting-inv-btn-attended" onclick="markAsAttended(${invite.Id})">`;[m
+[32m+[m[32m                                    html += `      <i class="fas fa-user-check"></i> Mark as Attended`;[m
+[32m+[m[32m                                    html += `    </button>`;[m
+[32m+[m[32m                                } else {[m
+[32m+[m[32m                                    html += `    <span style="color: #666; font-style: italic;">`;[m
+[32m+[m[32m                                    html += `      <i class="fas fa-info-circle"></i> You ${myResponse.toLowerCase()} this meeting`;[m
+[32m+[m[32m                                    html += `    </span>`;[m
+[32m+[m[32m                                }[m
+[32m+[m[32m                                html += `  </div>`;[m
+[32m+[m[41m                                [m
+[32m+[m[32m                                html += `</div>`;[m
+[32m+[m[32m                            });[m
+[32m+[m[41m                            [m
+[32m+[m[32m                            container.innerHTML = html;[m
+[32m+[m[32m                        } else {[m
+[32m+[m[32m                            container.innerHTML = `[m
+[32m+[m[32m                                <div class="no-invitations-message">[m
+[32m+[m[32m                                    <i class="fas fa-calendar-times"></i>[m
+[32m+[m[32m                                    <h4 style="color: var(--royal-blue); margin-bottom: 10px;">No Scheduled Meetings</h4>[m
+[32m+[m[32m                                    <p>Your faculty hasn't scheduled any meetings yet.</p>[m
+[32m+[m[32m                                </div>[m
+[32m+[m[32m                            `;[m
+[32m+[m[32m                        }[m
+[32m+[m[32m                    } catch (error) {[m
+[32m+[m[32m                        console.error('Error loading meeting invitations:', error);[m
+[32m+[m[32m                        container.innerHTML = `[m
+[32m+[m[32m                            <div class="no-invitations-message">[m
+[32m+[m[32m                                <i class="fas fa-exclamation-triangle"></i>[m
+[32m+[m[32m                                <h4 style="color: var(--error-red); margin-bottom: 10px;">Error Loading Meetings</h4>[m
+[32m+[m[32m                                <p>Unable to load scheduled meetings. Please refresh the page.</p>[m
+[32m+[m[32m                            </div>[m
+[32m+[m[32m                        `;[m
+[32m+[m[32m                    }[m
+[32m+[m[32m                }[m
+[32m+[m
+[32m+[m[32m                // Respond to meeting invitation[m
+[32m+[m[32m                async function respondToMeetingInvite(invitationId, response) {[m
+[32m+[m[32m                    const action = response === 'Accepted' ? 'accept' : 'decline';[m
+[32m+[m[32m                    if (!confirm(`Are you sure you want to ${action} this meeting invitation?`)) {[m
+[32m+[m[32m                        return;[m
+[32m+[m[32m                    }[m
+[32m+[m
+[32m+[m[32m                    try {[m
+[32m+[m[32m                        const formData = new FormData();[m
+[32m+[m[32m                        formData.append('invitationId', invitationId);[m
+[32m+[m[32m                        formData.append('response', response);[m
+[32m+[m[41m                        [m
+[32m+[m[32m                        const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');[m
+[32m+[m[32m                        if (tokenInput) {[m
+[32m+[m[32m                            formData.append('__RequestVerificationToken', tokenInput.value);[m
+[32m+[m[32m                        }[m
+[32m+[m
+[32m+[m[32m                        const result = await fetch('@Url.Action("RespondToMeetingInvite", "Student")', {[m
+[32m+[m[32m                            method: 'POST',[m
+[32m+[m[32m                            body: formData[m
+[32m+[m[32m                        });[m
+[32m+[m
+[32m+[m[32m                        const data = await result.json();[m
+[32m+[m
+[32m+[m[32m                        if (data.success) {[m
+[32m+[m[32m                            showNotification(data.message, 'success');[m
+[32m+[m[32m                            loadMeetingInvitations(); // Reload invitations[m
+[32m+[m[32m                        } else {[m
+[32m+[m[32m                            showNotification(data.message, 'error');[m
+[32m+[m[32m                        }[m
+[32m+[m[32m                    } catch (error) {[m
+[32m+[m[32m                        console.error('Error responding to invitation:', error);[m
+[32m+[m[32m                        showNotification('Error responding to invitation. Please try again.', 'error');[m
+[32m+[m[32m                    }[m
+[32m+[m[32m                }[m
+[32m+[m
+[32m+[m[32m                // Mark meeting as attended[m
+[32m+[m[32m                async function markAsAttended(invitationId) {[m
+[32m+[m[32m                    if (!confirm('Mark this meeting as attended? This will add it to your project progress.')) {[m
+[32m+[m[32m                        return;[m
+[32m+[m[32m                    }[m
+[32m+[m
+[32m+[m[32m                    try {[m
+[32m+[m[32m                        const formData = new FormData();[m
+[32m+[m[32m                        formData.append('invitationId', invitationId);[m
+[32m+[m[41m                        [m
+[32m+[m[32m                        const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');[m
+[32m+[m[32m                        if (tokenInput) {[m
+[32m+[m[32m                            formData.append('__RequestVerificationToken', tokenInput.value);[m
+[32m+[m[32m                        }[m
+[32m+[m
+[32m+[m[32m                        const result = await fetch('@Url.Action("MarkMeetingAttended", "Student")', {[m
+[32m+[m[32m                            method: 'POST',[m
+[32m+[m[32m                            body: formData[m
+[32m+[m[32m                        });[m
+[32m+[m
+[32m+[m[32m                        const data = await result.json();[m
+[32m+[m
+[32m+[m[32m                        if (data.success) {[m
+[32m+[m[32m                            showNotification(data.message, 'success');[m
+[32m+[m[32m                            setTimeout(() => location.reload(), 1500);[m
+[32m+[m[32m                        } else {[m
+[32m+[m[32m                            showNotification(data.message, 'error');[m
+[32m+[m[32m                        }[m
+[32m+[m[32m                    } catch (error) {[m
+[32m+[m[32m                        console.error('Error marking as attended:', error);[m
+[32m+[m[32m                        showNotification('Error marking meeting as attended. Please try again.', 'error');[m
+[32m+[m[32m                    }[m
+[32m+[m[32m                }[m
+[32m+[m
+[32m+[m[32m                // Show notification[m
+[32m+[m[32m                function showNotification(message, type) {[m
+[32m+[m[32m                    const color = type === 'success' ? '#28a745' : '#dc3545';[m
+[32m+[m[32m                    const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';[m
+[32m+[m[41m                    [m
+[32m+[m[32m                    const notif = document.createElement('div');[m
+[32m+[m[32m                    notif.style.cssText = `[m
+[32m+[m[32m                        position: fixed;[m
+[32m+[m[32m                        top: 80px;[m
+[32m+[m[32m                        right: 20px;[m
+[32m+[m[32m                        background: white;[m
+[32m+[m[32m                        padding: 18px 25px;[m
+[32m+[m[32m                        border-radius: 12px;[m
+[32m+[m[32m                        box-shadow: 0 6px 20px rgba(0,0,0,0.2);[m
+[32m+[m[32m                        border-left: 5px solid ${color};[m
+[32m+[m[32m                        z-index: 10000;[m
+[32m+[m[32m                        animation: slideIn 0.3s ease;[m
+[32m+[m[32m                        max-width: 400px;[m
+[32m+[m[32m                    `;[m
+[32m+[m[32m                    notif.innerHTML = `[m
+[32m+[m[32m                        <div style="display: flex; align-items: center; gap: 12px;">[m
+[32m+[m[32m                            <i class="fas ${icon}" style="color: ${color}; font-size: 1.5em;"></i>[m
+[32m+[m[32m                            <span style="color: #333; font-weight: 600;">${message}</span>[m
+[32m+[m[32m                        </div>[m
+[32m+[m[32m                    `;[m
+[32m+[m[41m                    [m
+[32m+[m[32m                    document.body.appendChild(notif);[m
+[32m+[m[41m                    [m
+[32m+[m[32m                    setTimeout(() => {[m
+[32m+[m[32m                        notif.style.animation = 'slideOut 0.3s ease';[m
+[32m+[m[32m                        setTimeout(() => notif.remove(), 300);[m
+[32m+[m[32m                    }, 4000);[m
+[32m+[m[32m                }[m
+[32m+[m
+                 function showAddMeetingModal() {[m
+                     // Check if button is disabled[m
+                     var btn = event.target.closest('button');[m

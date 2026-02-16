@@ -3,6 +3,13 @@
 @{
     ViewData["Title"] = "Assigned Teams";
     Layout = null;
+    var allYears = Model
+        .Where(p => p.Team?.Student1 != null)
+        .Select(p => p.Team!.Student1!.Year)
+        .Union(Model.Where(p => p.Team?.Student2 != null).Select(p => p.Team!.Student2!.Year))
+        .Distinct()
+        .OrderBy(y => y)
+        .ToList();
 }
 
 <!DOCTYPE html>
@@ -104,6 +111,106 @@
         .page-header p {
             color: #666;
             margin: 10px 0 0 0;
+        }
+
+        /* Filter Section */
+        .filters-section {
+            background: rgba(249,250,242,0.95);
+            border-radius: 20px;
+            padding: 25px 30px;
+            backdrop-filter: blur(12px);
+            border: 2px solid var(--slate);
+            box-shadow: 0 8px 32px var(--card-shadow);
+            margin-bottom: 30px;
+        }
+
+        .filters-header {
+            background: linear-gradient(135deg, var(--faculty-purple), var(--info-blue));
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .filters-header h4 {
+            margin: 0;
+            font-size: 1em;
+            font-weight: 600;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            align-items: end;
+        }
+
+        .filter-group {
+            margin-bottom: 0;
+        }
+
+        .filter-label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.85em;
+            color: var(--royal-blue);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .filter-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--slate);
+            border-radius: 12px;
+            font-size: 1em;
+            font-family: 'Montserrat', sans-serif;
+            background: rgba(255, 255, 255, 0.8);
+            transition: border-color 0.3s, box-shadow 0.3s;
+            box-sizing: border-box;
+        }
+
+        .filter-control:focus {
+            outline: none;
+            border-color: var(--faculty-purple);
+            box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.2);
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+            align-items: center;
+        }
+
+        .btn-clear-filters {
+            background: linear-gradient(135deg, var(--slate), #b0b7c0);
+            color: var(--royal-blue);
+            border: none;
+            border-radius: 12px;
+            padding: 10px 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .btn-clear-filters:hover {
+            background: linear-gradient(135deg, #b0b7c0, var(--slate));
+            transform: translateY(-2px);
+        }
+
+        .filter-result-count {
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #666;
+            margin-left: auto;
         }
 
         .teams-grid {
@@ -298,6 +405,31 @@
             color: #666;
         }
 
+        .no-results-state {
+            text-align: center;
+            padding: 40px 20px;
+            background: rgba(249,250,242,0.95);
+            border-radius: 20px;
+            border: 2px solid var(--slate);
+            display: none;
+        }
+
+        .no-results-state i {
+            font-size: 3em;
+            color: var(--slate);
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .no-results-state h3 {
+            color: var(--royal-blue);
+            margin-bottom: 10px;
+        }
+
+        .no-results-state p {
+            color: #666;
+        }
+
         .app-footer {
             background: rgba(249, 250, 242, 0.95);
             backdrop-filter: blur(12px);
@@ -369,6 +501,10 @@
                 margin-top: 20px;
             }
 
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+
             .app-footer {
                 padding: 20px 15px;
                 margin-top: 30px;
@@ -410,7 +546,36 @@
         }
         else
         {
-            <div class="teams-grid">
+            <!-- Filters Section -->
+            <div class="filters-section">
+                <div class="filters-header">
+                    <h4><i class="fas fa-filter"></i> Search & Filter Teams</h4>
+                </div>
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <label class="filter-label"><i class="fas fa-search"></i> Search by Name / Regd Number</label>
+                        <input type="text" id="searchInput" class="filter-control" placeholder="Enter student name or registration number..." oninput="filterTeams()" />
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label"><i class="fas fa-calendar"></i> Filter by Year</label>
+                        <select id="yearFilter" class="filter-control" onchange="filterTeams()">
+                            <option value="">All Years</option>
+                            @foreach (var year in allYears)
+                            {
+                                <option value="@year">Year @year</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="filter-actions">
+                    <button type="button" class="btn-clear-filters" onclick="clearFilters()">
+                        <i class="fas fa-eraser"></i> Clear Filters
+                    </button>
+                    <span class="filter-result-count" id="resultCount">Showing @Model.Count of @Model.Count teams</span>
+                </div>
+            </div>
+
+            <div class="teams-grid" id="teamsGrid">
                 @foreach (var progress in Model)
                 {
                     var team = progress.Team;
@@ -421,7 +586,19 @@
                         _ => "status-in-progress"
                     };
 
-                    <div class="team-card">
+                    var searchableText = "";
+                    var studentYear = "";
+                    if (team?.Student1 != null)
+                    {
+                        searchableText += team.Student1.FullName.ToLower() + " " + team.Student1.RegdNumber.ToLower() + " ";
+                        studentYear = team.Student1.Year.ToString();
+                    }
+                    if (team?.Student2 != null)
+                    {
+                        searchableText += team.Student2.FullName.ToLower() + " " + team.Student2.RegdNumber.ToLower();
+                    }
+
+                    <div class="team-card" data-search="@searchableText.Trim()" data-year="@studentYear">
                         <div class="team-header">
                             <span class="team-number">Team #@team?.TeamNumber</span>
                             <span class="team-status @statusClass">@progress.Status</span>
@@ -475,6 +652,12 @@
                     </div>
                 }
             </div>
+
+            <div class="no-results-state" id="noResultsState">
+                <i class="fas fa-search"></i>
+                <h3>No Teams Found</h3>
+                <p>No teams match your search criteria. Try adjusting your filters.</p>
+            </div>
         }
     </div>
 
@@ -491,5 +674,49 @@
             </div>
         </div>
     </footer>
+
+    <script>
+        var totalTeams = @Model.Count;
+
+        function filterTeams() {
+            var searchText = document.getElementById('searchInput').value.toLowerCase().trim();
+            var yearFilter = document.getElementById('yearFilter').value;
+            var cards = document.querySelectorAll('.team-card');
+            var visibleCount = 0;
+
+            cards.forEach(function(card) {
+                var searchData = card.getAttribute('data-search') || '';
+                var yearData = card.getAttribute('data-year') || '';
+
+                var matchSearch = !searchText || searchData.includes(searchText);
+                var matchYear = !yearFilter || yearData === yearFilter;
+
+                if (matchSearch && matchYear) {
+                    card.style.display = '';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            document.getElementById('resultCount').textContent = 'Showing ' + visibleCount + ' of ' + totalTeams + ' teams';
+
+            var noResults = document.getElementById('noResultsState');
+            var grid = document.getElementById('teamsGrid');
+            if (visibleCount === 0) {
+                noResults.style.display = 'block';
+                grid.style.display = 'none';
+            } else {
+                noResults.style.display = 'none';
+                grid.style.display = '';
+            }
+        }
+
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('yearFilter').value = '';
+            filterTeams();
+        }
+    </script>
 </body>
 </html>

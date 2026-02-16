@@ -535,6 +535,8 @@
     </style>
 </head>
 <body>
+    @Html.Partial("_AdminBackButton")
+    
     <div class="main-container">
         <!-- Header -->
         <div class="page-header">
@@ -558,9 +560,6 @@
                 <button type="button" class="glass-btn btn-danger" onclick="confirmDeleteAll()" id="deleteAllPsBtn">
                     <i class="fas fa-trash-alt"></i> Delete All
                 </button>
-                <a href="@Url.Action("Dashboard", "Admin")" class="glass-btn btn-back">
-                    <i class="fas fa-arrow-left"></i> Back to Dashboard
-                </a>
             </div>
         </div>
 

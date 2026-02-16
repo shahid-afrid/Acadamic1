@@ -1,0 +1,1229 @@
+@{
+    ViewData["Title"] = "Scheduled Meetings";
+    Layout = null;
+    var assignedTeams = ViewBag.AssignedTeams as List<TeamPro1.Models.Team> ?? new List<TeamPro1.Models.Team>();
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Scheduled Meetings - TeamPro1</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        :root {
+            --royal-blue: #274060;
+            --warm-gold: #FFC857;
+            --cream: #F9FAF2;
+            --slate: #CED3DC;
+            --card-shadow: rgba(39,64,96,0.13);
+            --success-green: #28a745;
+            --error-red: #dc3545;
+            --faculty-purple: #6f42c1;
+            --info-blue: #17a2b8;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px 0;
+            font-family: 'Montserrat', Arial, sans-serif;
+            background: linear-gradient(rgba(249, 250, 242, 0.15), rgba(255, 200, 87, 0.10)),
+            url('@Url.Content("~/images/RGMCET-BACKGROUND.jpg")') center center/cover no-repeat fixed;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 0;
+            background: linear-gradient(135deg, var(--cream) 60%, var(--warm-gold) 100%);
+            opacity: 0.20;
+            pointer-events: none;
+        }
+
+        .main-container {
+            position: relative;
+            z-index: 1;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .nav-link {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(249,250,242,0.9);
+            color: var(--royal-blue);
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 2px solid var(--slate);
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .nav-link:hover {
+            background: var(--warm-gold);
+            color: var(--royal-blue);
+            transform: translateY(-2px);
+            text-decoration: none;
+        }
+
+        .page-header {
+            background: rgba(249,250,242,0.92);
+            box-shadow: 0 8px 32px var(--card-shadow);
+            border-radius: 20px;
+            padding: 30px 40px;
+            text-align: center;
+            backdrop-filter: blur(12px);
+            margin-bottom: 30px;
+            border: 2px solid var(--slate);
+            margin-top: 60px;
+        }
+
+        .page-header h2 {
+            font-size: 2em;
+            font-weight: 700;
+            color: var(--royal-blue);
+            margin: 0;
+        }
+
+        .page-header p {
+            color: #666;
+            margin: 10px 0 0 0;
+        }
+
+        /* Schedule Banner */
+        .schedule-banner {
+            background: linear-gradient(135deg, rgba(111, 66, 193, 0.15), rgba(23, 162, 184, 0.15));
+            border: 3px solid var(--faculty-purple);
+            border-radius: 20px;
+            padding: 25px 30px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 6px 20px rgba(111, 66, 193, 0.2);
+            backdrop-filter: blur(8px);
+        }
+
+        .schedule-banner-content { flex: 1; }
+
+        .schedule-banner h3 {
+            color: var(--royal-blue);
+            margin: 0 0 8px 0;
+            font-size: 1.4em;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .schedule-banner h3 i { color: var(--faculty-purple); }
+
+        .schedule-banner p {
+            margin: 0;
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .btn-schedule {
+            background: linear-gradient(135deg, var(--faculty-purple), var(--info-blue));
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 15px 30px;
+            font-weight: 700;
+            font-size: 1.05em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 6px 20px rgba(111, 66, 193, 0.3);
+            white-space: nowrap;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .btn-schedule:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(111, 66, 193, 0.5);
+            background: linear-gradient(135deg, var(--info-blue), var(--faculty-purple));
+        }
+
+        /* Filter Section */
+        .filters-section {
+            background: rgba(249,250,242,0.95);
+            border-radius: 20px;
+            padding: 20px 25px;
+            border: 2px solid var(--slate);
+            box-shadow: 0 8px 32px var(--card-shadow);
+            margin-bottom: 25px;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 15px;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+
+        .filter-group { flex: 1; min-width: 180px; }
+
+        .filter-label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.8em;
+            color: var(--royal-blue);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .filter-control {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid var(--slate);
+            border-radius: 10px;
+            font-size: 0.95em;
+            font-family: 'Montserrat', sans-serif;
+            background: rgba(255, 255, 255, 0.8);
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+
+        .filter-control:focus {
+            outline: none;
+            border-color: var(--faculty-purple);
+            box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.15);
+        }
+
+        .btn-clear {
+            background: var(--slate);
+            color: var(--royal-blue);
+            border: none;
+            border-radius: 10px;
+            padding: 10px 18px;
+            font-weight: 600;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Montserrat', sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .btn-clear:hover {
+            background: #b0b7c0;
+            transform: translateY(-1px);
+        }
+
+        .filter-result-count {
+            font-size: 0.85em;
+            font-weight: 600;
+            color: #666;
+            white-space: nowrap;
+            padding-bottom: 10px;
+        }
+
+        /* Meetings Container */
+        .meetings-section {
+            background: rgba(249,250,242,0.95);
+            border-radius: 20px;
+            padding: 25px;
+            border: 2px solid var(--slate);
+            box-shadow: 0 8px 32px var(--card-shadow);
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: var(--royal-blue);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--slate);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i { color: var(--faculty-purple); }
+
+        /* Invitation Cards */
+        .inv-card {
+            background: rgba(255,255,255,0.7);
+            border: 2px solid var(--slate);
+            border-left: 5px solid var(--faculty-purple);
+            border-radius: 14px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .inv-card:hover {
+            box-shadow: 0 6px 20px rgba(111,66,193,0.12);
+            transform: translateY(-2px);
+        }
+
+        .inv-card.status-accepted { border-left-color: var(--success-green); }
+        .inv-card.status-rejected { border-left-color: var(--error-red); }
+        .inv-card.status-completed { border-left-color: var(--info-blue); }
+        .inv-card.status-cancelled { border-left-color: #999; opacity: 0.6; }
+
+        .inv-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .inv-title {
+            font-weight: 700;
+            font-size: 1.1em;
+            color: var(--royal-blue);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .inv-team-badge {
+            background: linear-gradient(135deg, var(--warm-gold), #ffb84d);
+            color: var(--royal-blue);
+            padding: 3px 12px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 700;
+            margin-left: 8px;
+        }
+
+        .inv-badge {
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.78em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .inv-badge.pending { background: rgba(255,193,7,0.15); color: #856404; }
+        .inv-badge.accepted { background: rgba(40,167,69,0.15); color: var(--success-green); }
+        .inv-badge.rejected { background: rgba(220,53,69,0.15); color: var(--error-red); }
+        .inv-badge.completed { background: rgba(23,162,184,0.15); color: var(--info-blue); }
+        .inv-badge.cancelled { background: rgba(108,117,125,0.15); color: #6c757d; }
+
+        .inv-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            margin-bottom: 14px;
+        }
+
+        .inv-detail-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+        }
+
+        .inv-detail-item i { color: var(--faculty-purple); width: 16px; text-align: center; }
+        .inv-detail-item .label { color: #888; font-weight: 600; font-size: 0.85em; text-transform: uppercase; }
+        .inv-detail-item .value { color: var(--royal-blue); font-weight: 600; }
+
+        .inv-responses {
+            display: flex;
+            gap: 18px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+            padding: 12px 16px;
+            background: rgba(249,250,242,0.7);
+            border-radius: 10px;
+            border: 1px solid var(--slate);
+        }
+
+        .inv-response {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.88em;
+        }
+
+        .inv-response .student-name { font-weight: 600; color: var(--royal-blue); }
+
+        .response-badge {
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 700;
+        }
+
+        .response-badge.resp-pending { background: rgba(255,193,7,0.15); color: #856404; }
+        .response-badge.resp-accepted { background: rgba(40,167,69,0.15); color: var(--success-green); }
+        .response-badge.resp-rejected { background: rgba(220,53,69,0.15); color: var(--error-red); }
+        .response-badge.resp-attended { background: rgba(23,162,184,0.15); color: var(--info-blue); }
+
+        .inv-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .inv-footer .created-at { font-size: 0.8em; color: #999; }
+
+        .btn-cancel-invite {
+            background: linear-gradient(135deg, var(--error-red), #c82333);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 8px 18px;
+            font-weight: 600;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .btn-cancel-invite:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220,53,69,0.3);
+        }
+
+        .btn-edit-invite {
+            background: linear-gradient(135deg, var(--warm-gold), #ffb84d);
+            color: var(--royal-blue);
+            border: none;
+            border-radius: 10px;
+            padding: 8px 18px;
+            font-weight: 600;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .btn-edit-invite:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255,200,87,0.5);
+        }
+
+        .btn-delete-invite {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 8px 18px;
+            font-weight: 600;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .btn-delete-invite:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(108,117,125,0.4);
+            background: linear-gradient(135deg, var(--error-red), #c82333);
+        }
+
+        .no-meetings-msg {
+            text-align: center;
+            padding: 50px 20px;
+            color: #999;
+        }
+
+        .no-meetings-msg i {
+            font-size: 3em;
+            color: #ddd;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .no-meetings-msg h3 {
+            color: var(--royal-blue);
+            margin-bottom: 10px;
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading-state i {
+            font-size: 2em;
+            color: var(--faculty-purple);
+        }
+
+        /* Alert */
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .alert-success {
+            background: rgba(40, 167, 69, 0.15);
+            color: var(--success-green);
+            border: 1px solid var(--success-green);
+        }
+
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.15);
+            color: var(--error-red);
+            border: 1px solid var(--error-red);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: var(--cream);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @@keyframes modalSlideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header-custom {
+            background: linear-gradient(135deg, var(--faculty-purple), var(--info-blue));
+            color: white;
+            padding: 25px 30px;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header-custom h3 {
+            margin: 0;
+            font-size: 1.3em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 1.3em;
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .modal-body-custom { padding: 30px; }
+
+        .modal-footer-custom {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            padding: 20px 30px;
+            border-top: 2px solid var(--slate);
+        }
+
+        .form-group { margin-bottom: 20px; }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: var(--royal-blue);
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--slate);
+            border-radius: 12px;
+            font-size: 1em;
+            font-family: 'Montserrat', sans-serif;
+            background: rgba(249,250,242,0.8);
+            transition: border-color 0.3s, box-shadow 0.3s;
+            box-sizing: border-box;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--faculty-purple);
+            box-shadow: 0 0 0 3px rgba(111, 66, 193, 0.2);
+        }
+
+        textarea.form-control { min-height: 80px; resize: vertical; }
+
+        .btn-secondary {
+            background: var(--slate);
+            color: #333;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .btn-secondary:hover { background: #b0b7c0; }
+
+        .glass-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(90deg, var(--success-green) 74%, var(--info-blue) 100%);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 20px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .glass-btn:hover {
+            background: linear-gradient(90deg, var(--info-blue) 0%, var(--success-green) 100%);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Footer */
+        .app-footer {
+            background: rgba(249, 250, 242, 0.95);
+            backdrop-filter: blur(12px);
+            border-top: 3px solid var(--slate);
+            box-shadow: 0 -8px 32px rgba(39,64,96,0.13);
+            padding: 30px 20px;
+            margin-top: 50px;
+            text-align: center;
+            font-family: 'Montserrat', Arial, sans-serif;
+            color: #274060;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .footer-content { max-width: 1200px; margin: 0 auto; }
+        .footer-line { margin: 8px 0; line-height: 1.6; }
+        .footer-line.guidance { font-size: 1em; font-weight: 600; color: #444; margin-bottom: 12px; }
+        .footer-line.team { font-size: 0.95em; font-weight: 500; color: #444; }
+        .footer-line.copyright { font-size: 0.9em; font-weight: 600; color: #274060; margin-top: 15px; padding-top: 15px; border-top: 2px solid rgba(39,64,96,0.1); }
+        .footer-highlight { color: #274060; font-weight: 700; }
+        .footer-name { color: #274060; font-weight: 600; }
+
+        @@media (max-width: 768px) {
+            .nav-link { position: static; display: inline-block; margin: 10px auto; }
+            .page-header { margin-top: 20px; }
+            .schedule-banner { flex-direction: column; text-align: center; }
+            .filter-row { flex-direction: column; }
+            .filter-group { min-width: 100%; }
+            .inv-header { flex-direction: column; gap: 8px; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+    <a href="@Url.Action("MainDashboard", "Faculty")" class="nav-link"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+
+    <div class="main-container">
+        <div class="page-header">
+            <h2><i class="fas fa-calendar-check"></i> Scheduled Meetings</h2>
+            <p>View and manage all meeting invitations across your assigned teams</p>
+        </div>
+
+        <div id="alertContainer"></div>
+
+        <!-- Schedule Meeting Banner -->
+        @if (assignedTeams.Count > 0)
+        {
+            <div class="schedule-banner">
+                <div class="schedule-banner-content">
+                    <h3><i class="fas fa-calendar-plus"></i> Schedule a New Meeting</h3>
+                    <p>Send meeting invitations to any of your assigned teams</p>
+                </div>
+                <button type="button" class="btn-schedule" onclick="showScheduleModal()">
+                    <i class="fas fa-paper-plane"></i> Schedule Meeting
+                </button>
+            </div>
+        }
+
+        <!-- Filters -->
+        <div class="filters-section">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label class="filter-label"><i class="fas fa-search"></i> Search</label>
+                    <input type="text" id="searchInput" class="filter-control" placeholder="Search by title, team, student..." oninput="filterMeetings()" />
+                </div>
+                <div class="filter-group" style="max-width: 200px;">
+                    <label class="filter-label"><i class="fas fa-users"></i> Team</label>
+                    <select id="teamFilter" class="filter-control" onchange="filterMeetings()">
+                        <option value="">All Teams</option>
+                        @foreach (var team in assignedTeams)
+                        {
+                            <option value="@team.TeamNumber">Team #@team.TeamNumber</option>
+                        }
+                    </select>
+                </div>
+                <div class="filter-group" style="max-width: 180px;">
+                    <label class="filter-label"><i class="fas fa-flag"></i> Status</label>
+                    <select id="statusFilter" class="filter-control" onchange="filterMeetings()">
+                        <option value="">All Statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="accepted">Accepted</option>
+                        <option value="rejected">Rejected</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <button type="button" class="btn-clear" onclick="clearFilters()">
+                    <i class="fas fa-eraser"></i> Clear
+                </button>
+                <span class="filter-result-count" id="resultCount"></span>
+            </div>
+        </div>
+
+        <!-- Meetings List -->
+        <div class="meetings-section">
+            <div class="section-title"><i class="fas fa-paper-plane"></i> All Meeting Invitations</div>
+            <div id="meetingsContainer">
+                <div class="loading-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p style="margin-top:15px; color:#666;">Loading meetings...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Schedule Meeting Modal -->
+        <div id="scheduleModal" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header-custom">
+                    <h3><i class="fas fa-calendar-plus"></i> Schedule New Meeting</h3>
+                    <button type="button" class="modal-close" onclick="hideScheduleModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body-custom">
+                    <form id="scheduleMeetingForm">
+                        @Html.AntiForgeryToken()
+
+                        <div class="form-group">
+                            <label><i class="fas fa-users"></i> Select Team <span style="color: red;">*</span></label>
+                            <select name="teamId" class="form-control" required>
+                                <option value="">-- Select a Team --</option>
+                                @foreach (var team in assignedTeams)
+                                {
+                                    var s1Name = team.Student1?.FullName ?? "Unknown";
+                                    var s2Name = team.Student2 != null ? " & " + team.Student2.FullName : "";
+                                    <option value="@team.Id">Team #@team.TeamNumber (@s1Name@s2Name)</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-heading"></i> Meeting Title <span style="color: red;">*</span></label>
+                            <input type="text" name="title" class="form-control" placeholder="e.g., Project Progress Review" required />
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-align-left"></i> Description / Agenda</label>
+                            <textarea name="description" class="form-control" rows="3" placeholder="Meeting agenda, discussion points..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-calendar-alt"></i> Meeting Date & Time <span style="color: red;">*</span></label>
+                            <input type="datetime-local" name="meetingDateTime" class="form-control" required />
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-map-marker-alt"></i> Location</label>
+                            <input type="text" name="location" class="form-control" placeholder="e.g., Faculty Room 301, Online (Teams)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-hourglass-half"></i> Duration (minutes)</label>
+                            <input type="number" name="durationMinutes" class="form-control" min="15" max="480" value="60" />
+                            <small style="color: #666; font-size: 0.85em;">Default: 60 minutes</small>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer-custom">
+                    <button type="button" class="btn-secondary" onclick="hideScheduleModal()">Cancel</button>
+                    <button type="button" class="glass-btn" onclick="submitScheduleMeeting()">
+                        <i class="fas fa-paper-plane"></i> Send Invitation
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Meeting Modal -->
+        <div id="editModal" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header-custom" style="background: linear-gradient(135deg, var(--warm-gold), #ffb84d);">
+                    <h3 style="color: var(--royal-blue);"><i class="fas fa-edit"></i> Edit Meeting Invitation</h3>
+                    <button type="button" class="modal-close" style="color: var(--royal-blue);" onclick="hideEditModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body-custom">
+                    <form id="editMeetingForm">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="invitationId" id="editInvitationId" />
+
+                        <div class="form-group">
+                            <label><i class="fas fa-heading"></i> Meeting Title <span style="color: red;">*</span></label>
+                            <input type="text" name="title" id="editTitle" class="form-control" placeholder="e.g., Project Progress Review" required />
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-align-left"></i> Description / Agenda</label>
+                            <textarea name="description" id="editDescription" class="form-control" rows="3" placeholder="Meeting agenda, discussion points..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-calendar-alt"></i> Meeting Date & Time <span style="color: red;">*</span></label>
+                            <input type="datetime-local" name="meetingDateTime" id="editMeetingDateTime" class="form-control" required />
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-map-marker-alt"></i> Location</label>
+                            <input type="text" name="location" id="editLocation" class="form-control" placeholder="e.g., Faculty Room 301, Online (Teams)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-hourglass-half"></i> Duration (minutes)</label>
+                            <input type="number" name="durationMinutes" id="editDurationMinutes" class="form-control" min="15" max="480" value="60" />
+                            <small style="color: #666; font-size: 0.85em;">Default: 60 minutes</small>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer-custom">
+                    <button type="button" class="btn-secondary" onclick="hideEditModal()">Cancel</button>
+                    <button type="button" class="glass-btn" onclick="submitEditMeeting()">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="app-footer">
+        <div class="footer-content">
+            <div class="footer-line guidance">
+                Developed under the guidance of <span class="footer-highlight">Dr. P. Penchala Prasad</span>, Associate Professor, CSE(DS), RGMCET
+            </div>
+            <div class="footer-line team">
+                With team <span class="footer-name">Mr. S. Md. Shahid Afrid</span> (23091A32D4) & <span class="footer-name">Ms. G. Veena</span> (23091A32H9)
+            </div>
+            <div class="footer-line copyright">
+                &copy; All Rights Reserved @@2025
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        var allInvitations = [];
+
+        function showAlert(message, isSuccess) {
+            var container = document.getElementById('alertContainer');
+            var cls = isSuccess ? 'alert-success' : 'alert-danger';
+            var icon = isSuccess ? 'fa-check-circle' : 'fa-exclamation-circle';
+            container.innerHTML = '<div class="alert ' + cls + '"><i class="fas ' + icon + '"></i> ' + message + '</div>';
+            setTimeout(function() { container.innerHTML = ''; }, 5000);
+        }
+
+        // Load all meetings
+        async function loadMeetings() {
+            var container = document.getElementById('meetingsContainer');
+            container.innerHTML = '<div class="loading-state"><i class="fas fa-spinner fa-spin"></i><p style="margin-top:15px; color:#666;">Loading meetings...</p></div>';
+
+            try {
+                var response = await fetch('@Url.Action("GetAllMeetingInvitations", "Faculty")');
+                var result = await response.json();
+                if (result.success) {
+                    allInvitations = result.invitations || [];
+                    renderMeetings(allInvitations);
+                } else {
+                    container.innerHTML = '<div class="no-meetings-msg"><i class="fas fa-exclamation-triangle"></i><p>Error loading meetings. Please try again.</p></div>';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                container.innerHTML = '<div class="no-meetings-msg"><i class="fas fa-exclamation-triangle"></i><p>Error loading meetings. Please try again.</p></div>';
+            }
+        }
+
+        function renderMeetings(invitations) {
+            var container = document.getElementById('meetingsContainer');
+
+            if (!invitations || invitations.length === 0) {
+                container.innerHTML = '<div class="no-meetings-msg"><i class="fas fa-calendar-times"></i><h3>No Scheduled Meetings</h3><p>You haven\'t scheduled any meetings yet. Click "Schedule Meeting" to get started.</p></div>';
+                document.getElementById('resultCount').textContent = '';
+                return;
+            }
+
+            var html = '';
+            invitations.forEach(function(inv) {
+                var statusLower = (inv.status || 'Pending').toLowerCase();
+                var badgeClass = statusLower === 'pending' ? 'pending' :
+                                 statusLower === 'accepted' ? 'accepted' :
+                                 statusLower === 'rejected' ? 'rejected' :
+                                 statusLower === 'completed' ? 'completed' : 'cancelled';
+
+                html += '<div class="inv-card status-' + badgeClass + '" data-team="' + inv.teamNumber + '" data-status="' + statusLower + '" data-search="' + (inv.title + ' ' + inv.student1Name + ' ' + (inv.student2Name || '') + ' Team ' + inv.teamNumber).toLowerCase() + '">';
+
+                // Header
+                html += '<div class="inv-header">';
+                html += '  <div class="inv-title"><i class="fas fa-calendar-check"></i> ' + inv.title + '<span class="inv-team-badge">Team #' + inv.teamNumber + '</span></div>';
+                html += '  <span class="inv-badge ' + badgeClass + '">' + inv.status + '</span>';
+                html += '</div>';
+
+                // Details
+                html += '<div class="inv-details">';
+                html += '  <div class="inv-detail-item"><i class="fas fa-calendar-alt"></i> <span class="label">Date & Time</span> <span class="value">' + inv.meetingDateTime + '</span></div>';
+                if (inv.location) {
+                    html += '  <div class="inv-detail-item"><i class="fas fa-map-marker-alt"></i> <span class="label">Location</span> <span class="value">' + inv.location + '</span></div>';
+                }
+                if (inv.durationMinutes) {
+                    html += '  <div class="inv-detail-item"><i class="fas fa-hourglass-half"></i> <span class="label">Duration</span> <span class="value">' + inv.durationMinutes + ' min</span></div>';
+                }
+                html += '</div>';
+
+                if (inv.description) {
+                    html += '<div style="margin-bottom:12px; font-size:0.9em; color:#555;"><strong><i class="fas fa-clipboard-list"></i> Agenda:</strong> ' + inv.description + '</div>';
+                }
+
+                // Student responses
+                html += '<div class="inv-responses">';
+                var s1Resp = inv.student1Response || 'Pending';
+                var s1Class = 'resp-' + s1Resp.toLowerCase();
+                html += '<div class="inv-response"><i class="fas fa-user"></i> <span class="student-name">' + inv.student1Name + '</span> <span class="response-badge ' + s1Class + '">' + s1Resp + '</span></div>';
+                if (inv.student2Name) {
+                    var s2Resp = inv.student2Response || 'Pending';
+                    var s2Class = 'resp-' + s2Resp.toLowerCase();
+                    html += '<div class="inv-response"><i class="fas fa-user"></i> <span class="student-name">' + inv.student2Name + '</span> <span class="response-badge ' + s2Class + '">' + s2Resp + '</span></div>';
+                }
+                html += '</div>';
+
+                // Footer
+                html += '<div class="inv-footer">';
+                html += '  <span class="created-at"><i class="fas fa-clock"></i> Sent: ' + inv.createdAt + '</span>';
+                html += '  <div style="display:flex; gap:8px; flex-wrap:wrap;">';
+                if (statusLower === 'pending' || statusLower === 'accepted') {
+                    html += '  <button type="button" class="btn-edit-invite" onclick=\'showEditModal(' + JSON.stringify(inv) + ')\'><i class="fas fa-edit"></i> Edit</button>';
+                    html += '  <button type="button" class="btn-cancel-invite" onclick="cancelMeeting(' + inv.id + ')"><i class="fas fa-times"></i> Cancel</button>';
+                }
+                html += '  <button type="button" class="btn-delete-invite" onclick="deleteMeeting(' + inv.id + ')"><i class="fas fa-trash-alt"></i> Delete</button>';
+                html += '  </div>';
+                html += '</div>';
+
+                html += '</div>';
+            });
+
+            container.innerHTML = html;
+            document.getElementById('resultCount').textContent = 'Showing ' + invitations.length + ' meeting(s)';
+        }
+
+        // Filter meetings
+        function filterMeetings() {
+            var search = document.getElementById('searchInput').value.toLowerCase().trim();
+            var teamFilter = document.getElementById('teamFilter').value;
+            var statusFilter = document.getElementById('statusFilter').value;
+
+            var cards = document.querySelectorAll('.inv-card');
+            var visible = 0;
+
+            cards.forEach(function(card) {
+                var searchData = card.getAttribute('data-search') || '';
+                var team = card.getAttribute('data-team') || '';
+                var status = card.getAttribute('data-status') || '';
+
+                var matchSearch = !search || searchData.includes(search);
+                var matchTeam = !teamFilter || team === teamFilter;
+                var matchStatus = !statusFilter || status === statusFilter;
+
+                if (matchSearch && matchTeam && matchStatus) {
+                    card.style.display = '';
+                    visible++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            document.getElementById('resultCount').textContent = 'Showing ' + visible + ' of ' + allInvitations.length + ' meeting(s)';
+        }
+
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('teamFilter').value = '';
+            document.getElementById('statusFilter').value = '';
+            filterMeetings();
+        }
+
+        // Schedule meeting modal
+        function showScheduleModal() {
+            var now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.querySelector('#scheduleMeetingForm input[name="meetingDateTime"]').min = now.toISOString().slice(0, 16);
+            document.getElementById('scheduleModal').style.display = 'flex';
+        }
+
+        function hideScheduleModal() {
+            document.getElementById('scheduleModal').style.display = 'none';
+            document.getElementById('scheduleMeetingForm').reset();
+        }
+
+        async function submitScheduleMeeting() {
+            var formData = new FormData(document.getElementById('scheduleMeetingForm'));
+
+            var teamId = formData.get('teamId');
+            var title = formData.get('title');
+            var meetingDateTime = formData.get('meetingDateTime');
+
+            if (!teamId) {
+                showAlert('Please select a team.', false);
+                return;
+            }
+            if (!title || !meetingDateTime) {
+                showAlert('Please fill in all required fields (Title and Date/Time).', false);
+                return;
+            }
+
+            var selectedDate = new Date(meetingDateTime);
+            if (selectedDate <= new Date()) {
+                showAlert('Meeting date/time must be in the future.', false);
+                return;
+            }
+
+            try {
+                var response = await fetch('@Url.Action("SendMeetingInvite", "Faculty")', {
+                    method: 'POST',
+                    body: formData
+                });
+                var result = await response.json();
+                showAlert(result.message, result.success);
+                if (result.success) {
+                    hideScheduleModal();
+                    loadMeetings();
+                }
+            } catch (error) {
+                showAlert('An error occurred. Please try again.', false);
+            }
+        }
+
+        // Cancel meeting
+        async function cancelMeeting(invitationId) {
+            if (!confirm('Are you sure you want to cancel this meeting invitation?')) return;
+
+            try {
+                var formData = new FormData();
+                formData.append('invitationId', invitationId);
+                var tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (tokenInput) {
+                    formData.append('__RequestVerificationToken', tokenInput.value);
+                }
+
+                var response = await fetch('@Url.Action("CancelMeetingInvite", "Faculty")', {
+                    method: 'POST',
+                    body: formData
+                });
+                var result = await response.json();
+                showAlert(result.message, result.success);
+                if (result.success) {
+                    loadMeetings();
+                }
+            } catch (error) {
+                showAlert('An error occurred. Please try again.', false);
+            }
+        }
+
+        // Edit Meeting Modal
+        function showEditModal(inv) {
+            document.getElementById('editInvitationId').value = inv.id;
+            document.getElementById('editTitle').value = inv.title || '';
+            document.getElementById('editDescription').value = inv.description || '';
+            document.getElementById('editMeetingDateTime').value = inv.meetingDateTimeRaw || '';
+            document.getElementById('editLocation').value = inv.location || '';
+            document.getElementById('editDurationMinutes').value = inv.durationMinutes || 60;
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function hideEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        async function submitEditMeeting() {
+            var formData = new FormData(document.getElementById('editMeetingForm'));
+            var title = formData.get('title');
+            var meetingDateTime = formData.get('meetingDateTime');
+
+            if (!title || !meetingDateTime) {
+                showAlert('Please fill in all required fields (Title and Date/Time).', false);
+                return;
+            }
+
+            try {
+                var response = await fetch('@Url.Action("EditMeetingInvite", "Faculty")', {
+                    method: 'POST',
+                    body: formData
+                });
+                var result = await response.json();
+                showAlert(result.message, result.success);
+                if (result.success) {
+                    hideEditModal();
+                    loadMeetings();
+                }
+            } catch (error) {
+                showAlert('An error occurred. Please try again.', false);
+            }
+        }
+
+        // Delete meeting permanently
+        async function deleteMeeting(invitationId) {
+            if (!confirm('Are you sure you want to permanently delete this meeting invitation? This cannot be undone.')) return;
+
+            try {
+                var formData = new FormData();
+                formData.append('invitationId', invitationId);
+                var tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (tokenInput) {
+                    formData.append('__RequestVerificationToken', tokenInput.value);
+                }
+
+                var response = await fetch('@Url.Action("DeleteMeetingInvite", "Faculty")', {
+                    method: 'POST',
+                    body: formData
+                });
+                var result = await response.json();
+                showAlert(result.message, result.success);
+                if (result.success) {
+                    loadMeetings();
+                }
+            } catch (error) {
+                showAlert('An error occurred. Please try again.', false);
+            }
+        }
+
+        // Close modal on outside click
+        document.getElementById('scheduleModal')?.addEventListener('click', function(e) {
+            if (e.target.id === 'scheduleModal') hideScheduleModal();
+        });
+
+        // Edit Meeting Modal
+        function showEditModal(inv) {
+            document.getElementById('editInvitationId').value = inv.id;
+            document.getElementById('editTitle').value = inv.title || '';
+            document.getElementById('editDescription').value = inv.description || '';
+            document.getElementById('editMeetingDateTime').value = inv.meetingDateTimeRaw || '';
+            document.getElementById('editLocation').value = inv.location || '';
+            document.getElementById('editDurationMinutes').value = inv.durationMinutes || 60;
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function hideEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        async function submitEditMeeting() {
+            var formData = new FormData(document.getElementById('editMeetingForm'));
+            var title = formData.get('title');
+            var meetingDateTime = formData.get('meetingDateTime');
+
+            if (!title || !meetingDateTime) {
+                showAlert('Please fill in all required fields (Title and Date/Time).', false);
+                return;
+            }
+
+            try {
+                var response = await fetch('@Url.Action("EditMeetingInvite", "Faculty")', {
+                    method: 'POST',
+                    body: formData
+                });
+                var result = await response.json();
+                showAlert(result.message, result.success);
+                if (result.success) {
+                    hideEditModal();
+                    loadMeetings();
+                }
+            } catch (error) {
+                showAlert('An error occurred. Please try again.', false);
+            }
+        }
+
+        // Delete meeting permanently
+        async function deleteMeeting(invitationId) {
+            if (!confirm('Are you sure you want to permanently delete this meeting invitation? This cannot be undone.')) return;
+
+            try {
+                var formData = new FormData();
+                formData.append('invitationId', invitationId);
+                var tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+                if (tokenInput) {
+                    formData.append('__RequestVerificationToken', tokenInput.value);
+                }
+
+                var response = await fetch('@Url.Action("DeleteMeetingInvite", "Faculty")', {
+                    method: 'POST',
+                    body: formData
+                });
+                var result = await response.json();
+                showAlert(result.message, result.success);
+                if (result.success) {
+                    loadMeetings();
+                }
+            } catch (error) {
+                showAlert('An error occurred. Please try again.', false);
+            }
+        }
+
+        // Close edit modal on outside click
+        document.getElementById('editModal')?.addEventListener('click', function(e) {
+            if (e.target.id === 'editModal') hideEditModal();
+        });
+
+        // Initial load
+        loadMeetings();
+    </script>
+</body>
+</html>

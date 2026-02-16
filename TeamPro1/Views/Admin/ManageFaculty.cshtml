@@ -19,7 +19,7 @@
             --warm-gold: #FFC857;
             --cream: #F9FAF2;
             --slate: #CED3DC;
-            --card-shadow: rgba(39,64,96,0.13);
+            --card-shadow: rgba(39, 64, 96, 0.13);
             --success-green: #28a745;
             --error-red: #dc3545;
             --cseds-purple: #6f42c1;
@@ -377,6 +377,8 @@
     </style>
 </head>
 <body>
+    @Html.Partial("_AdminBackButton")
+    
     <div class="main-container">
         <!-- Header -->
         <div class="page-header">
@@ -391,9 +393,6 @@
                 <button type="button" class="glass-btn" style="background: linear-gradient(135deg, #28a745, #20c997);" onclick="exportFacultyExcel()" id="exportExcelBtn">
                     <i class="fas fa-file-excel"></i> Export Excel
                 </button>
-                <a href="@Url.Action("Dashboard", "Admin")" class="glass-btn btn-back">
-                    <i class="fas fa-arrow-left"></i> Back to Dashboard
-                </a>
             </div>
         </div>
 

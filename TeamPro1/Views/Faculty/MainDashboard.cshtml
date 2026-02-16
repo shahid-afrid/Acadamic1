@@ -302,18 +302,16 @@
         }
 
         @@media (max-width: 768px) {
+            .main-container {
+                margin-top: 80px; /* Add margin to avoid overlap with notification bell */
+            }
+
             .dashboard-header h2 {
                 font-size: 1.8em;
             }
 
             .cards-container {
                 grid-template-columns: 1fr;
-            }
-
-            .nav-link, .logout-link {
-                position: static;
-                display: inline-block;
-                margin: 10px 5px;
             }
 
             .app-footer {
@@ -336,8 +334,7 @@
     </style>
 </head>
 <body>
-    <a href="@Url.Action("Index", "Home")" class="nav-link"><i class="fas fa-home"></i> Home</a>
-    <a href="@Url.Action("Logout", "Faculty")" class="logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    @Html.Partial("_FacultyNotificationBell")
 
     <div class="main-container">
         @if (TempData["SuccessMessage"] != null)
@@ -371,6 +368,13 @@
                 <h5 class="card-title">Assigned Teams</h5>
                 <p class="card-text">Manage and monitor teams assigned to you as mentor.</p>
                 <a asp-controller="Faculty" asp-action="AssignedTeams" class="glass-btn">View Assigned</a>
+            </div>
+
+            <div class="dashboard-card">
+                <div class="card-icon"><i class="fas fa-calendar-check"></i></div>
+                <h5 class="card-title">Scheduled Meetings</h5>
+                <p class="card-text">View, schedule and manage meeting invitations across all your teams.</p>
+                <a asp-controller="Faculty" asp-action="ScheduledMeetings" class="glass-btn">View Meetings</a>
             </div>
         </div>
     </div>

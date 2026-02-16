@@ -975,35 +975,192 @@
             padding: 10px;
         }
 
-        @@media (max-width: 768px) {
-            .page-header {
-                flex-direction: column;
-                gap: 20px;
-                text-align: center;
-            }
+        /* Meeting Invitations Styles */
+        .meeting-invitation-card {
+            background: white;
+            border: 2px solid var(--slate);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
 
-            .page-header h1 {
-                font-size: 1.6em;
-            }
+        .meeting-invitation-card.pending {
+            border-left: 5px solid var(--warning-orange);
+        }
 
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
+        .meeting-invitation-card.accepted {
+            border-left: 5px solid var(--success-green);
+            background: rgba(40, 167, 69, 0.05);
+        }
 
-            .info-row {
-                flex-direction: column;
-                gap: 8px;
-            }
+        .meeting-invitation-card.attended {
+            border-left: 5px solid var(--info-blue);
+            background: rgba(23, 162, 184, 0.05);
+        }
 
-            .info-row-label {
-                min-width: auto;
-            }
+        .meeting-invitation-card:hover {
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
 
-            .status-table th,
-            .status-table td {
-                padding: 12px 10px;
-                font-size: 0.85em;
-            }
+        .meeting-inv-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--slate);
+        }
+
+        .meeting-inv-title {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: var(--royal-blue);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .meeting-inv-status {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .meeting-inv-status.pending {
+            background: linear-gradient(135deg, rgba(255, 152, 0, 0.2), rgba(255, 152, 0, 0.3));
+            color: var(--warning-orange);
+            border: 2px solid var(--warning-orange);
+        }
+
+        .meeting-inv-status.accepted {
+            background: linear-gradient(135deg, rgba(40, 167, 69, 0.2), rgba(40, 167, 69, 0.3));
+            color: var(--success-green);
+            border: 2px solid var(--success-green);
+        }
+
+        .meeting-inv-status.attended {
+            background: linear-gradient(135deg, rgba(23,162,184,0.2), rgba(23,162,184,0.3));
+            color: var(--info-blue);
+            border: 2px solid var(--info-blue);
+        }
+
+        .meeting-inv-body {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .meeting-inv-detail {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .meeting-inv-detail i {
+            color: var(--warm-gold);
+            font-size: 1.1em;
+            margin-top: 2px;
+        }
+
+        .meeting-inv-detail-content {
+            flex: 1;
+        }
+
+        .meeting-inv-detail-label {
+            font-size: 0.8em;
+            color: #666;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+
+        .meeting-inv-detail-value {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .meeting-inv-description {
+            background: rgba(255, 200, 87, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 3px solid var(--warm-gold);
+        }
+
+        .meeting-inv-description strong {
+            color: var(--royal-blue);
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .meeting-inv-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .meeting-inv-btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .meeting-inv-btn-accept {
+            background: linear-gradient(135deg, var(--success-green), #66bb6a);
+            color: white;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        }
+
+        .meeting-inv-btn-accept:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(40, 167, 69, 0.4);
+        }
+
+        .meeting-inv-btn-reject {
+            background: linear-gradient(135deg, var(--error-red), #c82333);
+            color: white;
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        }
+
+        .meeting-inv-btn-reject:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(220, 53, 69, 0.4);
+        }
+
+        .meeting-inv-btn-attended {
+            background: linear-gradient(135deg, var(--info-blue), #20c1da);
+            color: white;
+            box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+        }
+
+        .meeting-inv-btn-attended:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(23, 162, 184, 0.4);
+        }
+
+        .no-invitations-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .no-invitations-message i {
+            font-size: 3em;
+            color: var(--slate);
+            margin-bottom: 15px;
+            display: block;
         }
 
         /* Footer Styling */
@@ -1048,6 +1205,8 @@
     </style>
 </head>
 <body>
+    @Html.Partial("_NotificationBell")
+    
     <div class="main-container">
         <!-- Page Header -->
         <div class="page-header">
@@ -1207,6 +1366,21 @@
                                 <i class="fas fa-clipboard-list"></i> View Logs
                             </button>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MEETING INVITATIONS SECTION (NEW) -->
+            <div class="status-card">
+                <div class="section-title">
+                    <i class="fas fa-calendar-check"></i>
+                    Scheduled Meetings
+                </div>
+
+                <div id="meetingInvitationsContainer">
+                    <div style="text-align:center;padding:30px;">
+                        <i class="fas fa-spinner fa-spin" style="font-size:2em;color:var(--royal-blue);"></i>
+                        <p style="margin-top:15px;color:#666;">Loading scheduled meetings...</p>
                     </div>
                 </div>
             </div>
@@ -1382,7 +1556,8 @@
                     <form id="addMeetingForm" method="post" action="@Url.Action("AddMeeting", "Student")" enctype="multipart/form-data">
                         @Html.AntiForgeryToken()
                         <input type="hidden" name="TeamId" value="@team.Id" />
-                        
+                        <input type="hidden" id="addMeetingInvitationId" name="MeetingInvitationId" value="" />
+
                         <div class="form-group">
                             <label><i class="fas fa-hashtag"></i> Meeting Number</label>
                             <input type="number" name="MeetingNumber" class="form-control" value="@nextMeetingNumber" readonly style="background: #e9ecef; cursor: not-allowed;" />
@@ -1400,10 +1575,10 @@
 
                         <div class="form-group">
                             <label><i class="fas fa-percentage"></i> Project Completion (%)</label>
-                            <input type="number" id="addCompletionPercentage" name="CompletionPercentage" class="form-control" min="@lastCompletionPercentage" max="100" value="@lastCompletionPercentage" required />
+                            <input type="number" id="addCompletionPercentage" name="CompletionPercentage" class="form-control" min="@(lastCompletionPercentage > 0 && lastCompletionPercentage < 100 ? lastCompletionPercentage + 1 : lastCompletionPercentage)" max="100" value="@(lastCompletionPercentage > 0 && lastCompletionPercentage < 100 ? lastCompletionPercentage + 1 : lastCompletionPercentage)" required />
                             @if (lastCompletionPercentage > 0)
                             {
-                                <small class="form-text"><i class="fas fa-info-circle"></i> Minimum value is @lastCompletionPercentage% (from previous meeting)</small>
+                                <small class="form-text"><i class="fas fa-info-circle"></i> Must be greater than @lastCompletionPercentage% (previous meeting progress)</small>
                             }
                         </div>
 
@@ -1494,6 +1669,263 @@
                 var nextMeetingNumber = @nextMeetingNumber;
                 var lastCompletionPercentage = @lastCompletionPercentage;
 
+                // Load meeting invitations on page load
+                document.addEventListener('DOMContentLoaded', function() {
+                    loadMeetingInvitations();
+                });
+
+                // Load meeting invitations
+                async function loadMeetingInvitations() {
+                    const container = document.getElementById('meetingInvitationsContainer');
+                    
+                    try {
+                        const response = await fetch('@Url.Action("GetMeetingInvitations", "Student")');
+                        const result = await response.json();
+                        
+                        if (result.success && result.invitations && result.invitations.length > 0) {
+                            let html = '';
+                            
+                            result.invitations.forEach(invite => {
+                                const myResponse = invite.myResponse || 'Pending';
+                                const canRespond = invite.canRespond;
+                                const isAccepted = myResponse === 'Accepted';
+                                const isPending = myResponse === 'Pending';
+                                const isAttended = myResponse === 'Attended';
+                                const isCompleted = invite.status === 'Completed';
+                                
+                                let statusClass = isPending ? 'pending' : (isAccepted ? 'accepted' : 'attended');
+                                let statusText = isPending ? 'Awaiting Response' : (isAccepted ? 'Accepted' : (isCompleted ? 'Completed' : myResponse));
+                                
+                                html += `<div class="meeting-invitation-card ${statusClass}">`;
+                                html += `  <div class="meeting-inv-header">`;
+                                html += `    <div class="meeting-inv-title">`;
+                                html += `      <i class="fas fa-calendar-check"></i>`;
+                                html += `      ${invite.title}`;
+                                html += `    </div>`;
+                                html += `    <div class="meeting-inv-status ${statusClass}">`;
+                                html += `      ${statusText}`;
+                                html += `    </div>`;
+                                html += `  </div>`;
+                                
+                                html += `  <div class="meeting-inv-body">`;
+                                html += `    <div class="meeting-inv-detail">`;
+                                html += `      <i class="fas fa-user-tie"></i>`;
+                                html += `      <div class="meeting-inv-detail-content">`;
+                                html += `        <div class="meeting-inv-detail-label">Faculty</div>`;
+                                html += `        <div class="meeting-inv-detail-value">${invite.facultyName}</div>`;
+                                html += `      </div>`;
+                                html += `    </div>`;
+                                
+                                html += `    <div class="meeting-inv-detail">`;
+                                html += `      <i class="fas fa-calendar-alt"></i>`;
+                                html += `      <div class="meeting-inv-detail-content">`;
+                                html += `        <div class="meeting-inv-detail-label">Date & Time</div>`;
+                                html += `        <div class="meeting-inv-detail-value">${invite.meetingDateTime}</div>`;
+                                html += `      </div>`;
+                                html += `    </div>`;
+                                
+                                if (invite.location) {
+                                    html += `    <div class="meeting-inv-detail">`;
+                                    html += `      <i class="fas fa-map-marker-alt"></i>`;
+                                    html += `      <div class="meeting-inv-detail-content">`;
+                                    html += `        <div class="meeting-inv-detail-label">Location</div>`;
+                                    html += `        <div class="meeting-inv-detail-value">${invite.location}</div>`;
+                                    html += `      </div>`;
+                                    html += `    </div>`;
+                                }
+                                
+                                if (invite.durationMinutes) {
+                                    html += `    <div class="meeting-inv-detail">`;
+                                    html += `      <i class="fas fa-hourglass-half"></i>`;
+                                    html += `      <div class="meeting-inv-detail-content">`;
+                                    html += `        <div class="meeting-inv-detail-label">Duration</div>`;
+                                    html += `        <div class="meeting-inv-detail-value">${invite.durationMinutes} minutes</div>`;
+                                    html += `      </div>`;
+                                    html += `    </div>`;
+                                }
+                                html += `  </div>`;
+                                
+                                if (invite.description) {
+                                    html += `  <div class="meeting-inv-description">`;
+                                    html += `    <strong><i class="fas fa-clipboard-list"></i> Agenda:</strong>`;
+                                    html += `    ${invite.description}`;
+                                    html += `  </div>`;
+                                }
+                                
+                                html += `  <div class="meeting-inv-actions">`;
+                                if (canRespond) {
+                                    html += `    <button class="meeting-inv-btn meeting-inv-btn-accept" onclick="respondToMeetingInvite(${invite.id}, 'Accepted')">`;
+                                    html += `      <i class="fas fa-check"></i> Accept`;
+                                    html += `    </button>`;
+                                    html += `    <button class="meeting-inv-btn meeting-inv-btn-reject" onclick="respondToMeetingInvite(${invite.id}, 'Rejected')">`;
+                                    html += `      <i class="fas fa-times"></i> Decline`;
+                                    html += `    </button>`;
+                                } else if (isAccepted) {
+                                    html += `    <button class="meeting-inv-btn meeting-inv-btn-attended" onclick="markAsAttended(${invite.id})">`;
+                                    html += `      <i class="fas fa-user-check"></i> Mark as Attended`;
+                                    html += `    </button>`;
+                                } else if (isAttended || isCompleted) {
+                                    html += `    <span style="color: var(--info-blue); font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">`;
+                                    html += `      <i class="fas fa-check-circle"></i> You attended this meeting`;
+                                    html += `    </span>`;
+                                    html += `    <button class="meeting-inv-btn" onclick="addAttendedMeetingToProgress(${invite.id}, '${invite.title}', '${invite.meetingDateOnly || ''}', '${invite.description ? invite.description.replace(/'/g, "\\\\'").replace(/\n/g, "\\\\n") : ''}')" style="background: linear-gradient(135deg, var(--success-green), #66bb6a); color: white; box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3); margin-left: 8px;">`;
+                                    html += `      <i class="fas fa-plus"></i> Add to Progress`;
+                                    html += `    </button>`;
+                                } else {
+                                    html += `    <span style="color: #666; font-style: italic;">`;
+                                    html += `      <i class="fas fa-info-circle"></i> You ${myResponse.toLowerCase()} this meeting`;
+                                    html += `    </span>`;
+                                }
+                                html += `  </div>`;
+                                
+                                html += `</div>`;
+                            });
+                            
+                            container.innerHTML = html;
+                        } else {
+                            container.innerHTML = `
+                                <div class="no-invitations-message">
+                                    <i class="fas fa-calendar-times"></i>
+                                    <h4 style="color: var(--royal-blue); margin-bottom: 10px;">No Scheduled Meetings</h4>
+                                    <p>Your faculty hasn't scheduled any meetings yet.</p>
+                                </div>
+                            `;
+                        }
+                    } catch (error) {
+                        console.error('Error loading meeting invitations:', error);
+                        container.innerHTML = `
+                            <div class="no-invitations-message">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <h4 style="color: var(--error-red); margin-bottom: 10px;">Error Loading Meetings</h4>
+                                <p>Unable to load scheduled meetings. Please refresh the page.</p>
+                            </div>
+                        `;
+                    }
+                }
+
+                // Respond to meeting invitation
+                async function respondToMeetingInvite(invitationId, response) {
+                    const action = response === 'Accepted' ? 'accept' : 'decline';
+                    if (!confirm(`Are you sure you want to ${action} this meeting invitation?`)) {
+                        return;
+                    }
+
+                    try {
+                        const formData = new FormData();
+                        formData.append('invitationId', invitationId);
+                        formData.append('response', response);
+                        
+                        const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+                        if (tokenInput) {
+                            formData.append('__RequestVerificationToken', tokenInput.value);
+                        }
+
+                        const result = await fetch('@Url.Action("RespondToMeetingInvite", "Student")', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        const data = await result.json();
+
+                        if (data.success) {
+                            showNotification(data.message, 'success');
+                            loadMeetingInvitations(); // Reload invitations
+                        } else {
+                            showNotification(data.message, 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error responding to invitation:', error);
+                        showNotification('Error responding to invitation. Please try again.', 'error');
+                    }
+                }
+
+                // Mark meeting as attended - just open the modal, don't mark in DB yet
+                // The actual marking happens when the student saves the meeting form
+                async function markAsAttended(invitationId) {
+                    // Check if add meeting is possible
+                    var canAdd = @(canAddMeeting ? "true" : "false");
+                    if (!canAdd) {
+                        alert('Cannot add meeting.\n\nProblem statement and mentor must be assigned by faculty first.');
+                        return;
+                    }
+
+                    // Fetch the invitation data to get the meeting date
+                    var meetingDate = '';
+                    try {
+                        const invResponse = await fetch('@Url.Action("GetMeetingInvitations", "Student")');
+                        const invResult = await invResponse.json();
+                        if (invResult.success && invResult.invitations) {
+                            var matchedInvite = invResult.invitations.find(i => i.id === invitationId);
+                            if (matchedInvite) {
+                                meetingDate = matchedInvite.meetingDateOnly || '';
+                            }
+                        }
+                    } catch (e) { /* ignore, will default to today */ }
+
+                    // Open the Add Meeting modal directly (NO server call to mark attended)
+                    openAttendedMeetingModal(invitationId, meetingDate);
+                }
+
+                // Open Add Meeting modal for an attended meeting with correct values
+                function openAttendedMeetingModal(invitationId, meetingDate) {
+                    // Check if add meeting is possible
+                    var canAdd = @(canAddMeeting ? "true" : "false");
+                    if (!canAdd) {
+                        alert('Cannot add meeting.\n\nProblem statement and mentor must be assigned by faculty first.');
+                        return;
+                    }
+
+                    // Reset form
+                    document.getElementById('addMeetingForm').reset();
+
+                    // Set the meeting invitation ID
+                    var invitationInput = document.getElementById('addMeetingInvitationId');
+                    if (invitationInput) {
+                        invitationInput.value = invitationId;
+                    }
+
+                    // Set auto-calculated meeting number (readonly)
+                    var meetingNumberInput = document.querySelector('#addMeetingForm input[name="MeetingNumber"]');
+                    if (meetingNumberInput) {
+                        meetingNumberInput.value = nextMeetingNumber;
+                        meetingNumberInput.readOnly = true;
+                    }
+
+                    // Set meeting date from the scheduled meeting (NOT today)
+                    var dateInput = document.querySelector('#addMeetingForm input[name="MeetingDate"]');
+                    if (dateInput) {
+                        if (meetingDate) {
+                            dateInput.value = meetingDate;
+                        } else {
+                            dateInput.value = new Date().toISOString().split('T')[0];
+                        }
+                    }
+
+                    // Notes should be EMPTY - student writes their own notes
+                    var notesInput = document.querySelector('#addMeetingForm textarea[name="Notes"]');
+                    if (notesInput) {
+                        notesInput.value = '';
+                        notesInput.placeholder = 'Write your meeting notes here (what was discussed, progress made, etc.)';
+                    }
+
+                    // Set completion percentage - must be greater than previous
+                    var completionInput = document.getElementById('addCompletionPercentage');
+                    if (completionInput) {
+                        var minValue = lastCompletionPercentage > 0 ? lastCompletionPercentage + 1 : 0;
+                        if (minValue > 100) minValue = 100;
+                        completionInput.value = minValue;
+                        completionInput.min = minValue;
+                    }
+
+                    // Update the hint text for completion
+                    var hintEl = completionInput?.parentElement?.querySelector('.form-text');
+                    if (hintEl) {
+                        hintEl.innerHTML = '<i class="fas fa-info-circle"></i> Must be greater than ' + lastCompletionPercentage + '% (previous meeting progress)';
+                    }
+
+                    document.getElementById('addMeetingModal').style.display = 'flex';
+                }
+
                 function showAddMeetingModal() {
                     // Check if button is disabled
                     var btn = event.target.closest('button');
@@ -1505,6 +1937,12 @@
                     // Reset form but preserve computed values
                     document.getElementById('addMeetingForm').reset();
 
+                    // Clear the meeting invitation ID (this is a manual add, not from invitation)
+                    var invitationInput = document.getElementById('addMeetingInvitationId');
+                    if (invitationInput) {
+                        invitationInput.value = '';
+                    }
+
                     // Set auto-calculated meeting number (readonly)
                     var meetingNumberInput = document.querySelector('#addMeetingForm input[name="MeetingNumber"]');
                     if (meetingNumberInput) {
@@ -1512,11 +1950,25 @@
                         meetingNumberInput.readOnly = true;
                     }
 
-                    // Set completion percentage with minimum from last meeting
+                    // Set completion percentage - must be greater than previous
                     var completionInput = document.getElementById('addCompletionPercentage');
                     if (completionInput) {
-                        completionInput.value = lastCompletionPercentage;
-                        completionInput.min = lastCompletionPercentage;
+                        var minValue = lastCompletionPercentage > 0 ? lastCompletionPercentage + 1 : 0;
+                        if (minValue > 100) minValue = 100;
+                        completionInput.value = minValue;
+                        completionInput.min = minValue;
+                    }
+
+                    // Reset notes placeholder
+                    var notesInput = document.querySelector('#addMeetingForm textarea[name="Notes"]');
+                    if (notesInput) {
+                        notesInput.placeholder = 'Enter meeting agenda or problem statement';
+                    }
+
+                    // Update the hint text for completion
+                    var hintEl = completionInput?.parentElement?.querySelector('.form-text');
+                    if (hintEl && lastCompletionPercentage > 0) {
+                        hintEl.innerHTML = '<i class="fas fa-info-circle"></i> Must be greater than ' + lastCompletionPercentage + '% (previous meeting progress)';
                     }
 
                     // Set today's date
@@ -1528,14 +1980,12 @@
                     document.getElementById('addMeetingModal').style.display = 'flex';
                 }
 
+                // Hide Add Meeting Modal
                 function hideAddMeetingModal() {
                     document.getElementById('addMeetingModal').style.display = 'none';
                 }
 
-                function showAddFirstMeetingModal() {
-                    showAddMeetingModal();
-                }
-
+                // Show Edit Meeting Modal
                 function showEditMeetingModal(meetingId, meetingNumber, meetingDate, notes, completionPercentage, isLatest) {
                     document.getElementById('editMeetingId').value = meetingId;
                     document.getElementById('editMeetingNumber').value = meetingNumber;
@@ -1543,29 +1993,28 @@
                     document.getElementById('editMeetingNotes').value = notes || '';
                     document.getElementById('editCompletionPercentage').value = completionPercentage;
 
-                    var completionInput = document.getElementById('editCompletionPercentage');
-                    var completionHint = document.getElementById('editCompletionHint');
-
-                    if (isLatest) {
-                        completionInput.readOnly = false;
-                        completionInput.style.background = '';
-                        completionInput.style.cursor = '';
-                        completionHint.style.display = 'none';
+                    // If not latest meeting, disable completion percentage editing
+                    if (!isLatest) {
+                        document.getElementById('editCompletionPercentage').readOnly = true;
+                        document.getElementById('editCompletionPercentage').style.background = '#e9ecef';
+                        document.getElementById('editCompletionPercentage').style.cursor = 'not-allowed';
+                        document.getElementById('editCompletionHint').style.display = 'block';
                     } else {
-                        completionInput.readOnly = true;
-                        completionInput.style.background = '#e9ecef';
-                        completionInput.style.cursor = 'not-allowed';
-                        completionHint.style.display = 'block';
+                        document.getElementById('editCompletionPercentage').readOnly = false;
+                        document.getElementById('editCompletionPercentage').style.background = '';
+                        document.getElementById('editCompletionPercentage').style.cursor = '';
+                        document.getElementById('editCompletionHint').style.display = 'none';
                     }
 
                     document.getElementById('editMeetingModal').style.display = 'flex';
                 }
 
+                // Hide Edit Meeting Modal
                 function hideEditMeetingModal() {
                     document.getElementById('editMeetingModal').style.display = 'none';
                 }
 
-                // Logs Modal
+                // Show Activity Logs Modal
                 async function showLogsModal(teamId) {
                     var modal = document.getElementById('logsModal');
                     var body = document.getElementById('logsModalBody');
@@ -1581,55 +2030,57 @@
                                 var roleColor = log.performedByRole === 'Student' ? '#274060' : log.performedByRole === 'Faculty' ? '#6f42c1' : '#e67e22';
                                 var roleIcon = log.performedByRole === 'Student' ? 'fa-user-graduate' : log.performedByRole === 'Faculty' ? 'fa-chalkboard-teacher' : 'fa-user-shield';
                                 html += '<div style="padding:15px 20px;border-bottom:1px solid #eee;transition:background 0.2s;" onmouseover="this.style.background=\'rgba(23,162,184,0.05)\'" onmouseout="this.style.background=\'transparent\'">';
-                                html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">';
+                                html += '<div style="display:flex;align-items:center;gap:10px;">';
+                                html += '<div style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:'+roleColor+'20;border-radius:50%;">';
+                                html += '<i class="fas '+roleIcon+'" style="color:'+roleColor+';font-size:1.2em;"></i>';
+                                html += '</div>';
                                 html += '<div style="flex:1;">';
-                                html += '<div style="font-weight:700;color:#274060;font-size:1em;margin-bottom:4px;"><i class="fas fa-circle" style="font-size:0.5em;color:' + roleColor + ';vertical-align:middle;margin-right:6px;"></i>' + log.action + '</div>';
+                                html += '<div style="font-weight:600;color:#274060;">'+(log.performedByName || 'Unknown')+'</div>';
+                                html += '<div style="font-size:0.9em;color:#666;">'+log.action+'</div>';
                                 if (log.details) {
-                                    html += '<div style="font-size:0.9em;color:#555;line-height:1.5;margin-bottom:6px;">' + log.details + '</div>';
+                                    html += '<div style="font-size:0.8em;color:#999;margin-top:3px;">'+log.details+'</div>';
                                 }
-                                html += '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">';
-                                html += '<span style="background:' + roleColor + ';color:white;padding:3px 10px;border-radius:12px;font-size:0.75em;font-weight:600;"><i class="fas ' + roleIcon + '" style="margin-right:4px;"></i>' + log.performedByRole + '</span>';
-                                html += '<span style="font-size:0.85em;color:#888;font-weight:500;">' + log.performedByName + '</span>';
                                 html += '</div>';
                                 html += '</div>';
-                                html += '<div style="font-size:0.8em;color:#999;white-space:nowrap;min-width:130px;text-align:right;">';
-                                html += '<i class="fas fa-clock" style="margin-right:4px;"></i>' + log.timestamp;
-                                html += '</div>';
+                                html += '<div style="margin-top:8px;font-size:0.85em;color:#888;">';
+                                html += '<i class="fas fa-clock" style="color:#fea116;"></i> ';
+                                html += log.timestamp;
                                 html += '</div>';
                                 html += '</div>';
                             });
                             html += '</div>';
                             body.innerHTML = html;
-                        } else if (result.success && result.logs.length === 0) {
-                            body.innerHTML = '<div style="text-align:center;padding:50px 20px;"><i class="fas fa-inbox" style="font-size:3em;color:var(--slate);margin-bottom:15px;display:block;"></i><h4 style="color:#274060;margin-bottom:8px;">No Activity Yet</h4><p style="color:#666;">Activity logs will appear here when changes are made.</p></div>';
                         } else {
-                            body.innerHTML = '<div style="text-align:center;padding:40px;color:#dc3545;"><i class="fas fa-exclamation-circle" style="font-size:2em;margin-bottom:10px;display:block;"></i>' + (result.message || 'Failed to load logs.') + '</div>';
+                            body.innerHTML = '<div style="padding:40px;color:#666;text-align:center;"><i class="fas fa-inbox" style="font-size:3em;color:#ddd;display:block;margin-bottom:15px;"></i>No activity logs found for this team.</div>';
                         }
-                    } catch (err) {
-                        body.innerHTML = '<div style="text-align:center;padding:40px;color:#dc3545;"><i class="fas fa-exclamation-circle" style="font-size:2em;margin-bottom:10px;display:block;"></i>Error loading logs.</div>';
+                    } catch (error) {
+                        body.innerHTML = '<div style="padding:40px;color:#666;text-align:center;">Error loading logs. Please try again.</div>';
                     }
                 }
 
+                // Hide Activity Logs Modal
                 function hideLogsModal() {
                     document.getElementById('logsModal').style.display = 'none';
                 }
 
-                document.getElementById('logsModal')?.addEventListener('click', function(e) {
-                    if (e.target.id === 'logsModal') hideLogsModal();
-                });
+                // Show notification toast
+                function showNotification(message, type) {
+                    var color = type === 'success' ? '#28a745' : '#dc3545';
+                    var icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
 
-                // Close modal when clicking outside
-                document.getElementById('addMeetingModal')?.addEventListener('click', function(e) {
-                    if (e.target.id === 'addMeetingModal') {
-                        hideAddMeetingModal();
-                    }
-                });
+                    var msgDiv = document.createElement('div');
+                    msgDiv.style.cssText = 'position:fixed;top:80px;right:20px;background:white;padding:18px 25px;border-radius:12px;box-shadow:0 6px 25px rgba(0,0,0,0.2);border-left:5px solid '+color+';z-index:10001;animation:slideIn 0.3s ease;display:flex;align-items:center;gap:12px;max-width:400px;font-family:Montserrat,sans-serif;';
+                    msgDiv.innerHTML = '<i class="fas '+icon+'" style="color:'+color+';font-size:1.3em;"></i><span style="color:#333;font-weight:600;font-size:0.95em;">'+message+'</span>';
 
-                document.getElementById('editMeetingModal')?.addEventListener('click', function(e) {
-                    if (e.target.id === 'editMeetingModal') {
-                        hideEditMeetingModal();
-                    }
-                });
+                    document.body.appendChild(msgDiv);
+
+                    setTimeout(function() {
+                        msgDiv.style.opacity = '0';
+                        msgDiv.style.transform = 'translateX(100px)';
+                        msgDiv.style.transition = 'all 0.3s ease';
+                        setTimeout(function() { msgDiv.remove(); }, 300);
+                    }, 4000);
+                }
             </script>
         }
     </div>

@@ -1,0 +1,597 @@
+@{
+    ViewData["Title"] = "Meeting Invitations";
+    Layout = "_StudentLayout";
+}
+
+<style>
+    .meeting-invitations-container {
+        background: linear-gradient(135deg, rgba(255, 240, 245, 0.3), rgba(240, 248, 255, 0.3));
+        min-height: 100vh;
+        padding: 30px 20px;
+    }
+
+    .invitations-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .invitations-header h1 {
+        color: var(--royal-blue);
+        font-weight: 800;
+        font-size: 2.5em;
+        margin-bottom: 10px;
+    }
+
+    .invitations-header p {
+        color: #666;
+        font-size: 1.1em;
+    }
+
+    .filter-tabs {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+
+    .filter-tab {
+        padding: 12px 30px;
+        background: white;
+        border: 2px solid var(--royal-blue);
+        border-radius: 30px;
+        color: var(--royal-blue);
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .filter-tab:hover {
+        background: var(--royal-blue);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(39, 64, 96, 0.3);
+    }
+
+    .filter-tab.active {
+        background: linear-gradient(135deg, var(--royal-blue), #1a2f47);
+        color: white;
+        box-shadow: 0 4px 15px rgba(39, 64, 96, 0.3);
+    }
+
+    .invitations-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 25px;
+        margin-bottom: 30px;
+    }
+
+    .invitation-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border-left: 5px solid var(--royal-blue);
+    }
+
+    .invitation-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .invitation-card.pending {
+        border-left-color: var(--warm-gold);
+    }
+
+    .invitation-card.accepted {
+        border-left-color: #28a745;
+    }
+
+    .invitation-card.rejected {
+        border-left-color: #dc3545;
+    }
+
+    .invitation-header {
+        background: linear-gradient(135deg, var(--royal-blue), #1a2f47);
+        color: white;
+        padding: 20px;
+    }
+
+    .invitation-header.pending {
+        background: linear-gradient(135deg, var(--warm-gold), #e6a800);
+    }
+
+    .invitation-header.accepted {
+        background: linear-gradient(135deg, #28a745, #20c997);
+    }
+
+    .invitation-header.rejected {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+    }
+
+    .invitation-title {
+        font-weight: 800;
+        font-size: 1.3em;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .invitation-faculty {
+        font-size: 0.95em;
+        opacity: 0.95;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .invitation-body {
+        padding: 20px;
+    }
+
+    .invitation-detail {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 15px;
+        padding: 12px;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+
+    .invitation-detail i {
+        color: var(--royal-blue);
+        font-size: 1.1em;
+        min-width: 20px;
+        margin-top: 2px;
+    }
+
+    .invitation-detail-content {
+        flex: 1;
+    }
+
+    .invitation-detail-label {
+        font-weight: 700;
+        color: #333;
+        font-size: 0.85em;
+        margin-bottom: 3px;
+    }
+
+    .invitation-detail-value {
+        color: #666;
+        font-size: 0.95em;
+        line-height: 1.5;
+    }
+
+    .invitation-description {
+        background: rgba(255, 200, 87, 0.1);
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        border-left: 3px solid var(--warm-gold);
+    }
+
+    .invitation-description-label {
+        font-weight: 700;
+        color: var(--royal-blue);
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .invitation-description-text {
+        color: #555;
+        line-height: 1.6;
+        font-size: 0.95em;
+    }
+
+    .invitation-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 0.85em;
+        margin-bottom: 15px;
+    }
+
+    .invitation-status.pending {
+        background: rgba(255, 200, 87, 0.2);
+        color: #e6a800;
+        border: 2px solid var(--warm-gold);
+    }
+
+    .invitation-status.accepted {
+        background: rgba(40, 167, 69, 0.2);
+        color: #1e7e34;
+        border: 2px solid #28a745;
+    }
+
+    .invitation-status.rejected {
+        background: rgba(220, 53, 69, 0.2);
+        color: #bd2130;
+        border: 2px solid #dc3545;
+    }
+
+    .invitation-actions {
+        display: flex;
+        gap: 10px;
+        padding-top: 15px;
+        border-top: 2px dashed #eee;
+    }
+
+    .invitation-btn {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 0.95em;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .invitation-btn-accept {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+    }
+
+    .invitation-btn-accept:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+    }
+
+    .invitation-btn-reject {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: white;
+    }
+
+    .invitation-btn-reject:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 80px 20px;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .empty-state i {
+        font-size: 5em;
+        color: #ddd;
+        margin-bottom: 20px;
+    }
+
+    .empty-state h3 {
+        color: #999;
+        font-weight: 700;
+        font-size: 1.5em;
+        margin-bottom: 10px;
+    }
+
+    .empty-state p {
+        color: #bbb;
+        font-size: 1.1em;
+    }
+
+    .loading-container {
+        text-align: center;
+        padding: 100px 20px;
+    }
+
+    .loading-spinner {
+        font-size: 4em;
+        color: var(--royal-blue);
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        100% { transform: rotate(360deg); }
+    }
+
+    @@media (max-width: 768px) {
+        .invitations-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .filter-tabs {
+            justify-content: stretch;
+        }
+
+        .filter-tab {
+            flex: 1;
+            min-width: calc(50% - 10px);
+        }
+    }
+</style>
+
+<div class="meeting-invitations-container">
+    <div class="invitations-header">
+        <h1>
+            <i class="fas fa-calendar-alt"></i>
+            Meeting Invitations
+        </h1>
+        <p>Manage your meeting invitations from faculty</p>
+    </div>
+
+    <div class="filter-tabs">
+        <div class="filter-tab active" data-filter="all" onclick="filterInvitations('all')">
+            <i class="fas fa-list"></i> All
+        </div>
+        <div class="filter-tab" data-filter="pending" onclick="filterInvitations('pending')">
+            <i class="fas fa-clock"></i> Pending
+        </div>
+        <div class="filter-tab" data-filter="accepted" onclick="filterInvitations('accepted')">
+            <i class="fas fa-check-circle"></i> Accepted
+        </div>
+        <div class="filter-tab" data-filter="rejected" onclick="filterInvitations('rejected')">
+            <i class="fas fa-times-circle"></i> Declined
+        </div>
+    </div>
+
+    <div id="invitationsContainer">
+        <div class="loading-container">
+            <i class="fas fa-spinner loading-spinner"></i>
+            <p style="margin-top: 20px; color: #666;">Loading invitations...</p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let allInvitations = [];
+        let currentFilter = 'all';
+
+        // Load invitations on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadMeetingInvitations();
+        });
+
+        // Load meeting invitations
+        async function loadMeetingInvitations() {
+            try {
+                const response = await fetch('@Url.Action("GetMeetingInvitations", "Student")');
+                const result = await response.json();
+
+                if (result.success) {
+                    allInvitations = result.invitations || [];
+                    displayInvitations();
+                } else {
+                    showError(result.message);
+                }
+            } catch (error) {
+                console.error('Error loading invitations:', error);
+                showError('Error loading meeting invitations');
+            }
+        }
+
+        // Display invitations
+        function displayInvitations() {
+            const container = document.getElementById('invitationsContainer');
+            
+            let filteredInvitations = allInvitations;
+            if (currentFilter !== 'all') {
+                filteredInvitations = allInvitations.filter(inv => {
+                    if (currentFilter === 'pending') {
+                        return inv.canRespond;
+                    } else {
+                        return inv.myResponse && inv.myResponse.toLowerCase() === currentFilter;
+                    }
+                });
+            }
+
+            if (filteredInvitations.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-calendar-times"></i>
+                        <h3>No ${currentFilter === 'all' ? '' : currentFilter + ' '}invitations</h3>
+                        <p>You don't have any ${currentFilter === 'all' ? 'meeting' : currentFilter} invitations yet</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<div class="invitations-grid">';
+
+            filteredInvitations.forEach(inv => {
+                const status = inv.canRespond ? 'pending' : inv.myResponse.toLowerCase();
+                const statusText = inv.canRespond ? 'Pending Response' : `You ${inv.myResponse}`;
+                
+                html += `
+                    <div class="invitation-card ${status}">
+                        <div class="invitation-header ${status}">
+                            <div class="invitation-title">
+                                <i class="fas fa-calendar-check"></i>
+                                ${inv.title}
+                            </div>
+                            <div class="invitation-faculty">
+                                <i class="fas fa-user-tie"></i>
+                                ${inv.facultyName}
+                            </div>
+                        </div>
+                        <div class="invitation-body">
+                            <div class="invitation-status ${status}">
+                                <i class="fas fa-${status === 'pending' ? 'clock' : status === 'accepted' ? 'check-circle' : 'times-circle'}"></i>
+                                ${statusText}
+                            </div>
+
+                            <div class="invitation-detail">
+                                <i class="fas fa-calendar"></i>
+                                <div class="invitation-detail-content">
+                                    <div class="invitation-detail-label">Date & Time</div>
+                                    <div class="invitation-detail-value">${inv.meetingDateTime}</div>
+                                </div>
+                            </div>
+
+                            ${inv.location ? `
+                            <div class="invitation-detail">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <div class="invitation-detail-content">
+                                    <div class="invitation-detail-label">Location</div>
+                                    <div class="invitation-detail-value">${inv.location}</div>
+                                </div>
+                            </div>
+                            ` : ''}
+
+                            ${inv.durationMinutes ? `
+                            <div class="invitation-detail">
+                                <i class="fas fa-hourglass-half"></i>
+                                <div class="invitation-detail-content">
+                                    <div class="invitation-detail-label">Duration</div>
+                                    <div class="invitation-detail-value">${inv.durationMinutes} minutes</div>
+                                </div>
+                            </div>
+                            ` : ''}
+
+                            ${inv.description ? `
+                            <div class="invitation-description">
+                                <div class="invitation-description-label">
+                                    <i class="fas fa-clipboard-list"></i>
+                                    Agenda
+                                </div>
+                                <div class="invitation-description-text">${inv.description}</div>
+                            </div>
+                            ` : ''}
+
+                            ${inv.canRespond ? `
+                            <div class="invitation-actions">
+                                <button class="invitation-btn invitation-btn-accept" onclick="respondToInvitation(${inv.id}, 'Accepted')">
+                                    <i class="fas fa-check"></i> Accept
+                                </button>
+                                <button class="invitation-btn invitation-btn-reject" onclick="respondToInvitation(${inv.id}, 'Rejected')">
+                                    <i class="fas fa-times"></i> Decline
+                                </button>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // Filter invitations
+        function filterInvitations(filter) {
+            currentFilter = filter;
+            
+            // Update active tab
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`[data-filter="${filter}"]`).classList.add('active');
+            
+            displayInvitations();
+        }
+
+        // Respond to invitation
+        async function respondToInvitation(invitationId, response) {
+            if (!confirm(`Are you sure you want to ${response.toLowerCase()} this invitation?`)) {
+                return;
+            }
+
+            try {
+                const formData = new FormData();
+                formData.append('invitationId', invitationId);
+                formData.append('response', response);
+                formData.append('__RequestVerificationToken', document.querySelector('input[name="__RequestVerificationToken"]').value);
+
+                const result = await fetch('@Url.Action("RespondToMeetingInvite", "Student")', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await result.json();
+
+                if (data.success) {
+                    showSuccess(data.message);
+                    await loadMeetingInvitations();
+                } else {
+                    showError(data.message);
+                }
+            } catch (error) {
+                console.error('Error responding to invitation:', error);
+                showError('Error responding to invitation');
+            }
+        }
+
+        // Show success message
+        function showSuccess(message) {
+            showMessage(message, '#28a745', 'fa-check-circle');
+        }
+
+        // Show error message
+        function showError(message) {
+            showMessage(message, '#dc3545', 'fa-exclamation-circle');
+        }
+
+        // Show message
+        function showMessage(message, color, icon) {
+            const msgDiv = document.createElement('div');
+            msgDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: white;
+                padding: 18px 25px;
+                border-radius: 12px;
+                box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+                border-left: 5px solid ${color};
+                z-index: 10000;
+                animation: slideIn 0.3s ease;
+                max-width: 400px;
+            `;
+            msgDiv.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <i class="fas ${icon}" style="color: ${color}; font-size: 1.5em;"></i>
+                    <span style="color: #333; font-weight: 600;">${message}</span>
+                </div>
+            `;
+
+            document.body.appendChild(msgDiv);
+
+            setTimeout(() => {
+                msgDiv.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => msgDiv.remove(), 300);
+            }, 4000);
+        }
+    </script>
+
+    <style>
+        @@keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @@keyframes slideOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+        }
+    </style>
+}
+
+@Html.AntiForgeryToken()

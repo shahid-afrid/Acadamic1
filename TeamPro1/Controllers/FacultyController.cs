@@ -614,5 +614,613 @@ namespace TeamPro1.Controllers
             TempData["SuccessMessage"] = "Logged out successfully!";
             return RedirectToAction("Login");
         }
+
+        // ===================== FACULTY NOTIFICATIONS =====================
+
+        // GET: Faculty/GetFacultyNotifications - Get notifications for faculty about student activities
+        public async Task<IActionResult> GetFacultyNotifications()
+        {
+            var facultyId = HttpContext.Session.GetInt32("FacultyId");
+            if (facultyId == null)
+            {
+                return Json(new { success = false, message = "Please login first." });
+            }
+
+            try
+            {
+                // Get all teams assigned to this faculty
+                var assignedTeamIds = await _context.ProjectProgresses
+                    .Where(pp => pp.AssignedFacultyId == facultyId.Value)
+                    .Select(pp => pp.TeamId)
+                    .ToListAsync();
+
+                if (!assignedTeamIds.Any())
+                {
+                    return Json(new { success = true, notifications = new List<object>() });
+                }
+
+                // Get recent team activity logs (last 7 days) related to student responses and meeting progress
+                var cutoffDate = DateTime.Now.AddDays(-7);
+                var recentActivities = await _context.TeamActivityLogs
+                    .Where(log => assignedTeamIds.Contains(log.TeamId)
+                        && log.Timestamp >= cutoffDate
+                        && log.PerformedByRole == "Student"
+                        && (log.Action.Contains("Meeting Invitation")
+                            || log.Action.Contains("Attended")
+                            || log.Action.Contains("Added Meeting")
+                            || log.Action.Contains("Updated Meeting")))
+                    .OrderByDescending(log => log.Timestamp)
+                    .Take(50)
+                    .ToListAsync();
+
+                // Get team details for each activity
+                var notifications = new List<object>();
+                foreach (var activity in recentActivities)
+                {
+                    var team = await _context.Teams
+                        .Include(t => t.Student1)
+                        .Include(t => t.Student2)
+                        .FirstOrDefaultAsync(t => t.Id == activity.TeamId);
+
+                    if (team == null) continue;
+
+                    var notificationType = "";
+                    var status = "";
+                    var title = "";
+                    var message = "";
+
+                    if (activity.Action.Contains("Accepted Meeting Invitation"))
+                    {
+                        notificationType = "accepted";
+                        status = "Accepted";
+                        title = "Meeting Accepted";
+                        message = $"{activity.PerformedByName} accepted a meeting invitation.";
+                    }
+                    else if (activity.Action.Contains("Rejected Meeting Invitation"))
+                    {
+                        notificationType = "rejected";
+                        status = "Rejected";
+                        title = "Meeting Rejected";
+                        message = $"{activity.PerformedByName} rejected a meeting invitation.";
+                    }
+                    else if (activity.Action.Contains("Attended Scheduled Meeting"))
+                    {
+                        notificationType = "attended";
+                        status = "Attended";
+                        title = "Meeting Attended";
+                        message = $"{activity.PerformedByName} marked a meeting as attended.";
+                    }
+                    else if (activity.Action.Contains("Added Meeting"))
+                    {
+                        notificationType = "added_progress";
+                        status = "Added";
+                        title = "Meeting Added to Progress";
+                        message = $"{activity.PerformedByName} added a new meeting to project progress.";
+                    }
+                    else if (activity.Action.Contains("Updated Meeting"))
+                    {
+                        notificationType = "added_progress";
+                        status = "Updated";
+                        title = "Meeting Updated";
+                        message = $"{activity.PerformedByName} updated a meeting record.";
+                    }
+                    else
+                    {
+                        continue; // Skip other activity types
+                    }
+
+                    notifications.Add(new
+                    {
+                        id = activity.Id,
+                        type = notificationType,
+                        title,
+                        message,
+                        details = activity.Details,
+                        teamNumber = team.TeamNumber,
+                        studentName = activity.PerformedByName,
+                        status,
+                        timestamp = activity.Timestamp.ToString("yyyy-MM-ddTHH:mm:ss"),
+                        isRead = false // Faculty notifications are always shown as new
+                    });
+                }
+
+                return Json(new { success = true, notifications });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        // POST: Faculty/MarkFacultyNotificationsAsRead - Mark notifications as viewed (optional, for future use)
+        [HttpPost]
+        public async Task<IActionResult> MarkFacultyNotificationsAsRead()
+        {
+            var facultyId = HttpContext.Session.GetInt32("FacultyId");
+            if (facultyId == null)
+            {
+                return Json(new { success = false, message = "Please login first." });
+            }
+
+            try
+            {
+                // Currently, faculty notifications are activity log based and don't have a read/unread state
+                // This endpoint is a placeholder for future enhancement
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        // ===================== MEETING INVITATIONS =====================
+
+        // GET: Faculty/ScheduledMeetings - View all scheduled meetings across all teams
+        [HttpGet]
+        public async Task<IActionResult> ScheduledMeetings()
+        {
+            var facultyId = HttpContext.Session.GetInt32("FacultyId");
+            if (facultyId == null)
+            {
+                TempData["ErrorMessage"] = "Please login to view scheduled meetings.";
+                return RedirectToAction("Login");
+            }
+
+            // Get all teams assigned to this faculty for the schedule meeting dropdown
+            var assignedTeams = await _context.ProjectProgresses
+                .Include(pp => pp.Team)
+                    .ThenInclude(t => t.Student1)
+                .Include(pp => pp.Team)
+                    .ThenInclude(t => t.Student2)
+                .Where(pp => pp.AssignedFacultyId == facultyId.Value)
+                .Select(pp => pp.Team)
+                .ToListAsync();
+
+            ViewBag.FacultyName = HttpContext.Session.GetString("FacultyName");
+            ViewBag.AssignedTeams = assignedTeams;
+
+            return View();
+        }
+
+        // GET: Faculty/GetAllMeetingInvitations - Get all meeting invitations for this faculty across all teams
+        public async Task<IActionResult> GetAllMeetingInvitations()
+        {
+            var facultyId = HttpContext.Session.GetInt32("FacultyId");
+            if (facultyId == null)
+            {
+                return Json(new { success = false, message = "Please login first." });
+            }
+
+            try
+            {
+                var cutoff24Hours = DateTime.Now.AddHours(-24);
+
+                // Clean up stale invitations
+                var staleInvitations = await _context.MeetingInvitations
+                    .Where(mi => mi.FacultyId == facultyId.Value
+                        && (
+                            mi.Status == "AddedToProgress"
+                            || mi.Status == "Completed"
+                            || (mi.Status == "Rejected" && mi.UpdatedAt.HasValue && mi.UpdatedAt.Value < cutoff24Hours)
+                            || (mi.Status == "Cancelled" && mi.UpdatedAt.HasValue && mi.UpdatedAt.Value < cutoff24Hours)
+                        ))
+                    .ToListAsync();
+
+                if (staleInvitations.Count > 0)
+                {
+                    _context.MeetingInvitations.RemoveRange(staleInvitations);
+                    await _context.SaveChangesAsync();
+                }
+
+                var invitations = await _context.MeetingInvitations
+                    .Include(mi => mi.Team)
+                        .ThenInclude(t => t.Student1)
+                    .Include(mi => mi.Team)
+                        .ThenInclude(t => t.Student2)
+                    .Where(mi => mi.FacultyId == facultyId.Value)
+                    .OrderByDescending(mi => mi.MeetingDateTime)
+                    .Select(mi => new
+                    {
+                        mi.Id,
+                        mi.Title,
+                        mi.Description,
+                        MeetingDateTime = mi.MeetingDateTime.ToString("MMM dd, yyyy hh:mm tt"),
+                        MeetingDateTimeRaw = mi.MeetingDateTime.ToString("yyyy-MM-ddTHH:mm"),
+                        mi.Location,
+                        mi.DurationMinutes,
+                        mi.Status,
+                        mi.TeamId,
+                        TeamNumber = mi.Team.TeamNumber,
+                        Student1Response = mi.Student1Response ?? "Pending",
+                        Student2Response = mi.Student2Response ?? (mi.Student2ResponseId.HasValue ? "Pending" : "N/A"),
+                        Student1Name = mi.Team.Student1.FullName,
+                        Student2Name = mi.Team.Student2 != null ? mi.Team.Student2.FullName : null,
+                        CreatedAt = mi.CreatedAt.ToString("MMM dd, yyyy hh:mm tt")
+                    })
+                    .ToListAsync();
+
+                return Json(new { success = true, invitations });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        // POST: Faculty/SendMeetingInvite
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SendMeetingInvite(int teamId, string title, string description, DateTime meetingDateTime, string location, int durationMinutes)
+        {
+            var facultyId = HttpContext.Session.GetInt32("FacultyId");
+            if (facultyId == null)
+            {
+                return Json(new { success = false, message = "Please login first." });
+            }
+
+            try
+            {
+                if (string.IsNullOrWhiteSpace(title))
+                {
+                    return Json(new { success = false, message = "Meeting title is required." });
+                }
+
+                if (meetingDateTime <= DateTime.Now)
+                {
+                    return Json(new { success = false, message = "Meeting date/time must be in the future." });
+                }
+
+                var team = await _context.Teams
+                    .Include(t => t.Student1)
+                    .Include(t => t.Student2)
+                    .FirstOrDefaultAsync(t => t.Id == teamId);
+
+                if (team == null)
+                {
+                    return Json(new { success = false, message = "Team not found." });
+                }
+
+                // Create meeting invitation
+                var invitation = new MeetingInvitation
+                {
+                    TeamId = teamId,
+                    FacultyId = facultyId.Value,
+                    Title = title.Trim(),
+                    Description = description?.Trim(),
+                    MeetingDateTime = meetingDateTime,
+                    Location = location?.Trim(),
+                    DurationMinutes = durationMinutes > 0 ? durationMinutes : 60,
+                    Status = "Pending",
+                    Student1ResponseId = team.Student1Id,
+                    Student1Response = "Pending",
+                    Student2ResponseId = team.Student2Id,
+                    Student2Response = team.Student2Id.HasValue ? "Pending" : null,
+                    CreatedAt = DateTime.Now
+                };
+
+                _context.MeetingInvitations.Add(invitation);
+
+                // Create notifications for students
+                var facultyName = HttpContext.Session.GetString("FacultyName") ?? "Your mentor";
+
+                // Notification for Student 1
+                _context.Notifications.Add(new Notification
+                {
+                    StudentId = team.Student1Id,
+                    Message = $"?? Meeting invite from {facultyName}: {title} on {meetingDateTime:MMM dd, yyyy hh:mm tt}",
+                    Type = "info",
+                    IsRead = false,
+                    CreatedAt = DateTime.Now
+                });
+
+                // Notification for Student 2 (if exists)
+                if (team.Student2Id.HasValue)
+                {
+                    _context.Notifications.Add(new Notification
+                    {
+                        StudentId = team.Student2Id.Value,
+                        Message = $"?? Meeting invite from {facultyName}: {title} on {meetingDateTime:MMM dd, yyyy hh:mm tt}",
+                        Type = "info",
+                        IsRead = false,
+                        CreatedAt = DateTime.Now
+                    });
+                }
+
+                await _context.SaveChangesAsync();
+
+                // Log activity
+                _context.TeamActivityLogs.Add(new TeamActivityLog
+                {
+                    TeamId = teamId,
+                    Action = "Sent Meeting Invitation",
+                    Details = $"{title} - {meetingDateTime:MMM dd, yyyy hh:mm tt}",
+                    PerformedByRole = "Faculty",
+                    PerformedByName = facultyName,
+                    Timestamp = DateTime.Now
+                });
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, message = "Meeting invitation sent successfully!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        // GET: Faculty/GetMeetingInvitations
+        public async Task<IActionResult> GetMeetingInvitations(int teamId)
+        {
+            var facultyId = HttpContext.Session.GetInt32("FacultyId");
+            if (facultyId == null)
+            {
+                return Json(new { success = false, message = "Please login first." });
+            }
+
+            try
+            {
+                var cutoff24Hours = DateTime.Now.AddHours(-24);
+
+                // Permanently delete stale invitations to free up space
+                // Activity logs are preserved in TeamActivityLogs table
+                var staleInvitations = await _context.MeetingInvitations
+                    .Where(mi => mi.TeamId == teamId
+                        && (
+                            // Delete AddedToProgress and Completed immediately
+                            mi.Status == "AddedToProgress"
+                            || mi.Status == "Completed"
+                            // Delete Rejected after 24 hours
+                            || (mi.Status == "Rejected" && mi.UpdatedAt.HasValue && mi.UpdatedAt.Value < cutoff24Hours)
+                            // Delete Cancelled after 24 hours
+                            || (mi.Status == "Cancelled" && mi.UpdatedAt.HasValue && mi.UpdatedAt.Value < cutoff24Hours)
+                        ))
+                    .ToListAsync();
+
+                if (staleInvitations.Count > 0)
+                {
+                    _context.MeetingInvitations.RemoveRange(staleInvitations);
+                    await _context.SaveChangesAsync();
+                }
+
+                // Now fetch remaining active invitations
+                var invitations = await _context.MeetingInvitations
+                    .Include(mi => mi.Team)
+                        .ThenInclude(t => t.Student1)
+                    .Include(mi => mi.Team)
+                        .ThenInclude(t => t.Student2)
+                    .Include(mi => mi.Faculty)
+                    .Where(mi => mi.TeamId == teamId)
+                    .OrderByDescending(mi => mi.MeetingDateTime)
+                    .Select(mi => new
+                    {
+                        mi.Id,
+                        mi.Title,
+                        mi.Description,
+                        MeetingDateTime = mi.MeetingDateTime.ToString("MMM dd, yyyy hh:mm tt"),
+                        MeetingDateTimeRaw = mi.MeetingDateTime.ToString("yyyy-MM-ddTHH:mm"),
+                        mi.Location,
+                        mi.DurationMinutes,
+                        mi.Status,
+                        Student1Response = mi.Student1Response ?? "Pending",
+                        Student2Response = mi.Student2Response ?? (mi.Student2ResponseId.HasValue ? "Pending" : "N/A"),
+                        Student1Name = mi.Team.Student1.FullName,
+                        Student2Name = mi.Team.Student2 != null ? mi.Team.Student2.FullName : null,
+                        CreatedAt = mi.CreatedAt.ToString("MMM dd, yyyy hh:mm tt")
+                    })
+                    .ToListAsync();
+
+                return Json(new { success = true, invitations });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        // POST: Faculty/CancelMeetingInvite
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CancelMeetingInvite(int invitationId)
+        {
+            var facultyId = HttpContext.Session.GetInt32("FacultyId");
+            if (facultyId == null)
+            {
+                return Json(new { success = false, message = "Please login first." });
+            }
+
+            try
+            {
+                var invitation = await _context.MeetingInvitations
+                    .FirstOrDefaultAsync(mi => mi.Id == invitationId && mi.FacultyId == facultyId.Value);
+
+                if (invitation == null)
+                {
+                    return Json(new { success = false, message = "Meeting invitation not found." });
+                }
+
+                invitation.Status = "Cancelled";
+                invitation.UpdatedAt = DateTime.Now;
+
+                await _context.SaveChangesAsync();
+
+                // Log activity
+                _context.TeamActivityLogs.Add(new TeamActivityLog
+                {
+                    TeamId = invitation.TeamId,
+                    Action = "Cancelled Meeting Invitation",
+                    Details = invitation.Title,
+                    PerformedByRole = "Faculty",
+                    PerformedByName = HttpContext.Session.GetString("FacultyName") ?? "Faculty",
+                    Timestamp = DateTime.Now
+                });
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, message = "Meeting invitation cancelled." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        // POST: Faculty/EditMeetingInvite
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditMeetingInvite(int invitationId, string title, string description, DateTime meetingDateTime, string location, int durationMinutes)
+        {
+            var facultyId = HttpContext.Session.GetInt32("FacultyId");
+            if (facultyId == null)
+            {
+                return Json(new { success = false, message = "Please login first." });
+            }
+
+            try
+            {
+                var invitation = await _context.MeetingInvitations
+                    .Include(mi => mi.Team)
+                    .FirstOrDefaultAsync(mi => mi.Id == invitationId && mi.FacultyId == facultyId.Value);
+
+                if (invitation == null)
+                {
+                    return Json(new { success = false, message = "Meeting invitation not found." });
+                }
+
+                // Update invitation details
+                invitation.Title = title;
+                invitation.Description = description;
+                invitation.MeetingDateTime = meetingDateTime;
+                invitation.Location = location;
+                invitation.DurationMinutes = durationMinutes > 0 ? durationMinutes : invitation.DurationMinutes;
+                invitation.Status = "Pending";
+                invitation.Student1Response = "Pending";
+                if (invitation.Student2ResponseId.HasValue)
+                {
+                    invitation.Student2Response = "Pending";
+                }
+                invitation.UpdatedAt = DateTime.Now;
+
+                var facultyName = HttpContext.Session.GetString("FacultyName") ?? "Your mentor";
+
+                // Notify students about the update
+                if (invitation.Student1ResponseId.HasValue)
+                {
+                    _context.Notifications.Add(new Notification
+                    {
+                        StudentId = invitation.Student1ResponseId.Value,
+                        Message = $"?? Meeting updated by {facultyName}: \"{title}\" - now on {meetingDateTime:MMM dd, yyyy hh:mm tt}. Please respond again.",
+                        Type = "warning",
+                        IsRead = false,
+                        CreatedAt = DateTime.Now
+                    });
+                }
+
+                if (invitation.Student2ResponseId.HasValue)
+                {
+                    _context.Notifications.Add(new Notification
+                    {
+                        StudentId = invitation.Student2ResponseId.Value,
+                        Message = $"?? Meeting updated by {facultyName}: \"{title}\" - now on {meetingDateTime:MMM dd, yyyy hh:mm tt}. Please respond again.",
+                        Type = "warning",
+                        IsRead = false,
+                        CreatedAt = DateTime.Now
+                    });
+                }
+
+                await _context.SaveChangesAsync();
+
+                // Log activity
+                _context.TeamActivityLogs.Add(new TeamActivityLog
+                {
+                    TeamId = invitation.TeamId,
+                    Action = "Updated Meeting Invitation",
+                    Details = title,
+                    PerformedByRole = "Faculty",
+                    PerformedByName = facultyName,
+                    Timestamp = DateTime.Now
+                });
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, message = "Meeting invitation updated successfully!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        // POST: Faculty/DeleteMeetingInvite
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteMeetingInvite(int invitationId)
+        {
+            var facultyId = HttpContext.Session.GetInt32("FacultyId");
+            if (facultyId == null)
+            {
+                return Json(new { success = false, message = "Please login first." });
+            }
+
+            try
+            {
+                var invitation = await _context.MeetingInvitations
+                    .Include(mi => mi.Team)
+                    .FirstOrDefaultAsync(mi => mi.Id == invitationId && mi.FacultyId == facultyId.Value);
+
+                if (invitation == null)
+                {
+                    return Json(new { success = false, message = "Meeting invitation not found." });
+                }
+
+                var invTitle = invitation.Title;
+                var invTeamId = invitation.TeamId;
+                var facultyName = HttpContext.Session.GetString("FacultyName") ?? "Your mentor";
+
+                // Notify students about the deletion
+                if (invitation.Student1ResponseId.HasValue)
+                {
+                    _context.Notifications.Add(new Notification
+                    {
+                        StudentId = invitation.Student1ResponseId.Value,
+                        Message = $"??? Meeting \"{invTitle}\" has been deleted by {facultyName}.",
+                        Type = "danger",
+                        IsRead = false,
+                        CreatedAt = DateTime.Now
+                    });
+                }
+
+                if (invitation.Student2ResponseId.HasValue)
+                {
+                    _context.Notifications.Add(new Notification
+                    {
+                        StudentId = invitation.Student2ResponseId.Value,
+                        Message = $"??? Meeting \"{invTitle}\" has been deleted by {facultyName}.",
+                        Type = "danger",
+                        IsRead = false,
+                        CreatedAt = DateTime.Now
+                    });
+                }
+
+                _context.MeetingInvitations.Remove(invitation);
+                await _context.SaveChangesAsync();
+
+                // Log activity
+                _context.TeamActivityLogs.Add(new TeamActivityLog
+                {
+                    TeamId = invTeamId,
+                    Action = "Deleted Meeting Invitation",
+                    Details = invTitle,
+                    PerformedByRole = "Faculty",
+                    PerformedByName = facultyName,
+                    Timestamp = DateTime.Now
+                });
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, message = "Meeting invitation deleted permanently." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
     }
 }

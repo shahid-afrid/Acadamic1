@@ -148,6 +148,8 @@
     </style>
 </head>
 <body>
+    @Html.Partial("_AdminBackButton")
+    
     <a id="backLink" href="@Url.Action("ManageTeams", "Admin")" class="nav-link"><i class="fas fa-arrow-left"></i> <span id="backLabel">Back to Teams</span></a>
 
     <script>

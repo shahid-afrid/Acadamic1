@@ -37,7 +37,7 @@ namespace TeamPro1.Controllers
 
             try
             {
-                // Find student by email
+                // Find student with hashed password
                 var student = await _context.Students
                     .FirstOrDefaultAsync(s => s.Email == model.Email);
 
@@ -395,10 +395,27 @@ namespace TeamPro1.Controllers
                 }).ToList();
 
                 // Get unread notifications for pop-up display
+                // Only get team request notifications (not meeting invitations, which are handled by _NotificationBell)
                 var unreadNotifications = await _context.Notifications
-                    .Where(n => n.StudentId == currentStudentId && !n.IsRead)
+                    .Where(n => n.StudentId == currentStudentId && !n.IsRead
+                        && !n.Message.Contains("Meeting invite from"))
                     .OrderByDescending(n => n.CreatedAt)
                     .ToListAsync();
+
+                // Also mark any old meeting-related notifications as read so they don't accumulate
+                var meetingNotifications = await _context.Notifications
+                    .Where(n => n.StudentId == currentStudentId && !n.IsRead
+                        && n.Message.Contains("Meeting invite from"))
+                    .ToListAsync();
+
+                if (meetingNotifications.Any())
+                {
+                    foreach (var mn in meetingNotifications)
+                    {
+                        mn.IsRead = true;
+                    }
+                    await _context.SaveChangesAsync();
+                }
 
                 ViewBag.CurrentStudentId = currentStudentId;
                 ViewBag.CurrentStudentName = currentStudent.FullName;
@@ -771,6 +788,7 @@ namespace TeamPro1.Controllers
                     teamMeetings = await _context.TeamMeetings
                         .Where(tm => tm.TeamId == team.Id)
                         .OrderBy(tm => tm.MeetingNumber)
+                        // .Select(tm => new { tm.MeetingNumber, tm.MeetingDate, tm.CompletionPercentage, tm.Status })
                         .ToListAsync();
                 }
                 catch (Exception dbEx)
@@ -811,7 +829,7 @@ namespace TeamPro1.Controllers
         // POST: Student/AddMeeting
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddMeeting(int TeamId, int MeetingNumber, DateTime? MeetingDate, string? Notes, int? CompletionPercentage, IFormFile? ProofFile)
+        public async Task<IActionResult> AddMeeting(int TeamId, int MeetingNumber, DateTime? MeetingDate, string? Notes, int? CompletionPercentage, IFormFile? ProofFile, int? MeetingInvitationId)
         {
             var studentIdString = HttpContext.Session.GetString("StudentId");
             if (string.IsNullOrEmpty(studentIdString))
@@ -927,9 +945,9 @@ namespace TeamPro1.Controllers
                 if (existingMeetings.Count > 0)
                 {
                     var lastCompletion = existingMeetings.Last().CompletionPercentage;
-                    if (CompletionPercentage < lastCompletion)
+                    if (CompletionPercentage <= lastCompletion && lastCompletion < 100)
                     {
-                        TempData["ErrorMessage"] = $"Completion percentage cannot be less than {lastCompletion}% (previous meeting progress).";
+                        TempData["ErrorMessage"] = $"Completion percentage must be greater than {lastCompletion}% (previous meeting progress).";
                         return RedirectToAction("StatusUpdate");
                     }
                 }
@@ -998,6 +1016,45 @@ namespace TeamPro1.Controllers
                     Timestamp = DateTime.Now
                 });
                 await _context.SaveChangesAsync();
+
+                // If this meeting was added from a scheduled meeting invitation, mark as attended and delete
+                if (MeetingInvitationId.HasValue && MeetingInvitationId.Value > 0)
+                {
+                    var invitation = await _context.MeetingInvitations
+                        .Include(mi => mi.Team)
+                        .FirstOrDefaultAsync(mi => mi.Id == MeetingInvitationId.Value && mi.TeamId == TeamId);
+                    if (invitation != null)
+                    {
+                        // Mark the student's response as "Attended"
+                        if (invitation.Student1ResponseId == currentStudentId)
+                        {
+                            invitation.Student1Response = "Attended";
+                        }
+                        else if (invitation.Student2ResponseId == currentStudentId)
+                        {
+                            invitation.Student2Response = "Attended";
+                        }
+
+                        // Mark invitation as Completed
+                        invitation.Status = "Completed";
+                        invitation.UpdatedAt = DateTime.Now;
+
+                        // Log the attendance
+                        _context.TeamActivityLogs.Add(new TeamActivityLog
+                        {
+                            TeamId = TeamId,
+                            Action = "Attended Scheduled Meeting",
+                            Details = $"Meeting: {invitation.Title}",
+                            PerformedByRole = "Student",
+                            PerformedByName = HttpContext.Session.GetString("StudentName") ?? "Student",
+                            Timestamp = DateTime.Now
+                        });
+
+                        // Now delete the invitation (activity logs are preserved)
+                        _context.MeetingInvitations.Remove(invitation);
+                        await _context.SaveChangesAsync();
+                    }
+                }
 
                 TempData["SuccessMessage"] = $"Meeting #{MeetingNumber} added successfully! Completion: {CompletionPercentage}%";
                 return RedirectToAction("StatusUpdate");
@@ -1245,7 +1302,7 @@ namespace TeamPro1.Controllers
                 })
                 .ToListAsync();
 
-            return Json(new { success = true, logs });
+                return Json(new { success = true, logs });
         }
 
         // POST: Student/BeIndividual
@@ -1358,6 +1415,321 @@ namespace TeamPro1.Controllers
             catch (Exception ex)
             {
                 return Json(new { success = false, message = "An error occurred." });
+            }
+        }
+
+        // ===================== MEETING INVITATIONS =====================
+
+        // GET: Student/GetMeetingInvitations
+        public async Task<IActionResult> GetMeetingInvitations()
+        {
+            var studentIdString = HttpContext.Session.GetString("StudentId");
+            if (string.IsNullOrEmpty(studentIdString))
+            {
+                return Json(new { success = false, message = "Please login first." });
+            }
+
+            try
+            {
+                if (!int.TryParse(studentIdString, out int studentId))
+                {
+                    return Json(new { success = false, message = "Invalid session." });
+                }
+
+                // Find team where student is a member
+                var team = await _context.Teams
+                    .FirstOrDefaultAsync(t => t.Student1Id == studentId || t.Student2Id == studentId);
+
+                if (team == null)
+                {
+                    return Json(new { success = true, invitations = new List<object>() });
+                }
+
+                var cutoff24Hours = DateTime.Now.AddHours(-24);
+
+                // Permanently delete stale invitations to free up space
+                // Activity logs are preserved in TeamActivityLogs table
+                var staleInvitations = await _context.MeetingInvitations
+                    .Where(mi => mi.TeamId == team.Id
+                        && (
+                            // Delete AddedToProgress and Completed immediately
+                            mi.Status == "AddedToProgress"
+                            || mi.Status == "Completed"
+                            // Delete Rejected after 24 hours
+                            || (mi.Status == "Rejected" && mi.UpdatedAt.HasValue && mi.UpdatedAt.Value < cutoff24Hours)
+                            // Delete Cancelled after 24 hours
+                            || (mi.Status == "Cancelled" && mi.UpdatedAt.HasValue && mi.UpdatedAt.Value < cutoff24Hours)
+                        ))
+                    .ToListAsync();
+
+                if (staleInvitations.Count > 0)
+                {
+                    _context.MeetingInvitations.RemoveRange(staleInvitations);
+                    await _context.SaveChangesAsync();
+                }
+
+                // Get remaining active meeting invitations
+                // Exclude cancelled and rejected (still within 24 hours but student shouldn't see them)
+                var invitations = await _context.MeetingInvitations
+                    .Include(mi => mi.Faculty)
+                    .Where(mi => mi.TeamId == team.Id && mi.Status != "Cancelled" && mi.Status != "Rejected" && mi.Status != "AddedToProgress")
+                    .OrderByDescending(mi => mi.MeetingDateTime)
+                    .ToListAsync();
+
+                // Also exclude invitations where the current student individually rejected
+                invitations = invitations.Where(mi =>
+                {
+                    if (mi.Student1ResponseId == studentId && mi.Student1Response == "Rejected") return false;
+                    if (mi.Student2ResponseId == studentId && mi.Student2Response == "Rejected") return false;
+                    return true;
+                }).ToList();
+
+                // Map to a clean DTO to ensure no null reference issues
+                var invitationDtos = invitations.Select(mi => new
+                {
+                    mi.Id,
+                    Title = mi.Title ?? "Untitled Meeting",
+                    Description = mi.Description ?? "",
+                    MeetingDateTime = mi.MeetingDateTime.ToString("MMM dd, yyyy hh:mm tt"),
+                    MeetingDateOnly = mi.MeetingDateTime.ToString("yyyy-MM-dd"),
+                    Location = mi.Location ?? "",
+                    DurationMinutes = mi.DurationMinutes,
+                    Status = mi.Status ?? "Pending",
+                    FacultyName = mi.Faculty?.FullName ?? "Unknown Faculty",
+                    MyResponse = (mi.Student1ResponseId == studentId ? mi.Student1Response : mi.Student2Response) ?? "Pending",
+                    CanRespond = (mi.Student1ResponseId == studentId && (mi.Student1Response == "Pending" || mi.Student1Response == null)) ||
+                                 (mi.Student2ResponseId == studentId && (mi.Student2Response == "Pending" || mi.Student2Response == null))
+                }).ToList();
+
+                return Json(new { success = true, invitations = invitationDtos });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        // POST: Student/RespondToMeetingInvite
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RespondToMeetingInvite(int invitationId, string response)
+        {
+            var studentIdString = HttpContext.Session.GetString("StudentId");
+            if (string.IsNullOrEmpty(studentIdString))
+            {
+                return Json(new { success = false, message = "Please login first." });
+            }
+
+            try
+            {
+                if (!int.TryParse(studentIdString, out int studentId))
+                {
+                    return Json(new { success = false, message = "Invalid session." });
+                }
+
+                if (response != "Accepted" && response != "Rejected")
+                {
+                    return Json(new { success = false, message = "Invalid response." });
+                }
+
+                var invitation = await _context.MeetingInvitations
+                    .Include(mi => mi.Team)
+                        .ThenInclude(t => t.Student1)
+                    .Include(mi => mi.Team)
+                        .ThenInclude(t => t.Student2)
+                    .FirstOrDefaultAsync(mi => mi.Id == invitationId);
+
+                if (invitation == null)
+                {
+                    return Json(new { success = false, message = "Meeting invitation not found." });
+                }
+
+                // Determine which student is responding and get their details
+                string respondingStudentName;
+                string respondingStudentRegd;
+
+                if (invitation.Student1ResponseId == studentId)
+                {
+                    invitation.Student1Response = response;
+                    respondingStudentName = invitation.Team?.Student1?.FullName ?? "Student";
+                    respondingStudentRegd = invitation.Team?.Student1?.RegdNumber ?? "";
+                }
+                else if (invitation.Student2ResponseId == studentId)
+                {
+                    invitation.Student2Response = response;
+                    respondingStudentName = invitation.Team?.Student2?.FullName ?? "Student";
+                    respondingStudentRegd = invitation.Team?.Student2?.RegdNumber ?? "";
+                }
+                else
+                {
+                    return Json(new { success = false, message = "You are not part of this team." });
+                }
+
+                // Update overall status
+                var student1Accepted = invitation.Student1Response == "Accepted";
+                var student2Accepted = invitation.Student2ResponseId.HasValue ? 
+                                       invitation.Student2Response == "Accepted" : true;
+                
+                var student1Rejected = invitation.Student1Response == "Rejected";
+                var student2Rejected = invitation.Student2ResponseId.HasValue && 
+                                       invitation.Student2Response == "Rejected";
+
+                if (student1Accepted && student2Accepted)
+                {
+                    invitation.Status = "Accepted";
+                }
+                else if (student1Rejected || student2Rejected)
+                {
+                    invitation.Status = "Rejected";
+                }
+
+                invitation.UpdatedAt = DateTime.Now;
+                await _context.SaveChangesAsync();
+
+                // Log activity with student name and registration number
+                var logDetails = !string.IsNullOrEmpty(respondingStudentRegd)
+                    ? $"Meeting: {invitation.Title} | {response} by {respondingStudentName} ({respondingStudentRegd})"
+                    : $"Meeting: {invitation.Title} | {response} by {respondingStudentName}";
+
+                _context.TeamActivityLogs.Add(new TeamActivityLog
+                {
+                    TeamId = invitation.TeamId,
+                    Action = $"{response} Meeting Invitation",
+                    Details = logDetails,
+                    PerformedByRole = "Student",
+                    PerformedByName = respondingStudentName,
+                    Timestamp = DateTime.Now
+                });
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, message = $"You have {response.ToLower()} the meeting invitation." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        // POST: Student/MarkMeetingAttended
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MarkMeetingAttended(int invitationId)
+        {
+            var studentIdString = HttpContext.Session.GetString("StudentId");
+            if (string.IsNullOrEmpty(studentIdString))
+            {
+                return Json(new { success = false, message = "Please login first." });
+            }
+
+            try
+            {
+                if (!int.TryParse(studentIdString, out int studentId))
+                {
+                    return Json(new { success = false, message = "Invalid session." });
+                }
+
+                var invitation = await _context.MeetingInvitations
+                    .Include(mi => mi.Team)
+                    .FirstOrDefaultAsync(mi => mi.Id == invitationId);
+
+                if (invitation == null)
+                {
+                    return Json(new { success = false, message = "Meeting invitation not found." });
+                }
+
+                // Verify student is part of this team
+                var team = invitation.Team;
+                if (team.Student1Id != studentId && team.Student2Id != studentId)
+                {
+                    return Json(new { success = false, message = "You are not part of this team." });
+                }
+
+                // Verify this student has accepted the meeting and hasn't already marked attended
+                var myResponse = invitation.Student1ResponseId == studentId ? invitation.Student1Response : invitation.Student2Response;
+                if (myResponse == "Attended")
+                {
+                    return Json(new { success = false, message = "You have already marked this meeting as attended." });
+                }
+                if (myResponse != "Accepted")
+                {
+                    return Json(new { success = false, message = "You must accept the meeting before marking as attended." });
+                }
+
+                // Update student's response to "Attended"
+                if (invitation.Student1ResponseId == studentId)
+                {
+                    invitation.Student1Response = "Attended";
+                }
+                else if (invitation.Student2ResponseId == studentId)
+                {
+                    invitation.Student2Response = "Attended";
+                }
+
+                // Mark invitation as Completed when at least one student attends
+                var student1Attended = invitation.Student1Response == "Attended";
+                var student2Attended = invitation.Student2Response == "Attended";
+
+                if ((student1Attended || student2Attended) && invitation.Status != "Completed")
+                {
+                    invitation.Status = "Completed";
+
+                    // Log activity
+                    _context.TeamActivityLogs.Add(new TeamActivityLog
+                    {
+                        TeamId = team.Id,
+                        Action = $"Attended Scheduled Meeting",
+                        Details = $"Meeting: {invitation.Title}",
+                        PerformedByRole = "Student",
+                        PerformedByName = HttpContext.Session.GetString("StudentName") ?? "Student",
+                        Timestamp = DateTime.Now
+                    });
+                }
+
+                invitation.UpdatedAt = DateTime.Now;
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, message = "Meeting marked as attended! Use the + button to add it to your project progress." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
+        // GET: Student/MeetingInvitations
+        public async Task<IActionResult> MeetingInvitations()
+        {
+            var studentIdString = HttpContext.Session.GetString("StudentId");
+            if (string.IsNullOrEmpty(studentIdString))
+            {
+                TempData["ErrorMessage"] = "Please login to view meeting invitations.";
+                return RedirectToAction("Login");
+            }
+
+            try
+            {
+                if (!int.TryParse(studentIdString, out int studentId))
+                {
+                    TempData["ErrorMessage"] = "Invalid session data. Please login again.";
+                    return RedirectToAction("Login");
+                }
+
+                var student = await _context.Students.FindAsync(studentId);
+                if (student == null)
+                {
+                    TempData["ErrorMessage"] = "Student not found. Please login again.";
+                    return RedirectToAction("Login");
+                }
+
+                ViewBag.StudentName = student.FullName;
+                ViewBag.StudentRegdNumber = student.RegdNumber;
+
+                return View();
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = $"An error occurred: {ex.Message}";
+                return RedirectToAction("MainDashboard");
             }
         }
     }

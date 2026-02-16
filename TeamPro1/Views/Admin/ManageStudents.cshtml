@@ -395,6 +395,8 @@
     </style>
 </head>
 <body>
+    @Html.Partial("_AdminBackButton")
+    
     <div class="main-container">
         <!-- Header Section -->
         <div class="page-header">
@@ -489,9 +491,6 @@
                 <button type="button" class="glass-btn btn-danger" onclick="confirmDeleteAll()" id="deleteAllBtn">
                     <i class="fas fa-trash-alt"></i> Delete All Students
                 </button>
-                <a href="@Url.Action("Dashboard", "Admin")" class="glass-btn btn-back">
-                    <i class="fas fa-arrow-left"></i> Back to Dashboard
-                </a>
             </div>
 
             <!-- Hidden file input for bulk upload -->

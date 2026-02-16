@@ -935,8 +935,8 @@
         <i class="fas fa-arrow-left"></i> Back to Dashboard
     </a>
 
-    <!-- Notification Bell Icon -->
-    <div class="notification-bell" onclick="openNotificationModal()" title="Team Requests">
+    <!-- Notification Bell Icon (Team Requests) -->
+    <div class="notification-bell" onclick="openNotificationModal()" title="Team Requests" style="right: 80px;">
         <i class="fas fa-bell"></i>
         @if (ViewBag.ReceivedRequestsCount != null && ViewBag.ReceivedRequestsCount > 0)
         {
@@ -1411,6 +1411,63 @@
                 showPopup('Error', 'An error occurred. Please try again.');
             }
         }
+
+        // Auto-show notification pop-up on page load if there are unread notifications
+        document.addEventListener('DOMContentLoaded', function() {
+            @{ 
+                var notifications = ViewBag.UnreadNotifications as List<TeamPro1.Models.Notification>;
+            }
+            @if (notifications != null && notifications.Count > 0)
+            {
+                <text>
+                setTimeout(function() {
+                    var notificationMessages = [];
+                    @foreach (var n in notifications)
+                    {
+                        @:notificationMessages.push({ id: @n.Id, message: '@Html.Raw(n.Message.Replace("'", "\\'"))', type: '@n.Type', createdAt: '@n.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ss")' });
+                    }
+
+                    if (notificationMessages.length > 0) {
+                        // Build combined message
+                        var combinedMessage = '';
+                        notificationMessages.forEach(function(n) {
+                            combinedMessage += n.message + '\n';
+                        });
+
+                        // Determine title and style based on type
+                        var firstType = notificationMessages[0].type;
+                        var title = 'Notification';
+                        if (firstType === 'danger') {
+                            title = 'Team Request Rejected';
+                            var header = document.querySelector('.notification-popup-header');
+                            if (header) {
+                                header.style.background = 'linear-gradient(135deg, #dc3545, #c82333)';
+                            }
+                        } else if (firstType === 'success') {
+                            title = 'Good News!';
+                        } else if (firstType === 'warning') {
+                            title = 'Important Notice';
+                        }
+
+                        showPopup(title, combinedMessage.trim());
+
+                        // Mark notifications as read
+                        var token = document.querySelector('input[name="__RequestVerificationToken"]');
+                        if (token) {
+                            var formData = new FormData();
+                            formData.append('__RequestVerificationToken', token.value);
+                            fetch('@Url.Action("MarkNotificationsRead", "Student")', {
+                                method: 'POST',
+                                body: formData
+                            }).catch(function(err) {
+                                console.error('Error marking notifications as read:', err);
+                            });
+                        }
+                    }
+                }, 500);
+                </text>
+            }
+        });
     </script>
 </body>
 </html>

@@ -23,6 +23,9 @@ namespace TeamPro1.Models
         public DbSet<ProjectProgress> ProjectProgresses { get; set; }
         public DbSet<TeamMeeting> TeamMeetings { get; set; }
 
+        // Meeting Invitations
+        public DbSet<MeetingInvitation> MeetingInvitations { get; set; }
+
         // Activity Logs
         public DbSet<TeamActivityLog> TeamActivityLogs { get; set; }
 
@@ -95,6 +98,19 @@ namespace TeamPro1.Models
                 .WithMany()
                 .HasForeignKey(tm => tm.TeamId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Configure MeetingInvitation relationships
+            modelBuilder.Entity<MeetingInvitation>()
+                .HasOne(mi => mi.Team)
+                .WithMany()
+                .HasForeignKey(mi => mi.TeamId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<MeetingInvitation>()
+                .HasOne(mi => mi.Faculty)
+                .WithMany()
+                .HasForeignKey(mi => mi.FacultyId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Configure TeamActivityLog relationships
             modelBuilder.Entity<TeamActivityLog>()
