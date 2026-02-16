@@ -125,6 +125,19 @@ namespace TeamPro1.Models
                 .WithMany()
                 .HasForeignKey(n => n.StudentId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Configure ProblemStatementBank relationships
+            modelBuilder.Entity<ProblemStatementBank>()
+                .HasOne(ps => ps.AssignedToTeam)
+                .WithMany()
+                .HasForeignKey(ps => ps.AssignedToTeamId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<ProblemStatementBank>()
+                .HasOne(ps => ps.AssignedByFaculty)
+                .WithMany()
+                .HasForeignKey(ps => ps.AssignedByFacultyId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

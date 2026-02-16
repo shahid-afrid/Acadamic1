@@ -366,6 +366,17 @@ namespace TeamPro1.Controllers
                     return RedirectToAction("ManageFaculty");
                 }
 
+                // Auto-generate FacultyId based on department
+                var existingFacultyIds = await _context.Faculties
+                    .Where(f => f.Department == model.Department)
+                    .Select(f => f.FacultyId)
+                    .ToListAsync();
+
+                model.FacultyId = TeamPro1.Utilities.FacultyIdGenerator.GenerateNextFacultyId(
+                    model.Department, 
+                    existingFacultyIds
+                );
+
                 // Hash password using BCrypt before storing
                 model.Password = BCrypt.Net.BCrypt.HashPassword(model.Password);
                 model.Department = GetAdminDepartment() ?? "Computer Science";
@@ -373,7 +384,7 @@ namespace TeamPro1.Controllers
                 _context.Faculties.Add(model);
                 await _context.SaveChangesAsync();
 
-                TempData["SuccessMessage"] = "Faculty added successfully";
+                TempData["SuccessMessage"] = $"Faculty added successfully! Faculty ID: {model.FacultyId}";
                 return RedirectToAction("ManageFaculty");
             }
 
@@ -926,13 +937,13 @@ namespace TeamPro1.Controllers
             if (!IsAdminLoggedIn())
                 return RedirectToAction("Login");
 
-            var faculties = await DeptFaculties().OrderBy(f => f.FullName).ToListAsync();
+            var faculties = await DeptFaculties().OrderBy(f => f.FacultyId).ToListAsync();
 
             using var workbook = new XLWorkbook();
             var worksheet = workbook.Worksheets.Add("Faculty");
 
             // Header row
-            worksheet.Cell(1, 1).Value = "S.No";
+            worksheet.Cell(1, 1).Value = "Faculty ID";
             worksheet.Cell(1, 2).Value = "Full Name";
             worksheet.Cell(1, 3).Value = "Email";
             worksheet.Cell(1, 4).Value = "Department";
@@ -949,7 +960,7 @@ namespace TeamPro1.Controllers
             for (int i = 0; i < faculties.Count; i++)
             {
                 var f = faculties[i];
-                worksheet.Cell(i + 2, 1).Value = i + 1;
+                worksheet.Cell(i + 2, 1).Value = f.FacultyId;
                 worksheet.Cell(i + 2, 2).Value = f.FullName;
                 worksheet.Cell(i + 2, 3).Value = f.Email;
                 worksheet.Cell(i + 2, 4).Value = f.Department;
@@ -1609,6 +1620,66 @@ namespace TeamPro1.Controllers
             {
                 return Json(new { success = false, message = $"Error deleting problem statements: {ex.Message}" });
             }
+        }
+
+        [HttpGet]
+        public IActionResult DownloadFacultyTemplate()
+        {
+            if (!IsAdminLoggedIn())
+                return RedirectToAction("Login");
+
+            var dept = GetAdminDepartment()!;
+
+            using var workbook = new XLWorkbook();
+            var worksheet = workbook.Worksheets.Add("Faculty Template");
+
+            // Header row with Faculty ID included
+            worksheet.Cell(1, 1).Value = "FacultyId";
+            worksheet.Cell(1, 2).Value = "FullName";
+            worksheet.Cell(1, 3).Value = "Email";
+            worksheet.Cell(1, 4).Value = "Password";
+            worksheet.Cell(1, 5).Value = "Department";
+
+            // Style header
+            var headerRange = worksheet.Range(1, 1, 1, 5);
+            headerRange.Style.Font.Bold = true;
+            headerRange.Style.Fill.BackgroundColor = XLColor.FromHtml("#6f42c1");
+            headerRange.Style.Font.FontColor = XLColor.White;
+
+            // Sample row with Faculty ID example
+            var deptCode = TeamPro1.Utilities.FacultyIdGenerator.GetDepartmentCode(dept);
+            worksheet.Cell(2, 1).Value = $"{deptCode}01 (AUTO)";
+            worksheet.Cell(2, 1).Style.Font.FontColor = XLColor.Gray;
+            
+            worksheet.Cell(2, 2).Value = "Dr. John Doe";
+            worksheet.Cell(2, 3).Value = "john.doe@rgmcet.edu.in";
+            worksheet.Cell(2, 4).Value = "Pass@1234";
+            worksheet.Cell(2, 5).Value = dept;
+
+            // Make sample row gray to indicate it's just an example
+            var sampleRange = worksheet.Range(2, 1, 2, 5);
+            sampleRange.Style.Font.FontColor = XLColor.Gray;
+
+            // Add instruction row
+            worksheet.Cell(4, 1).Value = "NOTE:";
+            worksheet.Cell(4, 1).Style.Font.Bold = true;
+            worksheet.Cell(4, 1).Style.Font.FontColor = XLColor.Red;
+            
+            worksheet.Cell(4, 2).Value = $"Faculty ID is AUTO-GENERATED. Example for {dept}: {deptCode}01, {deptCode}02, {deptCode}03... You can leave FacultyId column empty.";
+            worksheet.Range(4, 2, 4, 5).Merge();
+            worksheet.Cell(4, 2).Style.Font.FontColor = XLColor.Red;
+            worksheet.Cell(4, 2).Style.Font.Bold = true;
+
+            worksheet.Columns().AdjustToContents();
+            worksheet.Column(1).Width = 18;
+            worksheet.Column(2).Width = 25;
+            worksheet.Column(3).Width = 35;
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            stream.Position = 0;
+
+            return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"Faculty_Upload_Template_{dept}.xlsx");
         }
     }
 }

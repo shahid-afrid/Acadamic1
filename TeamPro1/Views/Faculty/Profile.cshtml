@@ -395,11 +395,19 @@
                 </div>
                 <div class="profile-info">
                     <h3>@Model.FullName</h3>
-                    <p>Faculty ID: @Model.Id</p>
+                    <p>Faculty ID: <strong style="color: var(--faculty-purple); font-family: 'Courier New', monospace;">@Model.FacultyId</strong></p>
                 </div>
             </div>
 
             <div class="profile-details">
+                <div class="detail-row">
+                    <div class="detail-icon"><i class="fas fa-id-card"></i></div>
+                    <div class="detail-content">
+                        <div class="detail-label">Faculty ID</div>
+                        <div class="detail-value" style="font-family: 'Courier New', monospace; color: var(--faculty-purple);">@Model.FacultyId</div>
+                    </div>
+                </div>
+
                 <div class="detail-row">
                     <div class="detail-icon"><i class="fas fa-user"></i></div>
                     <div class="detail-content">
@@ -421,14 +429,6 @@
                     <div class="detail-content">
                         <div class="detail-label">Department</div>
                         <div class="detail-value">@Model.Department</div>
-                    </div>
-                </div>
-
-                <div class="detail-row">
-                    <div class="detail-icon"><i class="fas fa-id-card"></i></div>
-                    <div class="detail-content">
-                        <div class="detail-label">Faculty ID</div>
-                        <div class="detail-value">@Model.Id</div>
                     </div>
                 </div>
 

@@ -1029,7 +1029,6 @@
                 <table class="students-table" id="studentsTable">
                     <thead>
                         <tr>
-                            <th>S.No</th>
                             <th>Registration Number</th>
                             <th>Student Name</th>
                             <th>Department</th>
@@ -1038,9 +1037,6 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @{
-                            int serialNo = 1;
-                        }
                         @foreach (var item in ViewBag.StudentPool)
                         {
                             var student = item.Student;
@@ -1048,7 +1044,6 @@
                             var isInTeam = item.IsInTeam;
 
                             <tr class="@(isInTeam ? "row-disabled" : "")" data-name="@student.FullName" data-regdnumber="@student.RegdNumber">
-                                <td class="text-center">@serialNo</td>
                                 <td class="font-bold text-royal">@student.RegdNumber</td>
                                 <td>@student.FullName</td>
                                 <td>@student.Department</td>
@@ -1098,7 +1093,6 @@
                                     }
                                 </td>
                             </tr>
-                            serialNo++;
                         }
                     </tbody>
                 </table>

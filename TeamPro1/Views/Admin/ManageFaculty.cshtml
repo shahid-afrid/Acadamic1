@@ -390,6 +390,9 @@
                 <a href="@Url.Action("AddFaculty", "Admin")" class="glass-btn btn-success">
                     <i class="fas fa-user-plus"></i> Add Faculty
                 </a>
+                <a href="@Url.Action("DownloadFacultyTemplate", "Admin")" class="glass-btn" style="background: linear-gradient(135deg, #3498db, #2980b9);">
+                    <i class="fas fa-download"></i> Download Template
+                </a>
                 <button type="button" class="glass-btn" style="background: linear-gradient(135deg, #28a745, #20c997);" onclick="exportFacultyExcel()" id="exportExcelBtn">
                     <i class="fas fa-file-excel"></i> Export Excel
                 </button>
@@ -449,7 +452,7 @@
                     <table class="faculty-table" id="facultyTable">
                         <thead>
                             <tr>
-                                <th>#</th>
+                                <th>Faculty ID</th>
                                 <th>Full Name</th>
                                 <th>Email</th>
                                 <th>Department</th>
@@ -458,11 +461,10 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @{ int idx = 1; }
                             @foreach (var faculty in Model)
                             {
                                 <tr data-faculty-id="@faculty.Id">
-                                    <td data-label="#">@idx</td>
+                                    <td data-label="Faculty ID"><strong style="color: var(--cseds-purple); font-family: 'Courier New', monospace;">@faculty.FacultyId</strong></td>
                                     <td data-label="Full Name"><strong>@faculty.FullName</strong></td>
                                     <td data-label="Email">@faculty.Email</td>
                                     <td data-label="Department">@faculty.Department</td>
@@ -482,7 +484,6 @@
                                         </div>
                                     </td>
                                 </tr>
-                                idx++;
                             }
                         </tbody>
                     </table>

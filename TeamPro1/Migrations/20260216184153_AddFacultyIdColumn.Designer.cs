@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TeamPro1.Models;
 
@@ -11,9 +12,11 @@ using TeamPro1.Models;
 namespace TeamPro1.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260216184153_AddFacultyIdColumn")]
+    partial class AddFacultyIdColumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -209,15 +212,6 @@ namespace TeamPro1.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("AssignedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("AssignedByFacultyId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("AssignedToTeamId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -225,9 +219,6 @@ namespace TeamPro1.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<bool>("IsAssigned")
-                        .HasColumnType("bit");
 
                     b.Property<string>("Statement")
                         .IsRequired()
@@ -238,10 +229,6 @@ namespace TeamPro1.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AssignedByFacultyId");
-
-                    b.HasIndex("AssignedToTeamId");
 
                     b.ToTable("ProblemStatementBanks");
                 });
@@ -565,23 +552,6 @@ namespace TeamPro1.Migrations
                         .IsRequired();
 
                     b.Navigation("Student");
-                });
-
-            modelBuilder.Entity("TeamPro1.Models.ProblemStatementBank", b =>
-                {
-                    b.HasOne("TeamPro1.Models.Faculty", "AssignedByFaculty")
-                        .WithMany()
-                        .HasForeignKey("AssignedByFacultyId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("TeamPro1.Models.Team", "AssignedToTeam")
-                        .WithMany()
-                        .HasForeignKey("AssignedToTeamId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("AssignedByFaculty");
-
-                    b.Navigation("AssignedToTeam");
                 });
 
             modelBuilder.Entity("TeamPro1.Models.ProjectProgress", b =>

@@ -8,6 +8,10 @@ namespace TeamPro1.Models
         public int Id { get; set; }
 
         [Required]
+        [StringLength(10)]
+        public string FacultyId { get; set; } = string.Empty; // e.g., "3201", "3202" for CSE(DS)
+
+        [Required]
         [StringLength(100)]
         public string FullName { get; set; } = string.Empty;
 

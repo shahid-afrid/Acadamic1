@@ -752,23 +752,32 @@
                                                 id="ps-@team.Id"
                                                 title="Select a problem statement for this team">
                                             <option value="">-- Select Problem Statement --</option>
-                                            @if (problemStatements != null)
+                                            @if (problemStatements != null && projectProgresses != null)
                                             {
+                                                @* Get problem statements already assigned to OTHER teams *@
+                                                var otherTeamsAssignedPS = projectProgresses
+                                                    .Where(p => p.TeamId != team.Id && !string.IsNullOrEmpty(p.ProblemStatement))
+                                                    .Select(p => p.ProblemStatement)
+                                                    .ToHashSet();
+
                                                 @foreach (var ps in problemStatements)
                                                 {
+                                                    @* Show the currently selected problem statement for this team *@
                                                     if (progress?.ProblemStatement == ps.Statement)
                                                     {
                                                         <option value="@ps.Statement" selected="selected">
                                                             @ps.Statement
                                                         </option>
                                                     }
-                                                    else
+                                                    @* Only show unassigned problem statements (not assigned to other teams) *@
+                                                    else if (!otherTeamsAssignedPS.Contains(ps.Statement))
                                                     {
                                                         <option value="@ps.Statement">
                                                             @ps.Statement
                                                         </option>
                                                     }
                                                 }
+                                                @* If the current team has a custom/manual problem statement not in the bank *@
                                                 @if (!string.IsNullOrEmpty(progress?.ProblemStatement) && problemStatements.All(ps => ps.Statement != progress.ProblemStatement))
                                                 {
                                                     <option value="@progress.ProblemStatement" selected="selected">

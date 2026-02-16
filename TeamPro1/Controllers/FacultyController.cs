@@ -615,6 +615,120 @@ namespace TeamPro1.Controllers
             return RedirectToAction("Login");
         }
 
+        // ===================== PROBLEM STATEMENT ASSIGNMENT =====================
+
+        // GET: Faculty/AssignProblemStatements
+        [HttpGet]
+        public async Task<IActionResult> AssignProblemStatements()
+        {
+            var facultyId = HttpContext.Session.GetInt32("FacultyId");
+            if (facultyId == null)
+            {
+                TempData["ErrorMessage"] = "Please login to assign problem statements.";
+                return RedirectToAction("Login");
+            }
+
+            var faculty = await _context.Faculties.FindAsync(facultyId.Value);
+            if (faculty == null)
+            {
+                TempData["ErrorMessage"] = "Faculty not found. Please login again.";
+                return RedirectToAction("Login");
+            }
+
+            // Get all teams assigned to this faculty with their problem statements
+            var assignedTeamsWithProgress = await _context.ProjectProgresses
+                .Include(pp => pp.Team)
+                    .ThenInclude(t => t.Student1)
+                .Include(pp => pp.Team)
+                    .ThenInclude(t => t.Student2)
+                .Where(pp => pp.AssignedFacultyId == facultyId.Value)
+                .ToListAsync();
+
+            // Get available problem statements (unassigned ones matching department and year)
+            var availableProblemStatements = await _context.ProblemStatementBanks
+                .Where(ps => !ps.IsAssigned && ps.Department == faculty.Department && ps.Year == 3)
+                .OrderByDescending(ps => ps.CreatedAt)
+                .ToListAsync();
+
+            ViewBag.FacultyName = HttpContext.Session.GetString("FacultyName");
+            ViewBag.AssignedTeams = assignedTeamsWithProgress;
+            ViewBag.AvailableProblemStatements = availableProblemStatements;
+
+            return View();
+        }
+
+        // POST: Faculty/AssignProblemStatementFromBank
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AssignProblemStatementFromBank(int teamId, int problemStatementId)
+        {
+            var facultyId = HttpContext.Session.GetInt32("FacultyId");
+            if (facultyId == null)
+            {
+                return Json(new { success = false, message = "Please login first." });
+            }
+
+            try
+            {
+                // Verify that the team is assigned to this faculty
+                var projectProgress = await _context.ProjectProgresses
+                    .FirstOrDefaultAsync(pp => pp.TeamId == teamId && pp.AssignedFacultyId == facultyId.Value);
+
+                if (projectProgress == null)
+                {
+                    return Json(new { success = false, message = "You are not assigned as mentor to this team." });
+                }
+
+                // Get the problem statement from bank
+                var problemStatement = await _context.ProblemStatementBanks
+                    .FirstOrDefaultAsync(ps => ps.Id == problemStatementId && !ps.IsAssigned);
+
+                if (problemStatement == null)
+                {
+                    return Json(new { success = false, message = "This problem statement is no longer available." });
+                }
+
+                // Assign the problem statement to the team
+                problemStatement.IsAssigned = true;
+                problemStatement.AssignedToTeamId = teamId;
+                problemStatement.AssignedByFacultyId = facultyId.Value;
+                problemStatement.AssignedAt = DateTime.Now;
+
+                // Update project progress
+                projectProgress.ProblemStatement = problemStatement.Statement;
+                projectProgress.LastUpdated = DateTime.Now;
+
+                if (projectProgress.AssignedFacultyId != null && !string.IsNullOrEmpty(problemStatement.Statement))
+                {
+                    projectProgress.Status = "In Progress";
+                }
+                else
+                {
+                    projectProgress.Status = "Problem Statement Assigned";
+                }
+
+                await _context.SaveChangesAsync();
+
+                // Log activity
+                _context.TeamActivityLogs.Add(new TeamActivityLog
+                {
+                    TeamId = teamId,
+                    Action = "Assigned Problem Statement from Bank",
+                    Details = problemStatement.Statement.Length > 100 ? problemStatement.Statement.Substring(0, 100) + "..." : problemStatement.Statement,
+                    PerformedByRole = "Faculty",
+                    PerformedByName = HttpContext.Session.GetString("FacultyName") ?? "Unknown",
+                    Timestamp = DateTime.Now
+                });
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, message = "Problem statement assigned successfully!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
         // ===================== FACULTY NOTIFICATIONS =====================
 
         // GET: Faculty/GetFacultyNotifications - Get notifications for faculty about student activities

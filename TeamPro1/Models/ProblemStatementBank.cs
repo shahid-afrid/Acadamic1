@@ -19,5 +19,18 @@ namespace TeamPro1.Models
         public string Department { get; set; } = string.Empty;
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+        // Assignment tracking
+        public bool IsAssigned { get; set; } = false;
+        
+        public int? AssignedToTeamId { get; set; }
+        
+        public int? AssignedByFacultyId { get; set; }
+        
+        public DateTime? AssignedAt { get; set; }
+
+        // Navigation properties
+        public virtual Team? AssignedToTeam { get; set; }
+        public virtual Faculty? AssignedByFaculty { get; set; }
     }
 }
